@@ -1,10 +1,9 @@
-# Create the full index.html file (v20) for download with repo-relative paths and working tooltips.
-content = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v20)</title>
+  <title>The World of Draelon – Campaign Primer (v21, repo-absolute paths)</title>
   <style>
     :root{
       --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
@@ -75,6 +74,10 @@ content = r"""<!DOCTYPE html>
     .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
     .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
     .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
+
+    /* Drawer (mobile quick lore) – unused for regions now */
+    .drawer{position:absolute;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .25s ease;background:var(--panel-2);border-top-left-radius:16px;border-top-right-radius:16px;max-height:60%;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+    .drawer.open{transform:translateY(0)}
 
     /* Tooltip card */
     .tooltip{position:absolute;right:12px;top:12px;min-width:260px;max-width:380px;background:rgba(13,17,26,.92);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none}
@@ -218,13 +221,13 @@ content = r"""<!DOCTYPE html>
 
 <script>
 (function(){
-  // ---- Config (repo-relative!) -------------------------------------------
-  const BASE_PATH = window.location.pathname.replace(/\/[^/]*$/, '');
-  const JSON_PATH = BASE_PATH + '/world-data.json';
-  const DEFAULT_MAP_PATH = BASE_PATH + '/map/world-map.png';
+  // ---- Config (GitHub Pages, repo-absolute) ------------------------------
+  // Use a leading slash so paths resolve under https://<user>.github.io/<repo>/
+  const JSON_PATH = '/Campaign-Primer/world-data.json';
+  const DEFAULT_MAP_PATH = '/Campaign-Primer/map/world-map.png';
 
   // ---- Data layer ---------------------------------------------------------
-  const STORAGE_KEY = 'signika.world.v20';
+  const STORAGE_KEY = 'signika.world.v21';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
   const defaultData = {
     mapSrc: DEFAULT_MAP_PATH,
@@ -337,7 +340,7 @@ content = r"""<!DOCTYPE html>
         const d = roundedPolygonPath(shape, 10);
         path.setAttribute('d', d);
         path.setAttribute('fill', color);
-        path.setAttribute('fill-opacity', '0.34'); /* slightly higher opacity as requested */
+        path.setAttribute('fill-opacity', '0.31');
         path.setAttribute('stroke', 'none');
         path.style.filter = 'url(#fuzzyEdge)';
         path.addEventListener('pointerdown', (e)=>{
@@ -387,12 +390,12 @@ content = r"""<!DOCTYPE html>
     g.addEventListener('pointerleave', ()=>{ if(isCoarse) return; hoveredId=null; updateStates(); });
     g.addEventListener('click', (e)=>{ 
       e.stopPropagation(); 
-      setLore(f); showTooltipFor(f, e);
+      setLore(f); showTooltipFor(f);
       if(gmOpen){ selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); }
     });
   }
   function attachPointHandlers(node,f){
-    node.addEventListener('click', (e)=>{ e.stopPropagation(); openLore(f); showTooltipFor(f, e); if(gmOpen) { selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); }});
+    node.addEventListener('click', (e)=>{ e.stopPropagation(); openLore(f); showTooltipFor(f); if(gmOpen) { selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); }});
     node.addEventListener('pointerdown', (e)=>{ if(!gmOpen) { startPanOnBackground(e); return; } if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; } });
   }
 
@@ -409,29 +412,8 @@ content = r"""<!DOCTYPE html>
   }
   function openLore(f){ setLore(f); }
 
-  // Tooltip logic (position near cursor/tap, but keep inside map)
-  function showTooltipFor(f, e){ 
-    if(!f) return; 
-    ttTitle.textContent = f.name || '—'; 
-    ttBody.textContent = f.desc || ''; 
-    const mapRect = svg.getBoundingClientRect();
-    let x = (e?.clientX ?? (mapRect.right - 320)) + 12;
-    let y = (e?.clientY ?? (mapRect.top + 12)) + 12;
-    // Clamp tooltip within map bounds
-    const tip = tooltip;
-    tip.style.display='block'; // temp to measure
-    const tr = tip.getBoundingClientRect();
-    tip.style.display=''; 
-    const maxX = mapRect.right - tr.width - 8;
-    const maxY = mapRect.bottom - tr.height - 8;
-    x = Math.min(x, maxX);
-    y = Math.min(y, maxY);
-    x = Math.max(x, mapRect.left + 8);
-    y = Math.max(y, mapRect.top + 8);
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
-    tooltip.classList.add('open'); 
-  }
+  // Tooltip logic
+  function showTooltipFor(f){ if(!f) return; ttTitle.textContent = f.name || '—'; ttBody.textContent = f.desc || ''; tooltip.classList.add('open'); }
   ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
 
   // ---- Tools --------------------------------------------------------------
@@ -440,7 +422,7 @@ content = r"""<!DOCTYPE html>
   setTool('select');
 
   // GM modal
-  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); updateHint(); render(); tooltip.classList.remove('open'); } });
+  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); updateHint(); render(); } });
   function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); updateHint(); primerIntroEdit.value = state.primerIntro || ''; } else { gmError.style.display='block'; } }
   gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
 
@@ -594,7 +576,7 @@ content = r"""<!DOCTYPE html>
   // ---- CMS interactions ---------------------------------------------------
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
-  function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); showTooltipFor(f); }
+  function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); }
   featurePicker.addEventListener('change', onPickerChange);
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
 
@@ -664,7 +646,7 @@ content = r"""<!DOCTYPE html>
     return {x,y}; }
   function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
-  function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c])); }
+  function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
   // ---- geometry helpers ---------------------------------------------------
   function roundedPolygonPath(points, radius){
@@ -679,7 +661,7 @@ content = r"""<!DOCTYPE html>
       const pA = lerp(p1, p0, rr/dist(p1,p0));
       const pB = lerp(p1, p2, rr/dist(p1,p2));
       if(i===0){ d += `M ${pA.x} ${pA.y} `; }
-      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
+      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} ';
     }
     d += 'Z';
     return d;
@@ -717,9 +699,3 @@ content = r"""<!DOCTYPE html>
 </script>
 </body>
 </html>
-"""
-with open('/mnt/data/index.html', 'w', encoding='utf-8') as f:
-    f.write(content)
-print("index.html written to /mnt/data")
-
-
