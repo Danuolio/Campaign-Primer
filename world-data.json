@@ -1,9 +1,11 @@
 {
-"mapImage": "/Campaign-Primer/map/world-map.png",
-"mapSize": {
+  "mapImage": "/Campaign-Primer/map/world-map.png",
+  "mapSize": {
     "w": 4080,
     "h": 3072
   },
+  "primerIntro": "Primer Intro",
+  "primerDetails": "Primer Details",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -2895,5 +2897,3 @@
     }
   ]
 }
-
-
