@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (Full v12 + external preload)</title>
+  <title>The World of Draelon – Campaign Primer (Full v13 · Mobile fixes + Tooltip)</title>
   <style>
     :root{
       --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
     }
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+    *{-webkit-tap-highlight-color:transparent}
+    body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 
-    /* Site chrome */
-    header.site{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#141821;border-bottom:1px solid #232a3a;box-shadow:0 8px 24px rgba(0,0,0,.4);position:sticky;top:0;z-index:50}
+    /* Top bar */
+    header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#141821;border-bottom:1px solid #232a3a;box-shadow:0 8px 24px rgba(0,0,0,.4);position:sticky;top:0;z-index:50}
     header.site h1{margin:0;font-size:22px;color:var(--accent)}
     header.site .tag{font-size:12px;color:#cfd7eb}
 
-    /* Hero / map section */
-    .hero{padding:18px 18px 0;}
-    .map-wrap{position:relative;height:72vh;min-height:420px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
+    /* Map container */
+    .wrap{position:relative;height:74vh;min-height:440px;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none;user-select:none}
+
+    /* Controls */
     .zoombar{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:8}
-    .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#101522;color:#e6edf8;border:1px solid #33405a;cursor:pointer}
+    .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .zoombar .btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center}
+    .gm-btn{position:absolute;top:12px;right:12px;z-index:9;background:var(--panel-2);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700}
     .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
-    .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
-    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
 
     /* CMS */
     .cms{position:absolute;top:56px;right:12px;width:min(480px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
@@ -38,35 +40,31 @@
     .row textarea{min-height:100px;resize:vertical}
     .list{border-top:1px dashed #33405a;padding-top:8px;display:grid;gap:6px}
     .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#0f1420;border:1px solid #2b354a;border-radius:10px}
-    .item .meta{display:flex;gap:10px;align-items:center}
     .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
-    .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
-    .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
     .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
 
     /* Map features */
-    .feature{cursor:pointer}
-    .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
-    .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
-
-    /* Regions visual states */
-    .feature.region path{stroke-width:0;fill-opacity:0.31;transition:fill-opacity .12s linear;filter:url(#fuzzyEdge)}
+    .feature{cursor:pointer;outline:none}
+    .feature:focus{outline:none}
+    .feature.region path{stroke-width:0;fill-opacity:.31;transition:fill-opacity .12s linear;filter:url(#fuzzyEdge)}
     .feature.region.hover path{fill-opacity:.36}
     .feature.region.selected path{fill-opacity:.44}
+    .feature.point circle{stroke:#141821;stroke-width:3;fill:var(--accent)}
+    .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px}
 
     /* Edit handles */
     .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
-    .edit-handle:active{cursor:grabbing}
     .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
 
-    /* Content sections */
-    .section{padding:32px 18px;max-width:980px;margin:0 auto;color:#e9eef9;line-height:1.6}
-    .section h2{margin:0 0 8px;color:#bfe27a}
-    .section p, .section li{color:#dbe2f6}
+    /* Tooltip lore */
+    .tooltip{position:absolute;min-width:220px;max-width:min(380px,70vw);background:rgba(15,20,32,.92);border:1px solid #2b354a;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px 12px;z-index:12;opacity:0;transform:translateY(6px);transition:opacity .15s ease, transform .15s ease;pointer-events:auto}
+    .tooltip.show{opacity:1;transform:translateY(0)}
+    .tooltip h3{margin:0 16px 6px 0;font-size:16px;color:#d7def0}
+    .tooltip p{margin:0;color:#dbe2f6;line-height:1.45}
+    .tooltip .close{position:absolute;right:8px;top:6px;background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
 
-    @media (max-width: 900px){
-      .map-wrap{height:68vh}
-      .app{grid-template-columns:1fr}
+    @media (max-width:900px){
+      .wrap{height:70vh}
     }
   </style>
 </head>
@@ -76,126 +74,101 @@
     <span class="tag">Campaign Primer</span>
   </header>
 
-  <div class="app">
-    <div class="map-wrap">
-      <div class="zoombar" aria-hidden="false">
-        <button class="btn" id="zoomIn" title="Zoom in" type="button">＋</button>
-        <button class="btn" id="zoomOut" title="Zoom out" type="button">－</button>
-        <button class="btn" id="zoomReset" title="Reset view" type="button">⤾</button>
-      </div>
-      <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom</div>
+  <div class="wrap">
+    <div class="zoombar">
+      <button class="btn" id="zoomIn" title="Zoom in">＋</button>
+      <button class="btn" id="zoomOut" title="Zoom out">－</button>
+      <button class="btn" id="zoomReset" title="Reset view">⤾</button>
+    </div>
+    <div class="hint" id="hint">Drag/Pan · Scroll/Pinch to zoom</div>
 
-      <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
+    <button class="gm-btn" id="gmBtn" title="GM Mode">GM</button>
 
-      <div class="cms" id="cms">
-        <header>
-          <h2>GM Tools</h2>
-          <div class="toolbar" style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="toolSelect" type="button">Select</button>
-            <button class="btn" id="toolAddPoint" type="button">Add Point</button>
-            <button class="btn" id="toolAddRegion" type="button">New Region</button>
-            <button class="btn" id="toolAddShape" type="button">Add Shape to Region</button>
-            <button class="btn" id="toolExport" type="button">Export</button>
-            <label class="btn" for="importFile" style="cursor:pointer;">Import</label>
-            <input id="importFile" type="file" accept="application/json" style="display:none;" />
-          </div>
-        </header>
-        <div class="cms-body">
-          <div class="row">
-            <label>Map Image <span class="muted">(Upload to replace – CSP-safe)</span></label>
-            <input type="file" id="mapFile" accept="image/*" />
-          </div>
-          <div class="row">
-            <label>Selected Feature</label>
-            <select id="featurePicker"></select>
-          </div>
-          <div class="row">
-            <label for="featName">Name (auto‑saves)</label>
-            <input id="featName" type="text" placeholder="e.g., Signika" />
-          </div>
-          <div class="row">
-            <label for="featDesc">Lore / Notes (auto‑saves)</label>
-            <textarea id="featDesc" placeholder="Write lore or notes..."></textarea>
-          </div>
-          <div class="row" id="rowColor" style="display:none;">
-            <label for="featColor">Region Colour (live)</label>
-            <input id="featColor" type="color" value="#8ad9ff" />
-          </div>
-          <div class="row" id="pointDanger" style="display:none;">
-            <button class="btn danger" id="deletePoint" type="button">Delete Point</button>
-          </div>
-          <div class="row" id="shapeManager" style="display:none;">
-            <label>Shapes in Region</label>
-            <div id="shapeList" class="list"></div>
-          </div>
-          <div class="list" id="featureList"></div>
+    <div class="cms" id="cms">
+      <header>
+        <h2>GM Tools</h2>
+        <div class="toolbar" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="toolSelect" type="button">Select</button>
+          <button class="btn" id="toolAddPoint" type="button">Add Point</button>
+          <button class="btn" id="toolAddRegion" type="button">New Region</button>
+          <button class="btn" id="toolAddShape" type="button">Add Shape to Region</button>
+          <button class="btn" id="toolExport" type="button">Export</button>
+          <label class="btn" for="importFile" style="cursor:pointer;">Import</label>
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
         </div>
+      </header>
+      <div class="cms-body">
+        <div class="row">
+          <label>Map Image <span class="muted">(Upload to replace – CSP-safe)</span></label>
+          <input type="file" id="mapFile" accept="image/*" />
+        </div>
+        <div class="row">
+          <label>Selected Feature</label>
+          <select id="featurePicker"></select>
+        </div>
+        <div class="row">
+          <label for="featName">Name (auto‑saves)</label>
+          <input id="featName" type="text" placeholder="e.g., Signika" />
+        </div>
+        <div class="row">
+          <label for="featDesc">Lore / Notes (auto‑saves)</label>
+          <textarea id="featDesc" placeholder="Write lore or notes..."></textarea>
+        </div>
+        <div class="row" id="rowColor" style="display:none;">
+          <label for="featColor">Region Colour (live)</label>
+          <input id="featColor" type="color" value="#8ad9ff" />
+        </div>
+        <div class="row" id="pointDanger" style="display:none;">
+          <button class="btn danger" id="deletePoint" type="button">Delete Point</button>
+        </div>
+        <div class="row" id="shapeManager" style="display:none;">
+          <label>Shapes in Region</label>
+          <div id="shapeList" class="list"></div>
+        </div>
+        <div class="list" id="featureList"></div>
       </div>
-
-      <!-- Map & overlays -->
-      <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
-        <defs>
-          <!-- Soft edges only, no glow -->
-          <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="in" />
-          </filter>
-        </defs>
-        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid meet" />
-        <g id="regions"></g>
-        <g id="points"></g>
-        <g id="editHandles"></g>
-      </svg>
     </div>
 
-    <aside class="side" id="sidePanel">
-      <header>
-        <h1>The World of Draelon</h1>
-        <span class="muted">Click the map to explore</span>
-      </header>
-      <div class="content">
-        <h3 class="lore-title" id="loreTitle">Welcome</h3>
-        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, hover to highlight and click to open details. <br/><br/>GM Mode lets you add points and draw regions. Data is saved to your browser and can be exported as JSON for a future database.</div>
-      </div>
-    </aside>
+    <div class="tooltip" id="tooltip" role="dialog" aria-live="polite" aria-hidden="true">
+      <button class="close" id="tipClose" aria-label="Close">✕</button>
+      <h3 id="tipTitle">Lore</h3>
+      <p id="tipBody">Tap a location to view details.</p>
+    </div>
+
+    <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
+      <defs>
+        <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="in" />
+        </filter>
+      </defs>
+      <image id="mapImage" href="" x="0" y="0" width="1000" height="600" />
+      <g id="regions"></g>
+      <g id="points"></g>
+      <g id="editHandles"></g>
+    </svg>
   </div>
 
-  <!-- Primer content below map -->
-  <section class="section">
-    <h2>About the Campaign</h2>
-    <p>Set in the distant north, the island of Signika is awakening. Once a forgotten trading post, it now teems with monsters of ancient and unknown origin. Powers from across Draelon—Athium, Oscana, Eturia—vie for control and knowledge of its mysteries. The island’s guilds, the <b>Legio Xernacus</b> and the <b>Wyrm’s Hoard</b>, wage both open and silent war in pursuit of glory and survival.</p>
-  </section>
-  <section class="section">
-    <h2>Factions of Draelon</h2>
-    <ul>
-      <li><b>Athium:</b> A disciplined southern empire with imperial ambitions and a powerful army.</li>
-      <li><b>Oscana:</b> A patchwork of feudal states known for mercenaries and old grudges.</li>
-      <li><b>Eturia:</b> The Magocracy of the south, ruled by spellcasters and ancient secrets.</li>
-      <li><b>House Rhomorn:</b> Nominal rulers of Signika, content to rule from afar.</li>
-    </ul>
-  </section>
-  <section class="section">
-    <h2>Adventuring on Signika</h2>
-    <p>The campaign begins as explorers, soldiers, and opportunists converge on Greywake Port—the only known settlement on Signika. Rumours speak of beasts glowing with inner light, creatures made of song and stone, and whispers that the island itself remembers what the world has forgotten.</p>
-  </section>
+  <!-- Optional primer content could go here later -->
 
 <script>
 (async function(){
-  // --- Persistent keys -----------------------------------------------------
-  const STORAGE_KEY = 'draelon.world.v12';
+  const STORAGE_KEY = 'draelon.world.v13';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
 
-  // --- Elements ------------------------------------------------------------
+  // Elements
   const svg = document.getElementById('world');
   const gRegions = document.getElementById('regions');
   const gPoints = document.getElementById('points');
   const editHandles = document.getElementById('editHandles');
   const mapImage = document.getElementById('mapImage');
   const hint = document.getElementById('hint');
-  const loreTitle = document.getElementById('loreTitle');
-  const loreBody = document.getElementById('loreBody');
+  const tooltip = document.getElementById('tooltip');
+  const tipTitle = document.getElementById('tipTitle');
+  const tipBody = document.getElementById('tipBody');
+  const tipClose = document.getElementById('tipClose');
 
-  // CMS elements
+  // CMS
   const gmBtn = document.getElementById('gmBtn');
   const cms = document.getElementById('cms');
   const mapFile = document.getElementById('mapFile');
@@ -216,51 +189,51 @@
   const shapeList = document.getElementById('shapeList');
   const featureList = document.getElementById('featureList');
 
-  // --- Load order: external JSON -> localStorage -> defaults --------------
-  let state = await loadExternalJSON('world-data.json')
-              || loadLocal()
-              || defaultState();
+  // Load order: external JSON -> localStorage -> defaults
+  let state = await loadExternalJSON('world-data.json') || loadLocal() || defaultState();
 
-  // --- Map & viewbox -------------------------------------------------------
+  // Map & viewbox
   let mapW = state.mapSize?.w || 1000;
   let mapH = state.mapSize?.h || 600;
-  if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); }
+  if(state.mapSrc) mapImage.setAttribute('href', state.mapSrc);
   mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH);
 
   // initial zoom/pan (~70% scale, panned upward a bit)
   let view = { x: 0, y: Math.round(mapH*0.10), w: Math.round(mapW*0.70), h: Math.round(mapH*0.70) };
   applyView();
 
-  // --- Runtime state -------------------------------------------------------
+  // Runtime state
   let gmOpen=false, currentTool='select', buildingRegion=null, buildingShapeTargetRegionId=null, isPanning=false, panStart=null, selectedId=state.features[0]?.id||null, hoveredId=null, isDraggingFeature=false;
 
-  // --- Render --------------------------------------------------------------
+  // Render
   function render(){
     gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
 
     // regions
     state.features.filter(f=>f.type==='region').forEach(f=>{
-      const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
+      const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('tabindex','0'); g.setAttribute('data-id', f.id);
       const color = f.color || DEFAULT_REGION_COLOR;
       (f.shapes||[]).forEach((shape, sIdx)=>{
         if(!Array.isArray(shape) || shape.length<3) return;
         const path = elNS('path');
-        const d = roundedPolygonPath(shape, 10);
-        path.setAttribute('d', d);
+        path.setAttribute('d', roundedPolygonPath(shape, 10));
         path.setAttribute('fill', color);
         path.setAttribute('stroke', 'none');
-        path.style.filter = 'url(#fuzzyEdge)';
+        path.style.filter='url(#fuzzyEdge)';
+        // Only start dragging shapes/regions when modifier key is held in GM mode
         path.addEventListener('pointerdown', (e)=>{
-          if(!gmOpen || currentTool!=='select') return; 
-          if(e.ctrlKey || e.metaKey){ startDragRegionMove(e, f); isDraggingFeature=true; }
-          else { startDragShapeMove(e, f, sIdx); isDraggingFeature=true; }
-          e.stopPropagation();
+          if(!(gmOpen && currentTool==='select')) return; 
+          const moveWhole = e.ctrlKey||e.metaKey; // region move
+          const moveShape = e.shiftKey;           // shape move
+          if(moveWhole){ startDragRegionMove(e, f); isDraggingFeature=true; e.stopPropagation(); }
+          else if(moveShape){ startDragShapeMove(e, f, sIdx); isDraggingFeature=true; e.stopPropagation(); }
         });
         g.appendChild(path);
       });
       attachRegionGroupHandlers(g, f);
       gRegions.appendChild(g);
 
+      // edit handles
       if(selectedId===f.id && gmOpen){
         (f.shapes||[]).forEach((shape, sIdx)=>{
           shape.forEach((p,idx)=>{
@@ -291,56 +264,57 @@
     refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); updatePointDanger(); saveLocal();
   }
 
-  // --- Interactions --------------------------------------------------------
+  // Tooltip helpers
+  function showTooltip(f, clientX, clientY){
+    tipTitle.textContent = f.name || 'Lore';
+    tipBody.textContent = f.desc || '';
+    const bounds = svg.getBoundingClientRect();
+    // Position near cursor/tap, clamp to viewport
+    let left = clientX + 12;
+    let top = clientY - 12;
+    const maxLeft = window.innerWidth - 20 - tooltip.offsetWidth;
+    const maxTop = window.innerHeight - 20 - tooltip.offsetHeight;
+    tooltip.style.left = Math.min(left, Math.max(12, maxLeft)) + 'px';
+    tooltip.style.top = Math.min(top, Math.max(12, maxTop)) + 'px';
+    tooltip.classList.add('show');
+    tooltip.setAttribute('aria-hidden','false');
+  }
+  function hideTooltip(){ tooltip.classList.remove('show'); tooltip.setAttribute('aria-hidden','true'); }
+  tipClose.addEventListener('click', hideTooltip);
+
+  // Interactions
   function attachRegionGroupHandlers(g, f){
     const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; selectedId=f.id; updateStates(); setLore(f); });
+    g.addEventListener('pointerenter', (e)=>{ if(isCoarse) return; hoveredId=f.id; selectedId=f.id; updateStates(); });
     g.addEventListener('pointerleave', ()=>{ if(isCoarse) return; hoveredId=null; updateStates(); });
-    g.addEventListener('click', (e)=>{ e.stopPropagation(); if(gmOpen){ selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); setLore(f); } });
+    g.addEventListener('click', (e)=>{ selectedId=f.id; updateStates(); showTooltip(f, e.clientX, e.clientY); });
   }
-
   function attachPointHandlers(node,f){
-    node.addEventListener('click', (e)=>{ e.stopPropagation(); if(gmOpen){ selectFeature(f.id); } else { selectedId=f.id; updateStates(); setLore(f); } });
-    node.addEventListener('dblclick', (e)=>{ if(!gmOpen) return; e.stopPropagation(); if(confirm(`Delete point "${f.name}"?`)){ state.features = state.features.filter(x=>x.id!==f.id); if(selectedId===f.id) selectedId=null; render(); } });
+    node.addEventListener('click', (e)=>{ selectedId=f.id; updateStates(); showTooltip(f, e.clientX, e.clientY); if(gmOpen) selectFeature(f.id); });
+    node.addEventListener('dblclick', (e)=>{ if(!gmOpen) return; e.stopPropagation(); if(confirm(`Delete point "${f.name}"?`)){ state.features = state.features.filter(x=>x.id!==f.id); if(selectedId===f.id) selectedId=null; render(); hideTooltip(); } });
     node.addEventListener('pointerdown', (e)=>{ if(!gmOpen) return; if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; } });
   }
 
-  function setLore(f){ loreTitle.textContent = f.name; loreBody.textContent = f.desc || ''; }
-
   function updateStates(){ gRegions.querySelectorAll('.feature.region').forEach(g=>{ const id=g.getAttribute('data-id'); g.classList.toggle('hover', id===hoveredId); g.classList.toggle('selected', id===selectedId); }); }
 
-  // --- Tools ---------------------------------------------------------------
+  // Tools
   function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
   setTool('select');
-
   gmBtn?.addEventListener('click', ()=>{ gmOpen=!gmOpen; cms?.classList.toggle('open', gmOpen); gmBtn.textContent = gmOpen? 'GM ✓' : 'GM'; updateHint(); render(); });
-
-  function updateHint(){ if(!hint) return; hint.textContent = gmOpen ? 'Drag map to pan · Scroll/Pinch to zoom · Alt+click vertex to delete · Click mid-dots to insert · Double‑click to finish shape · Ctrl/⌘ drag moves whole region' : 'Drag map to pan · Scroll/Pinch to zoom'; }
+  function updateHint(){ if(!hint) return; hint.textContent = gmOpen ? 'Drag/Pan · Pinch/Scroll to zoom · Shift‑drag moves shape · Ctrl/⌘‑drag moves region · Alt‑click vertex deletes · Click mid‑dot inserts · Double‑click finishes new region' : 'Drag/Pan · Pinch/Scroll to zoom'; }
   updateHint();
-
-  // Tool buttons
-  toolSelect.addEventListener('click', ()=> setTool('select'));
-  toolAddPoint.addEventListener('click', ()=> setTool('add-point'));
-  toolAddRegion.addEventListener('click', ()=> setTool('add-region'));
-  toolAddShape.addEventListener('click', ()=>{
-    const f = featureById(selectedId);
-    if(!f || f.type!=='region'){ alert('Select a region first'); return; }
-    buildingShapeTargetRegionId = f.id;
-    buildingRegion = { id:f.id, type:'region', addingShape:true, shape:[] };
-    setTool('add-shape');
-  });
 
   // Add via clicks
   svg.addEventListener('click', (e)=>{
     if(!gmOpen) return; const pt = svgPoint(e);
     if(currentTool==='add-point'){
       const f = { id:uid(), type:'point', name:'New Point', desc:'', x:pt.x, y:pt.y };
-      state.features.push(f); render(); selectFeature(f.id); return;
+      state.features.push(f); render(); selectFeature(f.id); showTooltip(f, e.clientX, e.clientY); return;
     }
     if(currentTool==='add-region'){
       if(!buildingRegion){
         const r = { id:uid(), type:'region', name:'New Region', color: DEFAULT_REGION_COLOR, desc:'', shapes:[[ {x:pt.x,y:pt.y} ]] };
-        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id); 
+        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id);
       } else {
         const shape = buildingRegion.shapes[ buildingRegion.shapes.length-1 ];
         shape.push({x:pt.x,y:pt.y}); render(); selectFeature(buildingRegion.id);
@@ -374,9 +348,8 @@
       buildingRegion = null; setTool('select'); render();
     }
   });
-  function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
 
-  // Drag helpers ------------------------------------------------------------
+  // Drag helpers
   function startDragPoint(e, f){
     e.preventDefault();
     const start = svgPoint(e);
@@ -399,39 +372,62 @@
     const up=()=>{ off(move,up); isDraggingFeature=false; saveLocal(); };
     on(move,up);
   }
-  function startDragVertex(e, f, sIdx, idx){
-    e.preventDefault(); e.stopPropagation();
-    const start = svgPoint(e);
-    const startPt = { x: f.shapes[sIdx][idx].x, y: f.shapes[sIdx][idx].y };
-    const offset = { x: startPt.x - start.x, y: startPt.y - start.y };
-    const move=(ev)=>{ const p=svgPoint(ev); f.shapes[sIdx][idx]={x:clamp(p.x + offset.x,0,mapW),y:clamp(p.y + offset.y,0,mapH)}; render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; saveLocal(); };
-    on(move,up);
-  }
   function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
   function off(move,up){ window.removeEventListener('pointermove',move); }
-  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
-  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
-  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
 
-  // Pan & Zoom --------------------------------------------------------------
+  // Pan & Zoom (mouse + touch pinch) ---------------------------------------
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
+
   function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
   function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
   zoomIn?.addEventListener('click', ()=> zoom(0.8)); zoomOut?.addEventListener('click', ()=> zoom(1.25)); zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
-  svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
-  svg.addEventListener('pointerdown', (e)=>{
-    if(isDraggingFeature) return;
-    if(e.button!==0) return;
-    if(!(e.target === svg || e.target === mapImage)) return; // start pan only on background
-    isPanning=true; panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y}; svg.setPointerCapture(e.pointerId);
-  });
-  svg.addEventListener('pointermove', (e)=>{ if(!isPanning) return; const dx=(e.clientX-panStart.sx)*(view.w/svg.getBoundingClientRect().width); const dy=(e.clientY-panStart.sy)*(view.h/svg.getBoundingClientRect().height); view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w)); view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h)); applyView(); });
-  svg.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
 
-  // --- CMS interactions ----------------------------------------------------
+  // Allow pan even when starting on a region unless actively editing (GM+mod)
+  let activePointers = new Map();
+  svg.addEventListener('pointerdown', (e)=>{
+    svg.setPointerCapture(e.pointerId);
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(activePointers.size===1){
+      // begin panning unless GM move modifiers are down (handled on paths)
+      isPanning=true; panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y};
+    }
+  }, true); // capture so it runs before child handlers
+
+  svg.addEventListener('pointermove', (e)=>{
+    if(activePointers.size===2){
+      // pinch zoom
+      const pts=[...activePointers.keys()];
+      const p0=activePointers.get(pts[0]); const p1=activePointers.get(pts[1]);
+      const n0={x:e.clientX,y:e.clientY}; activePointers.set(e.pointerId, n0);
+      const b0=activePointers.get(pts[0]); const b1=activePointers.get(pts[1]);
+      const d0=Math.hypot(p1.x-p0.x, p1.y-p0.y);
+      const d1=Math.hypot(b1.x-b0.x, b1.y-b0.y);
+      if(d0>0){ const scale=d0/d1; // invert because viewBox size ~ 1/scale
+        const center = clientToSvg({x:(b0.x+b1.x)/2, y:(b0.y+b1.y)/2});
+        zoom(1/scale, center);
+      }
+      return;
+    }
+    if(isPanning){
+      const dx=(e.clientX-panStart.sx)*(view.w/svg.getBoundingClientRect().width);
+      const dy=(e.clientY-panStart.sy)*(view.h/svg.getBoundingClientRect().height);
+      view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w));
+      view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h));
+      applyView();
+    }
+  });
+
+  svg.addEventListener('pointerup', (e)=>{
+    activePointers.delete(e.pointerId);
+    if(activePointers.size<2){ /* end pinch */ }
+    if(activePointers.size===0){ isPanning=false; panStart=null; }
+  });
+
+  svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
+
+  // CMS interactions --------------------------------------------------------
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
   function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; pointDanger.style.display='none'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; pointDanger.style.display='grid'; } updateStates(); refreshShapeListUI(); }
@@ -439,97 +435,46 @@
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
   function updatePointDanger(){ const f=state.features.find(x=>x.id===selectedId); pointDanger.style.display = (f && f.type==='point' && gmOpen) ? 'grid' : 'none'; }
 
-  // Auto-save: name/desc
+  // Auto-save
   featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); saveLocal(); render(); });
   featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; saveLocal(); });
 
   // Live colour updates
   let colorRAF = 0;
-  featColor.addEventListener('input', ()=>{
-    const f = featureById(selectedId);
-    if(!f || f.type!=='region') return;
-    f.color = featColor.value || DEFAULT_REGION_COLOR;
-    if(colorRAF) cancelAnimationFrame(colorRAF);
-    colorRAF = requestAnimationFrame(()=>{ updateRegionColorDOM(f); saveLocal(); });
-  });
+  featColor.addEventListener('input', ()=>{ const f = featureById(selectedId); if(!f || f.type!=='region') return; f.color = featColor.value || DEFAULT_REGION_COLOR; if(colorRAF) cancelAnimationFrame(colorRAF); colorRAF = requestAnimationFrame(()=>{ updateRegionColorDOM(f); saveLocal(); }); });
   function updateRegionColorDOM(f){ const g = gRegions.querySelector(`.feature.region[data-id="${CSS.escape(f.id)}"]`); if(!g) { render(); return; } g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR)); }
 
-  // Delete point via CMS
-  deletePointBtn.addEventListener('click', ()=>{ const f=featureById(selectedId); if(!f || f.type!=='point') return; if(!confirm(`Delete point "${f.name}"?`)) return; state.features = state.features.filter(x=>x.id!==f.id); selectedId=null; render(); });
+  deletePointBtn.addEventListener('click', ()=>{ const f=featureById(selectedId); if(!f || f.type!=='point') return; if(!confirm(`Delete point "${f.name}"?`)) return; state.features = state.features.filter(x=>x.id!==f.id); selectedId=null; render(); hideTooltip(); });
 
-  // Map upload -> data URL (CSP safe) + resize
+  // Map upload
   mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; mapImage.setAttribute('href', dataUrl); applyView(); render(); saveLocal(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
 
-  // --- Export / Import -----------------------------------------------------
+  // Export / Import
   exportBtn.addEventListener('click', ()=>{ try{ const data = JSON.stringify({ mapSrc: state.mapSrc, mapSize: state.mapSize, features: state.features }, null, 2); const blob = new Blob([data], {type:'application/json'}); const a = document.createElement('a'); const url = URL.createObjectURL(blob); a.href = url; a.download = 'draelon-world.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0); }catch(err){ alert('Export failed: ' + (err?.message||err)); } });
-
   importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result); if(obj.features) state.features=obj.features.map(f=> migrateFeature(f)); if(obj.mapSrc) state.mapSrc=obj.mapSrc; if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; } if(state.mapSrc) mapImage.setAttribute('href', state.mapSrc); applyView(); render(); saveLocal(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
 
-  // --- Data helpers --------------------------------------------------------
+  // Data helpers
   function featureById(id){ return state.features.find(x=>x.id===id); }
   function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
   function loadLocal(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? migrate(JSON.parse(s)): null; }catch(e){ return null; } }
   function defaultState(){ return migrate({ mapSrc:'', mapSize:{w:1000,h:600}, features:[ { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[{x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230}]] }, { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[{x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410}]] }, { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[{x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520}], [{x:600,y:480},{x:640,y:500},{x:620,y:530}]] }, { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 } ] }); }
-  async function loadExternalJSON(path){
-    try{
-      const res = await fetch(path, {cache:'no-store'});
-      if(!res.ok) return null;
-      const data = await res.json();
-      return migrate(data);
-    }catch(e){ return null; }
-  }
-  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; }
-    if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f));
-    return s; }
-  function migrateFeature(f){ if(f.type==='region'){
-      if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; }
-      f.color = f.color || DEFAULT_REGION_COLOR; return f;
-    } else { return f; } }
+  async function loadExternalJSON(path){ try{ const res = await fetch(path, {cache:'no-store'}); if(!res.ok) return null; const data = await res.json(); return migrate(data); }catch(e){ return null; } }
+  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; } if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f)); return s; }
+  function migrateFeature(f){ if(f.type==='region'){ if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; } f.color = f.color || DEFAULT_REGION_COLOR; return f; } else { return f; } }
   function svgPoint(evt){ const rect=svg.getBoundingClientRect(); const x = view.x + (evt.clientX - rect.left) * (view.w / rect.width); const y = view.y + (evt.clientY - rect.top) * (view.h / rect.height); return {x,y}; }
+  function clientToSvg(pt){ const rect=svg.getBoundingClientRect(); const x = view.x + (pt.x - rect.left) * (view.w / rect.width); const y = view.y + (pt.y - rect.top) * (view.h / rect.height); return {x,y}; }
   function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
   function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function roundedPolygonPath(points, radius){ const n=points.length; if(n<3) return ''; const r=Math.max(0,radius|0); function lerp(a,b,t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; } let d=''; for(let i=0;i<n;i++){ const p0=points[(i-1+n)%n], p1=points[i], p2=points[(i+1)%n]; const rr=Math.min(r, dist(p1,p0)/2, dist(p1,p2)/2); const pA=lerp(p1,p0,rr/dist(p1,p0)); const pB=lerp(p1,p2,rr/dist(p1,p2)); if(i===0){ d+=`M ${pA.x} ${pA.y} `; } d+=`L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `; } return d+'Z'; }
+  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
 
-  // --- Geometry helpers ----------------------------------------------------
-  function roundedPolygonPath(points, radius){
-    const n=points.length; if(n<3) return '';
-    const r = Math.max(0, radius|0);
-    function lerp(a,b,t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; }
-    let d='';
-    for(let i=0;i<n;i++){
-      const p0=points[(i-1+n)%n], p1=points[i], p2=points[(i+1)%n];
-      const rr = Math.min(r, dist(p1,p0)/2, dist(p1,p2)/2);
-      const pA = lerp(p1, p0, rr/dist(p1,p0));
-      const pB = lerp(p1, p2, rr/dist(p1,p2));
-      if(i===0){ d += `M ${pA.x} ${pA.y} `; }
-      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
-    }
-    d += 'Z';
-    return d;
-  }
-  function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-
-  // ---- CMS: per-shape delete UI ------------------------------------------
-  function refreshShapeListUI(){
-    const f = featureById(selectedId);
-    shapeList.innerHTML='';
-    if(!f || f.type!=='region'){ shapeManager.style.display='none'; return; }
-    shapeManager.style.display='grid';
-    f.shapes.forEach((shape, idx)=>{
-      const div=document.createElement('div'); div.className='item';
-      div.innerHTML = `<div class=\"meta\"><span class=\"chip\">Shape ${idx+1}</span><span class=\"muted\">${shape.length} pts</span></div>`+
-                      `<div class=\"toolbar\" style=\"display:flex;gap:8px\"><button class=\"btn danger\" data-del>Delete Shape</button></div>`;
-      div.querySelector('[data-del]').addEventListener('click', ()=>{
-        if(!confirm('Delete this shape from the region?')) return;
-        deleteShape(f, idx); render(); selectFeature(f.id);
-      });
-      shapeList.appendChild(div);
-    });
-  }
-
-  // Kickoff
+  // Init
   render();
+
+  // Close tooltip when tapping outside
+  document.addEventListener('click', (e)=>{ if(!tooltip.contains(e.target) && e.target.closest('svg')==null) hideTooltip(); }, true);
 })();
 </script>
 </body>
