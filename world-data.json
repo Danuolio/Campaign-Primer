@@ -1,5 +1,5 @@
 {
-"mapImage": "/map/world-map.png",
+"mapImage": "/Campaign-Primer/map/world-map.png",
 "mapSize": {
     "w": 4080,
     "h": 3072
@@ -2895,4 +2895,5 @@
     }
   ]
 }
+
 
