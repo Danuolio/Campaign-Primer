@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The World of Draelon – Campaign Primer (v17)</title>
+<title>The World of Draelon – Campaign Primer (v18)</title>
 <style>
   :root{--bg:#0b0d12;--panel:#141821;--panel-2:#1b2130;--accent:#c6f06e;--accent-2:#8ad9ff;--text:#e8ecf3;--muted:#9aa3b2;--shadow:0 10px 30px rgba(0,0,0,.45);--radius:14px}
   html,body{height:100%}
@@ -173,7 +173,7 @@
 
 <script>
 (async function(){
-  const STORAGE_KEY='draelon.world.v17';
+  const STORAGE_KEY='draelon.world.v18';
   const DEFAULT_REGION_COLOR='#8ad9ff';
   const DEFAULT_MAP_PATH='/map/world-map.png';
   const JSON_PATH='/world-data.json';
@@ -222,10 +222,9 @@
   const zoomReset=document.getElementById('zoomReset');
 
   // Load data: external JSON -> localStorage -> defaults
-  let state = await loadExternal(JSON_PATH) || loadLocal() || defaultState();
-  // Ensure a map path exists
+  let state = await loadExternal(JSON_PATH);
+  if(!state){ console.warn('world-data.json not found, using localStorage/defaults'); state = loadLocal() || defaultState(); }
   if(!state.mapImage) state.mapImage = DEFAULT_MAP_PATH;
-
   state.primer = state.primer || { intro: defaultIntro(), campaign: defaultCampaign() };
 
   // Map meta
@@ -241,9 +240,9 @@
 
   // Pan/zoom touch handling
   let activePointers=new Map();
-  let panReady=false; // only true when pointerdown started on background
+  let panReady=false; // true when pointerdown started on background
   let panStart=null;  // {sx,sy,vx,vy,d?}
-  const PAN_THRESHOLD=4; // px before we start panning
+  const PAN_THRESHOLD=4;
 
   // Primer render
   introEdit.value = state.primer.intro;
@@ -259,14 +258,13 @@
   // Initial render
   render();
 
-  // -------- Tooltip logic (fixed) ----------
+  // -------- Tooltip logic ----------
   function showTooltip(f, clientX, clientY){
     tipTitle.textContent = f.name || 'Lore';
     tipBody.innerHTML = mdToHtml(f.desc || '');
-    // Position inside wrap bounds
     const wrapRect = wrap.getBoundingClientRect();
     const tip = tooltip;
-    tip.style.display='block'; // ensure visible for measurements
+    tip.style.display='block';
     tip.setAttribute('aria-hidden','false');
     const desiredLeft = clientX - wrapRect.left + 12;
     const desiredTop  = clientY - wrapRect.top  - 12;
@@ -284,14 +282,13 @@
     tooltip.setAttribute('aria-hidden','true');
   }
   tipClose.addEventListener('click', (e)=>{ e.stopPropagation(); hideTooltip(); });
-  // Dismiss when clicking outside tooltip (but not when interacting with the map itself)
   document.addEventListener('click', (e)=>{
     const inTip = tooltip.contains(e.target);
     const onMap = e.target.closest('#world') != null;
     if(!inTip && !onMap) hideTooltip();
   }, true);
 
-  // -------- Region/Point handlers --------
+  // -------- Handlers --------
   function attachRegionGroupHandlers(g, f){
     const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; selectedId=f.id; updateStates(); });
@@ -369,21 +366,21 @@
     const start = svgPoint(e);
     const offset = { x: f.x - start.x, y: f.y - start.y };
     const move=(ev)=>{ const p=svgPoint(ev); f.x=clamp(p.x + offset.x,0,mapW); f.y=clamp(p.y + offset.y,0,mapH); render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; saveLocal(); };
+    const up=()=>{ off(move); isDraggingFeature=false; saveLocal(); };
     on(move,up);
   }
   function startDragShapeMove(e, f, sIdx){
     const p=svgPoint(e);
     const offset={x:p.x,y:p.y};
     const move=(ev)=>{ const q=svgPoint(ev); const dx=q.x-offset.x, dy=q.y-offset.y; f.shapes[sIdx]=f.shapes[sIdx].map(pt=>({x:clamp(pt.x+dx,0,mapW),y:clamp(pt.y+dy,0,mapH)})); offset.x=q.x; offset.y=q.y; render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; saveLocal(); };
+    const up=()=>{ off(move); isDraggingFeature=false; saveLocal(); };
     on(move,up);
   }
   function startDragRegionMove(e, f){
     const p=svgPoint(e);
     const offset={x:p.x,y:p.y};
     const move=(ev)=>{ const q=svgPoint(ev); const dx=q.x-offset.x, dy=q.y-offset.y; f.shapes=f.shapes.map(shape=> shape.map(pt=>({x:clamp(pt.x+dx,0,mapW),y:clamp(pt.y+dy,0,mapH)})) ); offset.x=q.x; offset.y=q.y; render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; saveLocal(); };
+    const up=()=>{ off(move); isDraggingFeature=false; saveLocal(); };
     on(move,up);
   }
   function on(move,up){ window.addEventListener('pointermove',move,{passive:false}); window.addEventListener('pointerup',up,{once:true}); }
@@ -457,7 +454,7 @@
 
   svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
 
-  // CMS UI
+  // CMS UI + render
   function render(){
     gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
 
@@ -519,6 +516,24 @@
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
   function updatePointDanger(){ const f=state.features.find(x=>x.id===selectedId); pointDanger.style.display=(f && f.type==='point' && gmOpen)?'grid':'none'; }
 
+  // SHAPE LIST UI (the missing function)
+  function refreshShapeListUI(){
+    const f = state.features.find(x=>x.id===selectedId);
+    shapeList.innerHTML='';
+    if(!f || f.type!=='region'){ shapeManager.style.display='none'; return; }
+    shapeManager.style.display='grid';
+    (f.shapes||[]).forEach((shape, idx)=>{
+      const div=document.createElement('div'); div.className='item';
+      div.innerHTML = `<div class="meta"><span class="chip">Shape ${idx+1}</span><span class="chip">${shape.length} pts</span></div>`+
+                      `<div class="toolbar" style="display:flex;gap:8px"><button class="btn danger" data-del>Delete</button></div>`;
+      div.querySelector('[data-del]').addEventListener('click', ()=>{
+        if(!confirm('Delete this shape from the region?')) return;
+        deleteShape(f, idx); render(); selectFeature(f.id);
+      });
+      shapeList.appendChild(div);
+    });
+  }
+
   // Auto-saves
   featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); saveLocal(); render(); });
   featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; saveLocal(); });
@@ -550,7 +565,7 @@
     state.mapImage=path; showMapLoader(); await setMapImagePath(path); saveLocal();
   });
 
-  // Export / Import includes primer + path
+  // Export / Import (includes primer + map path + size)
   exportBtn.addEventListener('click', ()=>{
     try{
       const data=JSON.stringify({ mapImage: state.mapImage||'', mapSize: state.mapSize, features: state.features, primer: state.primer }, null, 2);
@@ -593,9 +608,9 @@
     mapImage.removeAttribute('href');
     const done=()=> hideMapLoaderSoon();
     mapImage.addEventListener('load', done, {once:true});
-    mapImage.addEventListener('error', done, {once:true});
+    mapImage.addEventListener('error', ()=>{ console.warn('Map image failed to load:', path); done(); }, {once:true});
     mapImage.setAttribute('href', path || DEFAULT_MAP_PATH);
-    setTimeout(hideMapLoaderSoon, 2500); // non-blocking failsafe
+    setTimeout(hideMapLoaderSoon, 2500); // failsafe
   }
   function showMapLoader(){ mapLoading.classList.remove('hide'); }
   function hideMapLoaderSoon(){ mapLoading.classList.add('hide'); }
