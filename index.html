@@ -1,47 +1,96 @@
+<!-- FULL index.html with click-to-open, fixed-position tooltips + smaller map (v24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v26 – tap highlight fix)</title>
-  <style>
-    :root{
-      --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
-    }
-    html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The World of Draelon – Campaign Primer (v24)</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
+  }
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
+  .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
+  /* Cap the map/side panels' height so no page scroll is needed */
+  .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+  svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
+  .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+  .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
+  .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
+  .side .content{padding:16px;overflow:auto}
+  .lore-title{font-weight:700;margin:0 0 8px;font-size:18px}
+  .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
+  .muted{color:var(--muted);font-size:12px}
 
-    /* Remove mobile tap highlight */
-    html, body, svg, #world, #world * {
-      -webkit-tap-highlight-color: rgba(0,0,0,0);
-      -webkit-touch-callout: none;
-    }
+  /* Loader (top-left) */
+  .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* Hide focus for touch/mouse, keep keyboard */
-    .feature:focus { outline: none; }
-    .feature:focus-visible { outline: 2px solid #8ad9ff; outline-offset: 2px; }
-    button:focus-visible { outline: 2px solid #c6f06e; outline-offset: 2px; }
+  /* GM button + modal */
+  .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+  .gm-btn:hover{filter:brightness(1.1)}
+  .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
+  .gm-modal.open{display:flex}
+  .gm-modal-backdrop{position:absolute;inset:0;background:rgba(5,9,16,.65);backdrop-filter:blur(2px)}
+  .gm-modal-card{position:relative;width:min(92%,360px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
+  .gm-modal-card h3{margin:0 0 8px;font-size:16px}
+  .gm-modal-card input{width:100%;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px;box-sizing:border-box;margin:8px 0 10px}
+  .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
+  .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
 
-    .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
-    .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
-    .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
-    .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
-    .side .content{padding:16px;overflow:auto}
-    .lore-title{font-weight:700;margin:0 0 8px;font-size:18px}
-    .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
-    .muted{color:var(--muted);font-size:12px}
+  /* CMS */
+  .cms{position:absolute;top:56px;right:12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
+  .cms.open{display:flex;flex-direction:column}
+  .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
+  .cms header h2{font-size:14px;margin:0}
+  .cms .cms-body{padding:12px;overflow:auto;display:grid;gap:10px}
+  .row{display:grid;gap:6px}
+  .row label{font-size:12px;color:#cbd5e1}
+  .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px}
+  .row textarea{min-height:100px;resize:vertical}
+  .list{border-top:1px dashed #33405a;padding-top:8px;display:grid;gap:6px}
+  .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#0f1420;border:1px solid #2b354a;border-radius:10px}
+  .item .meta{display:flex;gap:10px;align-items:center}
+  .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
 
-    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+  /* Map features */
+  .feature{cursor:pointer}
+  .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
+  .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
 
-    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-    .gm-btn:hover{filter:brightness(1.1)}
+  /* Regions visual states */
+  .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; touch-action:none}
+  .feature.region.hover path{fill-opacity:.35}
+  .feature.region.selected path{fill-opacity:.42}
 
-    /* ... rest of the CSS unchanged ... */
-  </style>
+  /* Edit handles */
+  .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
+  .edit-handle:active{cursor:grabbing}
+  .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
+
+  /* Zoom controls & hints */
+  .zoombar{position:absolute;left:12px;top:48px;display:flex;flex-direction:column;gap:8px;z-index:8}
+  .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
+  .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
+
+  /* Tooltip card (click-to-open, fixed position) */
+  .tooltip{position:absolute;min-width:240px;max-width:360px;background:rgba(13,17,26,.98);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto}
+  .tooltip.open{display:block}
+  .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
+  .tooltip header h3{margin:0;font-size:14px}
+  .tooltip .close{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
+  .tooltip .body{padding:10px 12px;color:#e7eefb;line-height:1.4}
+
+  /* Primer above/below */
+  .primer{margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:16px}
+  .primer h2{margin:0 0 8px 0;font-size:20px}
+
+  @media (max-width: 900px){.app{grid-template-columns:1fr}.side{grid-row:2;margin:0 16px 16px 16px}}
+</style>
 </head>
 <body>
   <div class="primer" id="primerTop">
@@ -51,21 +100,614 @@
 
   <div class="app">
     <div class="map-wrap" id="mapWrap">
+      <!-- Loader (top-left) -->
       <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
-      <!-- map etc. omitted for brevity, unchanged -->
+
+      <!-- Zoom bar -->
+      <div class="zoombar" aria-hidden="false">
+        <button class="btn" id="zoomIn" title="Zoom in" type="button">＋</button>
+        <button class="btn" id="zoomOut" title="Zoom out" type="button">－</button>
+        <button class="btn" id="zoomReset" title="Reset view" type="button">⤾</button>
+      </div>
+      <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom · Click a region/point for details</div>
+
+      <!-- GM Mode -->
+      <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
+      <div class="gm-modal" id="gmModal" aria-hidden="true">
+        <div class="gm-modal-backdrop" id="gmBackdrop"></div>
+        <div class="gm-modal-card">
+          <h3>Enter GM Passcode</h3>
+          <input id="gmPass" type="password" placeholder="Passcode" autocomplete="off" />
+          <div class="toolbar" style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn" id="gmCancel" type="button">Cancel</button>
+            <button class="btn primary" id="gmSubmit" type="button">Unlock</button>
+          </div>
+          <p class="muted" id="gmError" style="display:none;margin-top:8px;color:#ffb4bf">Wrong code. Try again.</p>
+        </div>
+      </div>
+
+      <div class="cms" id="cms">
+        <header>
+          <h2>GM Tools</h2>
+          <div class="toolbar" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="toolSelect" type="button">Select</button>
+            <button class="btn" id="toolAddPoint" type="button">Add Point</button>
+            <button class="btn" id="toolAddRegion" type="button">New Region</button>
+            <button class="btn" id="toolAddShape" type="button">Add Shape to Region</button>
+            <button class="btn" id="toolExport" type="button">Export</button>
+            <label class="btn" for="importFile" style="cursor:pointer;">Import</label>
+            <input id="importFile" type="file" accept="application/json" style="display:none;" />
+          </div>
+        </header>
+        <div class="cms-body">
+          <div class="row">
+            <label>Primer Intro (top) – auto-saves</label>
+            <textarea id="primerIntroEdit" placeholder="Edit the top primer text..."></textarea>
+          </div>
+          <div class="row">
+            <label>Primer Details (bottom) – auto-saves</label>
+            <textarea id="primerDetailsEdit" placeholder="Edit the bottom primer details..."></textarea>
+          </div>
+          <div class="row">
+            <label>Map Image <span class="muted">(Upload to replace – CSP-safe)</span></label>
+            <input type="file" id="mapFile" accept="image/*" />
+          </div>
+          <div class="row">
+            <label>Selected Feature</label>
+            <select id="featurePicker"></select>
+          </div>
+          <div class="row">
+            <label for="featName">Name (auto-saves)</label>
+            <input id="featName" type="text" placeholder="e.g., Signika" />
+          </div>
+          <div class="row">
+            <label for="featDesc">Lore / Notes (auto-saves)</label>
+            <textarea id="featDesc" placeholder="Write lore or notes..."></textarea>
+          </div>
+          <div class="row" id="rowColor" style="display:none;">
+            <label for="featColor">Region Colour (live)</label>
+            <input id="featColor" type="color" value="#8ad9ff" />
+          </div>
+          <div class="row" id="shapeManager" style="display:none;">
+            <label>Shapes in Region</label>
+            <div id="shapeList" class="list"></div>
+          </div>
+          <div class="list" id="featureList"></div>
+        </div>
+      </div>
+
+      <!-- Tooltip (click-to-open, fixed position) -->
+      <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
+        <header>
+          <h3 id="ttTitle">Title</h3>
+          <button class="close" id="ttClose" aria-label="Close">×</button>
+        </header>
+        <div class="body" id="ttBody">Description…</div>
+      </div>
+
+      <!-- Map & overlays -->
+      <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
+        <defs>
+          <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="in" />
+          </filter>
+        </defs>
+        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid meet" />
+        <g id="regions"></g>
+        <g id="points"></g>
+        <g id="editHandles"></g>
+      </svg>
+
+      <!-- Close tooltip on empty click -->
+      <div id="clickBlocker" style="position:absolute;inset:0;"></div>
+
+      <!-- Mobile drawer (unused for regions now) -->
+      <div class="drawer" id="drawer"></div>
     </div>
+
+    <aside class="side" id="sidePanel">
+      <header>
+        <h1>Campaign Info</h1>
+        <span class="muted">Click the map to explore</span>
+      </header>
+      <div class="content">
+        <h3 class="lore-title" id="loreTitle">Welcome</h3>
+        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, click to open details. <br/><br/>GM Mode lets you add points and draw regions. Data is saved to your browser and can be exported as JSON for a future database.</div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="primer" id="primerBottom">
+    <h2>Primer – Details</h2>
+    <div id="primerDetails">Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.</div>
   </div>
 
 <script>
 (function(){
-  // existing JS
+  const JSON_PATH = './world-data.json';
+  const DEFAULT_MAP_PATH = './map/world-map.png';
+  const STORAGE_KEY = 'signika.world.v24';
+  const DEFAULT_REGION_COLOR = '#8ad9ff';
 
-  // prevent tap highlight focus lingering
-  document.getElementById('world').addEventListener('pointerdown', () => {
-    if (document.activeElement && document.activeElement !== document.body) {
-      document.activeElement.blur();
+  const defaultData = {
+    mapSrc: DEFAULT_MAP_PATH,
+    mapSize: {w:1000,h:600},
+    primerIntro: 'This is your editable campaign introduction. Enable GM mode to edit this text.',
+    primerDetails: 'Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.',
+    features: [
+      { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[{x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230}]] },
+      { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[{x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410}]] },
+      { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[{x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520}], [{x:600,y:480},{x:640,y:500},{x:620,y:530}]] },
+      { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 }
+    ]
+  };
+
+  let state = null;
+
+  // Elements
+  const svg = document.getElementById('world');
+  const mapWrap = document.getElementById('mapWrap');
+  const gRegions = document.getElementById('regions');
+  const gPoints = document.getElementById('points');
+  const editHandles = document.getElementById('editHandles');
+  const loreTitle = document.getElementById('loreTitle');
+  const loreBody = document.getElementById('loreBody');
+  const mapImage = document.getElementById('mapImage');
+  const loader = document.getElementById('loader');
+  const loaderText = document.getElementById('loaderText');
+  const clickBlocker = document.getElementById('clickBlocker');
+
+  const primerIntro = document.getElementById('primerIntro');
+  const primerDetails = document.getElementById('primerDetails');
+  const primerIntroEdit = document.getElementById('primerIntroEdit');
+  const primerDetailsEdit = document.getElementById('primerDetailsEdit');
+
+  // CMS
+  const gmBtn = document.getElementById('gmBtn');
+  const cms = document.getElementById('cms');
+  const mapFile = document.getElementById('mapFile');
+  const toolSelect = document.getElementById('toolSelect');
+  const toolAddPoint = document.getElementById('toolAddPoint');
+  const toolAddRegion = document.getElementById('toolAddRegion');
+  const toolAddShape = document.getElementById('toolAddShape');
+  const exportBtn = document.getElementById('toolExport');
+  const importFile = document.getElementById('importFile');
+  const featurePicker = document.getElementById('featurePicker');
+  const featName = document.getElementById('featName');
+  const featDesc = document.getElementById('featDesc');
+  const featColor = document.getElementById('featColor');
+  const rowColor = document.getElementById('rowColor');
+  const shapeManager = document.getElementById('shapeManager');
+  const shapeList = document.getElementById('shapeList');
+  const featureList = document.getElementById('featureList');
+
+  // GM modal
+  const gmModal = document.getElementById('gmModal');
+  const gmBackdrop = document.getElementById('gmBackdrop');
+  const gmPass = document.getElementById('gmPass');
+  const gmSubmit = document.getElementById('gmSubmit');
+  const gmCancel = document.getElementById('gmCancel');
+  const gmError = document.getElementById('gmError');
+
+  // Tooltip
+  const tooltip = document.getElementById('tooltip');
+  const ttTitle = document.getElementById('ttTitle');
+  const ttBody = document.getElementById('ttBody');
+  const ttClose = document.getElementById('ttClose');
+
+  // Map state
+  let mapW = 1000, mapH = 600;
+  let view = {x:0,y:0,w:1000,h:600};
+  function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
+  function applyMapSrc(){ if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); } mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH); }
+
+  init();
+  async function init(){
+    showLoader('Loading world…');
+    try{
+      const res = await fetch('./world-data.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('JSON not found');
+      const data = await res.json();
+      state = migrate({
+        mapSrc: data.mapImage || data.mapSrc || DEFAULT_MAP_PATH,
+        mapSize: data.mapSize || {w:1000,h:600},
+        features: data.features || [],
+        primerIntro: data.primerIntro ?? defaultData.primerIntro,
+        primerDetails: data.primerDetails ?? defaultData.primerDetails
+      });
+    }catch(e){
+      state = migrate(load()) || defaultData;
     }
-  }, { passive: true });
+    mapW = state.mapSize?.w || 1000; mapH = state.mapSize?.h || 600;
+    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7};
+    primerIntro.textContent = state.primerIntro || '';
+    primerDetails.textContent = state.primerDetails || '';
+    applyMapSrc(); applyView();
+    render();
+    hideLoader();
+  }
+  function showLoader(msg){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }
+  function hideLoader(){ loader.style.display='none'; }
+
+  function render(){
+    gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
+    state.features.filter(f=>f.type==='region').forEach(f=>{
+      const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
+      const color = f.color || DEFAULT_REGION_COLOR;
+      f.shapes.forEach((shape)=>{
+        const path = elNS('path');
+        path.setAttribute('d', roundedPolygonPath(shape, 10));
+        path.setAttribute('fill', color);
+        path.setAttribute('fill-opacity', '0.31');
+        path.setAttribute('stroke','none');
+        path.style.filter = 'url(#fuzzyEdge)';
+        path.addEventListener('pointerdown', (e)=>{
+          if(!gmOpen || currentTool==='select'){ startPanOnBackground(e); }
+          if(gmOpen && (e.ctrlKey||e.metaKey)) { startDragRegionMove(e, f); isDraggingFeature=true; }
+        });
+        g.appendChild(path);
+      });
+      attachRegionGroupHandlers(g, f);
+      gRegions.appendChild(g);
+
+      if(selectedId===f.id && gmOpen){
+        f.shapes.forEach((shape, sIdx)=>{
+          shape.forEach((p,idx)=>{
+            const h = elNS('circle'); h.setAttribute('cx', p.x); h.setAttribute('cy', p.y); h.setAttribute('r', 6); h.classList.add('edit-handle');
+            h.addEventListener('pointerdown', (e)=> startDragVertex(e, f, sIdx, idx));
+            h.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); if(e.altKey){ deleteVertex(f, sIdx, idx); render(); } });
+            editHandles.appendChild(h);
+          });
+          for(let i=0;i<shape.length;i++){
+            const a=shape[i], b=shape[(i+1)%shape.length];
+            const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; const m = elNS('circle');
+            m.setAttribute('cx', mx); m.setAttribute('cy', my); m.setAttribute('r', 6); m.classList.add('edge-handle');
+            m.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); insertVertexAtEdge(f, sIdx, i, {x:mx, y:my}); render(); });
+            editHandles.appendChild(m);
+          }
+        });
+      }
+    });
+
+    state.features.filter(f=>f.type==='point').forEach(f=>{
+      const g = elNS('g'); g.classList.add('feature','point'); g.setAttribute('data-id', f.id);
+      const c = elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
+      const label = elNS('text'); label.setAttribute('x', f.x + 30); label.setAttribute('y', f.y - 30); label.classList.add('label'); label.textContent = f.name;
+      g.appendChild(c); g.appendChild(label); attachPointHandlers(g, f); gPoints.appendChild(g);
+    });
+
+    refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); save();
+  }
+
+  // Only hover highlight; tooltip opens on click and stays
+  function attachRegionGroupHandlers(g, f){
+    const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; updateStates(); });
+    g.addEventListener('pointerleave', ()=>{ if(isCoarse) return; hoveredId=null; updateStates(); });
+    g.addEventListener('click', (e)=>{ 
+      e.stopPropagation();
+      selectedId=f.id; updateStates(); setLore(f);
+      showTooltipFor(f, e); // click-to-open
+      if(gmOpen){ selectFeature(f.id); render(); }
+    });
+  }
+  function attachPointHandlers(node,f){
+    node.addEventListener('click', (e)=>{ 
+      e.stopPropagation(); selectedId=f.id; updateStates(); openLore(f); showTooltipFor(f, e);
+      if(gmOpen) { selectFeature(f.id); render(); }
+    });
+    node.addEventListener('pointerdown', (e)=>{ 
+      if(!gmOpen) { startPanOnBackground(e); return; }
+      if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; }
+    });
+  }
+
+  function updateStates(){
+    gRegions.querySelectorAll('.feature.region').forEach(g=>{
+      const id=g.getAttribute('data-id');
+      g.classList.toggle('hover', id===hoveredId);
+      g.classList.toggle('selected', id===selectedId);
+    });
+  }
+
+  function setLore(f){ loreTitle.textContent = f.name; loreBody.textContent = f.desc || ''; }
+  function openLore(f){ setLore(f); }
+
+  // Tooltip: open on click, fixed at click point, clamp to map container
+  function showTooltipFor(f, evt){
+    if(!f) return;
+    ttTitle.textContent = f.name || '—';
+    ttBody.textContent = f.desc || '';
+    tooltip.classList.add('open');
+    positionTooltip(evt);
+  }
+  function positionTooltip(evt){
+    const wrapRect = mapWrap.getBoundingClientRect();
+    const ttRect = tooltip.getBoundingClientRect();
+    let x = (evt?.clientX ?? wrapRect.left) - wrapRect.left + 12;
+    let y = (evt?.clientY ?? wrapRect.top) - wrapRect.top + 12;
+    const maxX = wrapRect.width - ttRect.width - 8;
+    const maxY = wrapRect.height - ttRect.height - 8;
+    x = Math.max(8, Math.min(maxX, x));
+    y = Math.max(8, Math.min(maxY, y));
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+  ttClose.addEventListener('click', (e)=>{ e.stopPropagation(); tooltip.classList.remove('open'); });
+  // Click empty map area to close tooltip
+  clickBlocker.addEventListener('click', (e)=>{
+    // only close if click is not on an SVG feature or the tooltip itself
+    if(e.target === clickBlocker){ tooltip.classList.remove('open'); }
+  });
+  // Prevent closing when clicking inside tooltip
+  tooltip.addEventListener('click', (e)=> e.stopPropagation());
+
+  // Tools / GM
+  let gmOpen = false; let currentTool = 'select'; let buildingRegion = null; let buildingShapeTargetRegionId = null; let isPanning = false; let panStart = null; let selectedId = null; let hoveredId=null; let isDraggingFeature=false;
+  function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
+  setTool('select');
+
+  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); render(); } });
+  function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); primerIntroEdit.value = state.primerIntro || ''; primerDetailsEdit.value = state.primerDetails || ''; } else { gmError.style.display='block'; } }
+  gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
+
+  // Tool buttons
+  toolSelect.addEventListener('click', ()=> setTool('select'));
+  toolAddPoint.addEventListener('click', ()=> setTool('add-point'));
+  toolAddRegion.addEventListener('click', ()=> setTool('add-region'));
+  toolAddShape.addEventListener('click', ()=>{
+    const f = featureById(selectedId);
+    if(!f || f.type!=='region'){ alert('Select a region first'); return; }
+    buildingShapeTargetRegionId = f.id;
+    buildingRegion = { id:f.id, type:'region', addingShape:true, shape:[] };
+    setTool('add-shape');
+  });
+
+  // Add via clicks (unchanged)
+  svg.addEventListener('click', (e)=>{
+    if(!gmOpen) return; const pt = svgPoint(e);
+    if(currentTool==='add-point'){
+      const f = { id:uid(), type:'point', name:'New Point', desc:'', x:pt.x, y:pt.y };
+      state.features.push(f); render(); selectFeature(f.id); openLore(f); return;
+    }
+    if(currentTool==='add-region'){
+      if(!buildingRegion){
+        const r = { id:uid(), type:'region', name:'New Region', color: DEFAULT_REGION_COLOR, desc:'', shapes:[[ {x:pt.x,y:pt.y} ]] };
+        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id); 
+      } else {
+        const shape = buildingRegion.shapes[ buildingRegion.shapes.length-1 ];
+        shape.push({x:pt.x,y:pt.y}); render(); selectFeature(buildingRegion.id);
+      }
+      return;
+    }
+    if(currentTool==='add-shape' && buildingRegion && buildingShapeTargetRegionId){
+      const r = featureById(buildingShapeTargetRegionId); if(!r) return;
+      if(!buildingRegion.shape.length){
+        const s = 24; const half = s/2;
+        const square = [
+          {x:pt.x-half, y:pt.y-half},
+          {x:pt.x+half, y:pt.y-half},
+          {x:pt.x+half, y:pt.y+half},
+          {x:pt.x-half, y:pt.y+half}
+        ];
+        r.shapes.push(square);
+        buildingRegion = null; buildingShapeTargetRegionId = null; setTool('select');
+        render(); selectFeature(r.id);
+      }
+      return;
+    }
+  });
+
+  // Finish shape
+  svg.addEventListener('dblclick', ()=>{
+    if(!gmOpen) return;
+    if(currentTool==='add-region'){
+      const r = buildingRegion; if(!r) return; const shape = r.shapes[r.shapes.length-1];
+      if(shape.length<3){ alert('Need at least 3 points for a shape.'); return; }
+      buildingRegion = null; setTool('select'); render();
+    }
+  });
+  function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
+
+  // Drag helpers
+  function startDragPoint(e, f){
+    e.preventDefault();
+    const start = svgPoint(e);
+    const offset = { x: f.x - start.x, y: f.y - start.y };
+    const move=(ev)=>{ const p=svgPoint(ev); f.x=clamp(p.x + offset.x,0,mapW); f.y=clamp(p.y + offset.y,0,mapH); render(); selectFeature(f.id,false); };
+    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
+    on(move,up);
+  }
+  function startDragRegionMove(e, f){
+    const p=svgPoint(e);
+    const offset={x:p.x,y:p.y};
+    const move=(ev)=>{ const q=svgPoint(ev); const dx=q.x-offset.x, dy=q.y-offset.y; f.shapes=f.shapes.map(shape=> shape.map(pt=>({x:clamp(pt.x+dx,0,mapW),y:clamp(pt.y+dy,0,mapH)})) ); offset.x=q.x; offset.y=q.y; render(); selectFeature(f.id,false); };
+    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
+    on(move,up);
+  }
+  function startDragVertex(e, f, sIdx, idx){
+    e.preventDefault(); e.stopPropagation();
+    const start = svgPoint(e);
+    const startPt = { x: f.shapes[sIdx][idx].x, y: f.shapes[sIdx][idx].y };
+    const offset = { x: startPt.x - start.x, y: startPt.y - start.y };
+    const move=(ev)=>{ const p=svgPoint(ev); f.shapes[sIdx][idx]={x:clamp(p.x + offset.x,0,mapW),y:clamp(p.y + offset.y,0,mapH)}; render(); selectFeature(f.id,false); };
+    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
+    on(move,up);
+  }
+  function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
+  function off(move,up){ window.removeEventListener('pointermove',move); }
+
+  // Pan & zoom
+  const zoomIn = document.getElementById('zoomIn');
+  const zoomOut = document.getElementById('zoomOut');
+  const zoomReset = document.getElementById('zoomReset');
+  function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
+  zoomIn?.addEventListener('click', ()=> zoom(0.8));
+  zoomOut?.addEventListener('click', ()=> zoom(1.25));
+  zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
+
+  svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
+
+  function startPanOnBackground(e){
+    if(e.button!==0 && e.pointerType!=='touch') return;
+    e.preventDefault();
+    isPanning=true;
+    const rect=svg.getBoundingClientRect();
+    panStart={ sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height };
+    if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){ } }
+  }
+  svg.addEventListener('pointerdown', (e)=>{
+    if(isDraggingFeature) return; if(e.button!==0 && e.pointerType!=='touch') return;
+    if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){ startPanOnBackground(e); }
+  });
+  svg.addEventListener('pointermove', (e)=>{ if(!isPanning) return; const dx=(e.clientX-panStart.sx)*panStart.rw; const dy=(e.clientY-panStart.sy)*panStart.rh; view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w)); view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h)); applyView(); });
+  svg.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
+
+  // Touch pinch zoom
+  let touches = new Map();
+  svg.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch'){ touches.set(e.pointerId, e); try{ svg.setPointerCapture(e.pointerId);}catch(_){} }});
+  svg.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
+  svg.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
+  let pinchBase=null;
+  svg.addEventListener('pointermove', (e)=>{
+    if(e.pointerType!=='touch') return;
+    if(touches.has(e.pointerId)) touches.set(e.pointerId,e);
+    if(touches.size===2){
+      const [a,b]=[...touches.values()];
+      const dNow = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+      const mid = { clientX:(a.clientX+b.clientX)/2, clientY:(a.clientY+b.clientY)/2 };
+      const pt = svgPoint(mid);
+      if(!pinchBase){ pinchBase={d:dNow}; return; }
+      const scale = dNow / pinchBase.d;
+      const factor = 1/scale;
+      pinchBase.d = dNow;
+      zoom(factor, pt);
+    }
+  });
+
+  // CMS interactions
+  function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
+  function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
+  function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); }
+  featurePicker.addEventListener('change', onPickerChange);
+  function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
+
+  // Auto-save name/desc
+  featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); });
+  featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); });
+
+  // Primer edits
+  primerIntroEdit.addEventListener('input', ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; save(); });
+  primerDetailsEdit.addEventListener('input', ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; save(); });
+
+  // Color live update
+  let colorRAF = 0;
+  featColor.addEventListener('input', ()=>{
+    const f = featureById(selectedId);
+    if(!f || f.type!=='region') return;
+    f.color = featColor.value || DEFAULT_REGION_COLOR;
+    if(colorRAF) cancelAnimationFrame(colorRAF);
+    colorRAF = requestAnimationFrame(()=>{ updateRegionColorDOM(f); save(); });
+  });
+  function updateRegionColorDOM(f){
+    const g = gRegions.querySelector(`.feature.region[data-id="${CSS.escape(f.id)}"]`);
+    if(!g) { render(); return; }
+    g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR));
+  }
+
+  // Map upload
+  mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; applyMapSrc(); applyView(); render(); save(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
+
+  // Export / Import
+  exportBtn.addEventListener('click', ()=>{
+    try{
+      const out = { mapImage: state.mapSrc, mapSize: state.mapSize, primerIntro: state.primerIntro || '', primerDetails: state.primerDetails || '', features: state.features };
+      const data = JSON.stringify(out, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url; a.download = 'world-data.json';
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    }catch(err){ alert('Export failed: ' + (err?.message||err)); }
+  });
+  importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result);
+      if(obj.features) state.features=obj.features.map(f=> migrateFeature(f));
+      if(obj.mapImage||obj.mapSrc) state.mapSrc=obj.mapImage||obj.mapSrc;
+      if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; }
+      if('primerIntro' in obj){ state.primerIntro = obj.primerIntro; primerIntro.textContent = state.primerIntro; }
+      if('primerDetails' in obj){ state.primerDetails = obj.primerDetails; primerDetails.textContent = state.primerDetails; }
+      applyMapSrc(); applyView(); render(); save(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
+
+  // Utils
+  function featureById(id){ return state.features.find(x=>x.id===id); }
+  function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+  function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+  function load(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): null; }catch(e){ return null; } }
+  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; }
+    if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f));
+    if(typeof s.primerIntro !== 'string') s.primerIntro = defaultData.primerIntro;
+    if(typeof s.primerDetails !== 'string') s.primerDetails = defaultData.primerDetails;
+    return s; }
+  function migrateFeature(f){ if(f.type==='region'){ if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; } f.color = f.color || DEFAULT_REGION_COLOR; return f; } else { return f; } }
+  function svgPoint(evt){
+    const rect=svg.getBoundingClientRect();
+    const clientX = evt?.clientX ?? rect.left;
+    const clientY = evt?.clientY ?? rect.top;
+    const x = view.x + (clientX - rect.left) * (view.w / rect.width);
+    const y = view.y + (clientY - rect.top) * (view.h / rect.height);
+    return {x,y}; }
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
+  function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  // Rounded polygon
+  function roundedPolygonPath(points, radius){
+    const n=points.length; if(n<3) return '';
+    const r = Math.max(0, radius|0);
+    function lerp(a,b,t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; }
+    function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+    let d='';
+    for(let i=0;i<n;i++){
+      const p0=points[(i-1+n)%n], p1=points[i], p2=points[(i+1)%n];
+      const rr = Math.min(r, dist(p1,p0)/2, dist(p1,p2)/2);
+      const pA = lerp(p1, p0, rr/dist(p1,p0));
+      const pB = lerp(p1, p2, rr/dist(p1,p2));
+      if(i===0){ d += `M ${pA.x} ${pA.y} `; }
+      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
+    }
+    d += 'Z';
+    return d;
+  }
+
+  // Shape list UI
+  function refreshShapeListUI(){
+    const f = featureById(selectedId);
+    shapeList.innerHTML='';
+    if(!f || f.type!=='region'){ shapeManager.style.display='none'; return; }
+    shapeManager.style.display='grid';
+    f.shapes.forEach((shape, idx)=>{
+      const div=document.createElement('div'); div.className='item';
+      div.innerHTML = `<div class="meta"><span class="chip">Shape ${idx+1}</span><span class="muted">${shape.length} pts</span></div>`+
+                      `<div class="toolbar" style="display:flex;gap:8px"><button class="btn danger" data-del>Delete Shape</button></div>`;
+      div.querySelector('[data-del]').addEventListener('click', ()=>{
+        if(!confirm('Delete this shape from the region?')) return;
+        f.shapes.splice(idx,1);
+        render(); selectFeature(f.id);
+      });
+      shapeList.appendChild(div);
+    });
+  }
+
+  // Smoke tests
+  (function runTests(){
+    try{
+      console.assert(svg && gRegions && gPoints && mapImage, 'TEST: core SVG elements exist');
+      const f={id:'t', type:'region', name:'T', color:'#fff', shapes:[[ {x:0,y:0},{x:20,y:0},{x:20,y:20},{x:0,y:20} ], [ {x:40,y:40},{x:60,y:40},{x:60,y:60},{x:40,y:60} ]]};
+      f.shapes.splice(1,1); console.assert(f.shapes.length===1, 'TEST: delete shape');
+    }catch(e){ console.warn('Tests failed:', e); }
+  })();
 
 })();
 </script>
