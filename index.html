@@ -219,8 +219,9 @@ content = r"""<!DOCTYPE html>
 <script>
 (function(){
   // ---- Config (repo-relative!) -------------------------------------------
-  const JSON_PATH = './world-data.json';
-  const DEFAULT_MAP_PATH = './map/world-map.png';
+  const BASE_PATH = window.location.pathname.replace(/\/[^/]*$/, '');
+  const JSON_PATH = BASE_PATH + '/world-data.json';
+  const DEFAULT_MAP_PATH = BASE_PATH + '/map/world-map.png';
 
   // ---- Data layer ---------------------------------------------------------
   const STORAGE_KEY = 'signika.world.v20';
@@ -720,4 +721,5 @@ content = r"""<!DOCTYPE html>
 with open('/mnt/data/index.html', 'w', encoding='utf-8') as f:
     f.write(content)
 print("index.html written to /mnt/data")
+
 
