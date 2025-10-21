@@ -3,22 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (Full v13 · Mobile fixes + Tooltip)</title>
+  <title>The World of Draelon – Campaign Primer (Full v14 · pinch fix + loader + GM‑editable primer)</title>
   <style>
-    :root{
-      --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
-    }
+    :root{ --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px; }
     html,body{height:100%}
     *{-webkit-tap-highlight-color:transparent}
     body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+
+    /* Loader */
+    .loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0b0d12,#0a0f18);z-index:9999}
+    .loader.hidden{opacity:0;pointer-events:none;transition:opacity .25s ease}
+    .spinner{width:48px;height:48px;border-radius:999px;border:3px solid #273042;border-top-color:var(--accent);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .load-msg{margin-top:12px;color:#cfd7eb;font-size:14px}
 
     /* Top bar */
     header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#141821;border-bottom:1px solid #232a3a;box-shadow:0 8px 24px rgba(0,0,0,.4);position:sticky;top:0;z-index:50}
     header.site h1{margin:0;font-size:22px;color:var(--accent)}
     header.site .tag{font-size:12px;color:#cfd7eb}
 
+    /* Primer blocks */
+    .primer{max-width:1000px;margin:16px auto 8px;padding:0 16px}
+    .primer .card{background:var(--panel);border:1px solid #232a3a;border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .primer h2{margin:0 0 8px;color:#bfe27a}
+    .primer .md{color:#dbe2f6;line-height:1.6}
+
     /* Map container */
-    .wrap{position:relative;height:74vh;min-height:440px;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    .wrap{position:relative;height:74vh;min-height:440px;margin:12px auto 16px;max-width:1200px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
     svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none;user-select:none}
 
     /* Controls */
@@ -29,7 +40,7 @@
     .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
 
     /* CMS */
-    .cms{position:absolute;top:56px;right:12px;width:min(480px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
+    .cms{position:absolute;top:56px;right:12px;width:min(520px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
     .cms.open{display:flex;flex-direction:column}
     .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
     .cms header h2{font-size:14px;margin:0}
@@ -57,22 +68,35 @@
     .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
 
     /* Tooltip lore */
-    .tooltip{position:absolute;min-width:220px;max-width:min(380px,70vw);background:rgba(15,20,32,.92);border:1px solid #2b354a;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px 12px;z-index:12;opacity:0;transform:translateY(6px);transition:opacity .15s ease, transform .15s ease;pointer-events:auto}
+    .tooltip{position:absolute;min-width:220px;max-width:min(420px,78vw);background:rgba(15,20,32,.92);border:1px solid #2b354a;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px 12px;z-index:12;opacity:0;transform:translateY(6px);transition:opacity .15s ease, transform .15s ease;pointer-events:auto}
     .tooltip.show{opacity:1;transform:translateY(0)}
     .tooltip h3{margin:0 16px 6px 0;font-size:16px;color:#d7def0}
-    .tooltip p{margin:0;color:#dbe2f6;line-height:1.45}
+    .tooltip .md{margin:0;color:#dbe2f6;line-height:1.45}
     .tooltip .close{position:absolute;right:8px;top:6px;background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
 
-    @media (max-width:900px){
-      .wrap{height:70vh}
-    }
+    @media (max-width:900px){ .wrap{height:70vh} }
   </style>
 </head>
 <body>
+  <div class="loader" id="loader" aria-live="polite" aria-busy="true">
+    <div>
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="load-msg">Loading world map…</div>
+    </div>
+  </div>
+
   <header class="site">
     <h1>The World of Draelon</h1>
     <span class="tag">Campaign Primer</span>
   </header>
+
+  <!-- World intro (GM-editable markdown) -->
+  <section class="primer" id="introSection">
+    <div class="card">
+      <h2>World Introduction</h2>
+      <div class="md" id="introRender">Loading…</div>
+    </div>
+  </section>
 
   <div class="wrap">
     <div class="zoombar">
@@ -126,13 +150,22 @@
           <div id="shapeList" class="list"></div>
         </div>
         <div class="list" id="featureList"></div>
+        
+        <div class="row">
+          <label for="introEdit">World Introduction (Markdown)</label>
+          <textarea id="introEdit" placeholder="# Welcome to Draelon\nWrite your intro here…"></textarea>
+        </div>
+        <div class="row">
+          <label for="campaignEdit">Campaign Primer (Markdown)</label>
+          <textarea id="campaignEdit" placeholder="# Signika Awakens\nWrite your campaign primer here…"></textarea>
+        </div>
       </div>
     </div>
 
     <div class="tooltip" id="tooltip" role="dialog" aria-live="polite" aria-hidden="true">
       <button class="close" id="tipClose" aria-label="Close">✕</button>
       <h3 id="tipTitle">Lore</h3>
-      <p id="tipBody">Tap a location to view details.</p>
+      <div class="md" id="tipBody">Tap a location to view details.</div>
     </div>
 
     <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
@@ -149,14 +182,21 @@
     </svg>
   </div>
 
-  <!-- Optional primer content could go here later -->
+  <!-- Campaign primer (GM-editable markdown) -->
+  <section class="primer" id="campaignSection">
+    <div class="card">
+      <h2>Campaign Primer</h2>
+      <div class="md" id="campaignRender">Loading…</div>
+    </div>
+  </section>
 
 <script>
 (async function(){
-  const STORAGE_KEY = 'draelon.world.v13';
+  const STORAGE_KEY = 'draelon.world.v14';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
 
   // Elements
+  const loader = document.getElementById('loader');
   const svg = document.getElementById('world');
   const gRegions = document.getElementById('regions');
   const gPoints = document.getElementById('points');
@@ -167,6 +207,8 @@
   const tipTitle = document.getElementById('tipTitle');
   const tipBody = document.getElementById('tipBody');
   const tipClose = document.getElementById('tipClose');
+  const introRender = document.getElementById('introRender');
+  const campaignRender = document.getElementById('campaignRender');
 
   // CMS
   const gmBtn = document.getElementById('gmBtn');
@@ -188,9 +230,13 @@
   const shapeManager = document.getElementById('shapeManager');
   const shapeList = document.getElementById('shapeList');
   const featureList = document.getElementById('featureList');
+  const introEdit = document.getElementById('introEdit');
+  const campaignEdit = document.getElementById('campaignEdit');
 
   // Load order: external JSON -> localStorage -> defaults
   let state = await loadExternalJSON('world-data.json') || loadLocal() || defaultState();
+  // Ensure primer fields
+  state.primer = state.primer || { intro: defaultIntro(), campaign: defaultCampaign() };
 
   // Map & viewbox
   let mapW = state.mapSize?.w || 1000;
@@ -203,7 +249,15 @@
   applyView();
 
   // Runtime state
-  let gmOpen=false, currentTool='select', buildingRegion=null, buildingShapeTargetRegionId=null, isPanning=false, panStart=null, selectedId=state.features[0]?.id||null, hoveredId=null, isDraggingFeature=false;
+  let gmOpen=false, currentTool='select', buildingRegion=null, buildingShapeTargetRegionId=null, selectedId=state.features[0]?.id||null, hoveredId=null, isDraggingFeature=false;
+  let activePointers = new Map();
+  let isPanning=false; let panStart=null;
+
+  // Primer initial render
+  introEdit.value = state.primer.intro;
+  campaignEdit.value = state.primer.campaign;
+  introRender.innerHTML = mdToHtml(state.primer.intro);
+  campaignRender.innerHTML = mdToHtml(state.primer.campaign);
 
   // Render
   function render(){
@@ -220,8 +274,8 @@
         path.setAttribute('fill', color);
         path.setAttribute('stroke', 'none');
         path.style.filter='url(#fuzzyEdge)';
-        // Only start dragging shapes/regions when modifier key is held in GM mode
         path.addEventListener('pointerdown', (e)=>{
+          // Only move shapes/regions with modifiers in GM mode; otherwise allow pan to start
           if(!(gmOpen && currentTool==='select')) return; 
           const moveWhole = e.ctrlKey||e.metaKey; // region move
           const moveShape = e.shiftKey;           // shape move
@@ -264,20 +318,22 @@
     refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); updatePointDanger(); saveLocal();
   }
 
-  // Tooltip helpers
+  // Tooltip helpers (markdown)
   function showTooltip(f, clientX, clientY){
     tipTitle.textContent = f.name || 'Lore';
-    tipBody.textContent = f.desc || '';
+    tipBody.innerHTML = mdToHtml(f.desc || '');
     const bounds = svg.getBoundingClientRect();
     // Position near cursor/tap, clamp to viewport
     let left = clientX + 12;
     let top = clientY - 12;
-    const maxLeft = window.innerWidth - 20 - tooltip.offsetWidth;
-    const maxTop = window.innerHeight - 20 - tooltip.offsetHeight;
-    tooltip.style.left = Math.min(left, Math.max(12, maxLeft)) + 'px';
-    tooltip.style.top = Math.min(top, Math.max(12, maxTop)) + 'px';
-    tooltip.classList.add('show');
-    tooltip.setAttribute('aria-hidden','false');
+    requestAnimationFrame(()=>{
+      const maxLeft = window.innerWidth - 20 - tooltip.offsetWidth;
+      const maxTop = window.innerHeight - 20 - tooltip.offsetHeight;
+      tooltip.style.left = Math.min(left, Math.max(12, maxLeft)) + 'px';
+      tooltip.style.top = Math.min(top, Math.max(12, maxTop)) + 'px';
+      tooltip.classList.add('show');
+      tooltip.setAttribute('aria-hidden','false');
+    });
   }
   function hideTooltip(){ tooltip.classList.remove('show'); tooltip.setAttribute('aria-hidden','true'); }
   tipClose.addEventListener('click', hideTooltip);
@@ -325,12 +381,7 @@
       const r = featureById(buildingShapeTargetRegionId); if(!r) return;
       if(!buildingRegion.shape.length){
         const s = 24; const half = s/2;
-        const square = [
-          {x:pt.x-half, y:pt.y-half},
-          {x:pt.x+half, y:pt.y-half},
-          {x:pt.x+half, y:pt.y+half},
-          {x:pt.x-half, y:pt.y+half}
-        ];
+        const square = [ {x:pt.x-half, y:pt.y-half}, {x:pt.x+half, y:pt.y-half}, {x:pt.x+half, y:pt.y+half}, {x:pt.x-half, y:pt.y+half} ];
         r.shapes.push(square);
         buildingRegion = null; buildingShapeTargetRegionId = null; setTool('select');
         render(); selectFeature(r.id);
@@ -375,42 +426,50 @@
   function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
   function off(move,up){ window.removeEventListener('pointermove',move); }
 
-  // Pan & Zoom (mouse + touch pinch) ---------------------------------------
+  // Pan & Zoom (mouse + touch pinch)
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
 
   function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
-  function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
-  zoomIn?.addEventListener('click', ()=> zoom(0.8)); zoomOut?.addEventListener('click', ()=> zoom(1.25)); zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
+  function zoom(factor, center){
+    const cx=center?.x ?? (view.x+view.w/2);
+    const cy=center?.y ?? (view.y+view.h/2);
+    const nw=clamp(view.w*factor, 200, mapW);
+    const nh=clamp(view.h*factor, 120, mapH);
+    view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw));
+    view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh));
+    view.w=nw; view.h=nh; applyView();
+  }
+  zoomIn?.addEventListener('click', ()=> zoom(0.8));
+  zoomOut?.addEventListener('click', ()=> zoom(1.25));
+  zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
 
-  // Allow pan even when starting on a region unless actively editing (GM+mod)
-  let activePointers = new Map();
+  // Pointer handling to allow panning even when starting on regions
   svg.addEventListener('pointerdown', (e)=>{
     svg.setPointerCapture(e.pointerId);
     activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-    if(activePointers.size===1){
-      // begin panning unless GM move modifiers are down (handled on paths)
-      isPanning=true; panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y};
-    }
-  }, true); // capture so it runs before child handlers
-
+    if(activePointers.size===1){ isPanning=true; panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y}; }
+  }, true);
   svg.addEventListener('pointermove', (e)=>{
+    if(activePointers.has(e.pointerId)) activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
     if(activePointers.size===2){
-      // pinch zoom
-      const pts=[...activePointers.keys()];
-      const p0=activePointers.get(pts[0]); const p1=activePointers.get(pts[1]);
-      const n0={x:e.clientX,y:e.clientY}; activePointers.set(e.pointerId, n0);
-      const b0=activePointers.get(pts[0]); const b1=activePointers.get(pts[1]);
-      const d0=Math.hypot(p1.x-p0.x, p1.y-p0.y);
-      const d1=Math.hypot(b1.x-b0.x, b1.y-b0.y);
-      if(d0>0){ const scale=d0/d1; // invert because viewBox size ~ 1/scale
-        const center = clientToSvg({x:(b0.x+b1.x)/2, y:(b0.y+b1.y)/2});
-        zoom(1/scale, center);
+      // Natural pinch: spread -> zoom in, pinch -> zoom out
+      const pts=[...activePointers.values()];
+      const d0=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      // Keep previous distance in panStart.d if present
+      if(panStart && typeof panStart.d === 'number'){
+        const d1 = d0;
+        const factor = panStart.d>0 ? panStart.d/d1 : 1; // if fingers move apart (d1>d_prev) => factor<1 => zoom in
+        const center = clientToSvg({x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2});
+        zoom(factor, center);
+        panStart.d = d1;
+      } else {
+        panStart = panStart || {}; panStart.d = d0;
       }
       return;
     }
-    if(isPanning){
+    if(isPanning && activePointers.size===1){
       const dx=(e.clientX-panStart.sx)*(view.w/svg.getBoundingClientRect().width);
       const dy=(e.clientY-panStart.sy)*(view.h/svg.getBoundingClientRect().height);
       view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w));
@@ -418,16 +477,13 @@
       applyView();
     }
   });
-
   svg.addEventListener('pointerup', (e)=>{
     activePointers.delete(e.pointerId);
-    if(activePointers.size<2){ /* end pinch */ }
     if(activePointers.size===0){ isPanning=false; panStart=null; }
   });
-
   svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
 
-  // CMS interactions --------------------------------------------------------
+  // CMS interactions
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
   function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; pointDanger.style.display='none'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; pointDanger.style.display='grid'; } updateStates(); refreshShapeListUI(); }
@@ -438,6 +494,8 @@
   // Auto-save
   featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); saveLocal(); render(); });
   featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; saveLocal(); });
+  introEdit.addEventListener('input', ()=>{ state.primer.intro = introEdit.value; introRender.innerHTML = mdToHtml(state.primer.intro); saveLocal(); });
+  campaignEdit.addEventListener('input', ()=>{ state.primer.campaign = campaignEdit.value; campaignRender.innerHTML = mdToHtml(state.primer.campaign); saveLocal(); });
 
   // Live colour updates
   let colorRAF = 0;
@@ -449,32 +507,73 @@
   // Map upload
   mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; mapImage.setAttribute('href', dataUrl); applyView(); render(); saveLocal(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
 
-  // Export / Import
-  exportBtn.addEventListener('click', ()=>{ try{ const data = JSON.stringify({ mapSrc: state.mapSrc, mapSize: state.mapSize, features: state.features }, null, 2); const blob = new Blob([data], {type:'application/json'}); const a = document.createElement('a'); const url = URL.createObjectURL(blob); a.href = url; a.download = 'draelon-world.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0); }catch(err){ alert('Export failed: ' + (err?.message||err)); } });
-  importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result); if(obj.features) state.features=obj.features.map(f=> migrateFeature(f)); if(obj.mapSrc) state.mapSrc=obj.mapSrc; if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; } if(state.mapSrc) mapImage.setAttribute('href', state.mapSrc); applyView(); render(); saveLocal(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
+  // Export / Import include primer
+  exportBtn.addEventListener('click', ()=>{ try{ const data = JSON.stringify({ mapSrc: state.mapSrc, mapSize: state.mapSize, features: state.features, primer: state.primer }, null, 2); const blob = new Blob([data], {type:'application/json'}); const a = document.createElement('a'); const url = URL.createObjectURL(blob); a.href = url; a.download = 'draelon-world.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0); }catch(err){ alert('Export failed: ' + (err?.message||err)); } });
+  importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result); if(obj.features) state.features=obj.features.map(f=> migrateFeature(f)); if(obj.mapSrc) state.mapSrc=obj.mapSrc; if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; } if(obj.primer) state.primer = { intro: obj.primer.intro||'', campaign: obj.primer.campaign||'' }; if(state.mapSrc) mapImage.setAttribute('href', state.mapSrc); introEdit.value = state.primer.intro; campaignEdit.value = state.primer.campaign; introRender.innerHTML = mdToHtml(state.primer.intro); campaignRender.innerHTML = mdToHtml(state.primer.campaign); applyView(); render(); saveLocal(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
 
   // Data helpers
   function featureById(id){ return state.features.find(x=>x.id===id); }
   function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
   function loadLocal(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? migrate(JSON.parse(s)): null; }catch(e){ return null; } }
-  function defaultState(){ return migrate({ mapSrc:'', mapSize:{w:1000,h:600}, features:[ { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[{x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230}]] }, { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[{x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410}]] }, { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[{x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520}], [{x:600,y:480},{x:640,y:500},{x:620,y:530}]] }, { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 } ] }); }
+  function defaultIntro(){ return `# Draelon at a Glance\n\n*From the gilded courts of Oscana to the spellbound towers of Eturia, and the iron hosts of Athium—Draelon is a world of divided crowns and converging destinies.*\n\n- **Oscana** – feudal realms, old blood, new money.\n- **Athium** – an empire tempered for conquest.\n- **Eturia** – a magocracy where scholarship is sovereignty.\n- **Signika** – a northern island long ignored… until now.`; }
+  function defaultCampaign(){ return `# Signika Awakens\n\nMonsters once thought myth now tread the forests of **Signika**—some wreathed in strange light, others touched by unheard‑of magics. Guilds arrive in force: \n- **Legio Xernacus** (Athium‑backed)\n- **Wyrm’s Hoard** (Oscanan mercenaries)\n- **Eturian expeditions** (scholars with sharp minds and sharper wards)\n\nYour choices will decide whose banners take root and which secrets stay buried.`; }
+  function defaultState(){ return migrate({ mapSrc:'', mapSize:{w:1000,h:600}, primer:{ intro: defaultIntro(), campaign: defaultCampaign() }, features:[ { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[{x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230}]] }, { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[{x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410}]] }, { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[{x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520}], [{x:600,y:480},{x:640,y:500},{x:620,y:530}]] }, { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 } ] }); }
   async function loadExternalJSON(path){ try{ const res = await fetch(path, {cache:'no-store'}); if(!res.ok) return null; const data = await res.json(); return migrate(data); }catch(e){ return null; } }
-  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; } if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f)); return s; }
+  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; } if(!s.primer){ s.primer = { intro: defaultIntro(), campaign: defaultCampaign() }; } if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f)); return s; }
   function migrateFeature(f){ if(f.type==='region'){ if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; } f.color = f.color || DEFAULT_REGION_COLOR; return f; } else { return f; } }
   function svgPoint(evt){ const rect=svg.getBoundingClientRect(); const x = view.x + (evt.clientX - rect.left) * (view.w / rect.width); const y = view.y + (evt.clientY - rect.top) * (view.h / rect.height); return {x,y}; }
   function clientToSvg(pt){ const rect=svg.getBoundingClientRect(); const x = view.x + (pt.x - rect.left) * (view.w / rect.width); const y = view.y + (pt.y - rect.top) * (view.h / rect.height); return {x,y}; }
   function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
   function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function roundedPolygonPath(points, radius){ const n=points.length; if(n<3) return ''; const r=Math.max(0,radius|0); function lerp(a,b,t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; } let d=''; for(let i=0;i<n;i++){ const p0=points[(i-1+n)%n], p1=points[i], p2=points[(i+1)%n]; const rr=Math.min(r, dist(p1,p0)/2, dist(p1,p2)/2); const pA=lerp(p1,p0,rr/dist(p1,p0)); const pB=lerp(p1,p2,rr/dist(p1,p2)); if(i===0){ d+=`M ${pA.x} ${pA.y} `; } d+=`L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `; } return d+'Z'; }
-  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
 
-  // Init
+  // Minimal Markdown → HTML (safe-ish: escape then replace syntax)
+  function mdToHtml(md){
+    md = (md||'');
+    // Escape HTML first
+    md = md.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    // Headings
+    md = md.replace(/^######\s?(.*)$/gm,'<h6>$1</h6>')
+           .replace(/^#####\s?(.*)$/gm,'<h5>$1</h5>')
+           .replace(/^####\s?(.*)$/gm,'<h4>$1</h4>')
+           .replace(/^###\s?(.*)$/gm,'<h3>$1</h3>')
+           .replace(/^##\s?(.*)$/gm,'<h2>$1</h2>')
+           .replace(/^#\s?(.*)$/gm,'<h1>$1</h1>');
+    // Bold/italic
+    md = md.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+           .replace(/\*(.*?)\*/g,'<em>$1</em>')
+           .replace(/__(.*?)__/g,'<strong>$1</strong>')
+           .replace(/_(.*?)_/g,'<em>$1</em>');
+    // Lists
+    md = md.replace(/^(?:- |\* )(.*)$/gm,'<li>$1</li>');
+    md = md.replace(/(<li>.*<\/li>\n?)+/g, m=> `<ul>${m}</ul>`);
+    // Line breaks to paragraphs
+    md = md.split(/\n\n+/).map(p=>`<p>${p.replace(/\n/g,'<br/>')}</p>`).join('');
+    return md;
+  }
+
+  // Initial render & loader handling
   render();
+  // Wait for map image if provided, then hide loader
+  await waitForMapImage();
+  loader.classList.add('hidden');
 
   // Close tooltip when tapping outside
   document.addEventListener('click', (e)=>{ if(!tooltip.contains(e.target) && e.target.closest('svg')==null) hideTooltip(); }, true);
+
+  async function waitForMapImage(){
+    const href = mapImage.getAttribute('href');
+    if(!href){ return; }
+    try{
+      await new Promise((resolve)=>{
+        const img = new Image();
+        img.onload=()=> resolve();
+        img.onerror=()=> resolve();
+        img.src = href;
+      });
+    }catch(_){}
+  }
 })();
 </script>
 </body>
