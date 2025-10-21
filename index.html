@@ -661,7 +661,7 @@
       const pA = lerp(p1, p0, rr/dist(p1,p0));
       const pB = lerp(p1, p2, rr/dist(p1,p2));
       if(i===0){ d += `M ${pA.x} ${pA.y} `; }
-      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
+     d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
     }
     d += 'Z';
     return d;
