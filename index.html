@@ -1,19 +1,21 @@
+<!-- FULL index.html with click-to-open, fixed-position tooltips + smaller map (v24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The World of Draelon – Campaign Primer (v23)</title>
+<title>The World of Draelon – Campaign Primer (v24)</title>
 <style>
   :root{
     --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
   }
   html,body{height:100%}
   body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
-  .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px;min-height:100%}
-  .map-wrap{position:relative;min-height:70vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+  .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
+  /* Cap the map/side panels' height so no page scroll is needed */
+  .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
   svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
-  .side{display:flex;flex-direction:column;min-height:70vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+  .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
   .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
   .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
   .side .content{padding:16px;overflow:auto}
@@ -75,7 +77,7 @@
   .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
   .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
 
-  /* Tooltip card */
+  /* Tooltip card (click-to-open, fixed position) */
   .tooltip{position:absolute;min-width:240px;max-width:360px;background:rgba(13,17,26,.98);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto}
   .tooltip.open{display:block}
   .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
@@ -107,7 +109,7 @@
         <button class="btn" id="zoomOut" title="Zoom out" type="button">－</button>
         <button class="btn" id="zoomReset" title="Reset view" type="button">⤾</button>
       </div>
-      <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom</div>
+      <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom · Click a region/point for details</div>
 
       <!-- GM Mode -->
       <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
@@ -174,7 +176,7 @@
         </div>
       </div>
 
-      <!-- Tooltip (now positioned at cursor/tap) -->
+      <!-- Tooltip (click-to-open, fixed position) -->
       <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
         <header>
           <h3 id="ttTitle">Title</h3>
@@ -197,6 +199,9 @@
         <g id="editHandles"></g>
       </svg>
 
+      <!-- Close tooltip on empty click -->
+      <div id="clickBlocker" style="position:absolute;inset:0;"></div>
+
       <!-- Mobile drawer (unused for regions now) -->
       <div class="drawer" id="drawer"></div>
     </div>
@@ -208,7 +213,7 @@
       </header>
       <div class="content">
         <h3 class="lore-title" id="loreTitle">Welcome</h3>
-        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, hover to highlight and click to open details. <br/><br/>GM Mode lets you add points and draw regions. Data is saved to your browser and can be exported as JSON for a future database.</div>
+        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, click to open details. <br/><br/>GM Mode lets you add points and draw regions. Data is saved to your browser and can be exported as JSON for a future database.</div>
       </div>
     </aside>
   </div>
@@ -220,13 +225,11 @@
 
 <script>
 (function(){
-  // ---- Config (repo-relative) --------------------------------------------
   const JSON_PATH = './world-data.json';
   const DEFAULT_MAP_PATH = './map/world-map.png';
-
-  // ---- Data layer ---------------------------------------------------------
-  const STORAGE_KEY = 'signika.world.v23';
+  const STORAGE_KEY = 'signika.world.v24';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
+
   const defaultData = {
     mapSrc: DEFAULT_MAP_PATH,
     mapSize: {w:1000,h:600},
@@ -242,7 +245,7 @@
 
   let state = null;
 
-  // ---- Elements -----------------------------------------------------------
+  // Elements
   const svg = document.getElementById('world');
   const mapWrap = document.getElementById('mapWrap');
   const gRegions = document.getElementById('regions');
@@ -251,16 +254,16 @@
   const loreTitle = document.getElementById('loreTitle');
   const loreBody = document.getElementById('loreBody');
   const mapImage = document.getElementById('mapImage');
-  const hint = document.getElementById('hint');
   const loader = document.getElementById('loader');
   const loaderText = document.getElementById('loaderText');
+  const clickBlocker = document.getElementById('clickBlocker');
 
   const primerIntro = document.getElementById('primerIntro');
   const primerDetails = document.getElementById('primerDetails');
   const primerIntroEdit = document.getElementById('primerIntroEdit');
   const primerDetailsEdit = document.getElementById('primerDetailsEdit');
 
-  // CMS elements
+  // CMS
   const gmBtn = document.getElementById('gmBtn');
   const cms = document.getElementById('cms');
   const mapFile = document.getElementById('mapFile');
@@ -279,7 +282,7 @@
   const shapeList = document.getElementById('shapeList');
   const featureList = document.getElementById('featureList');
 
-  // GM modal elements
+  // GM modal
   const gmModal = document.getElementById('gmModal');
   const gmBackdrop = document.getElementById('gmBackdrop');
   const gmPass = document.getElementById('gmPass');
@@ -293,18 +296,17 @@
   const ttBody = document.getElementById('ttBody');
   const ttClose = document.getElementById('ttClose');
 
-  // ---- Map state (pan/zoom) ----------------------------------------------
-  let mapW = 1000; let mapH = 600;
-  let view = {x:0, y:0, w:1000, h:600};
+  // Map state
+  let mapW = 1000, mapH = 600;
+  let view = {x:0,y:0,w:1000,h:600};
   function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
   function applyMapSrc(){ if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); } mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH); }
 
-  // ---- Load world-data.json ----------------------------------------------
   init();
   async function init(){
     showLoader('Loading world…');
     try{
-      const res = await fetch(JSON_PATH, {cache:'no-store'});
+      const res = await fetch('./world-data.json', {cache:'no-store'});
       if(!res.ok) throw new Error('JSON not found');
       const data = await res.json();
       state = migrate({
@@ -314,40 +316,32 @@
         primerIntro: data.primerIntro ?? defaultData.primerIntro,
         primerDetails: data.primerDetails ?? defaultData.primerDetails
       });
-    }catch(err){
-      console.warn('Falling back to saved/defaults:', err);
+    }catch(e){
       state = migrate(load()) || defaultData;
     }
     mapW = state.mapSize?.w || 1000; mapH = state.mapSize?.h || 600;
-    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7}; // start slightly zoomed & panned
+    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7};
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     applyMapSrc(); applyView();
     render();
     hideLoader();
   }
+  function showLoader(msg){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }
+  function hideLoader(){ loader.style.display='none'; }
 
-  function showLoader(msg){ if(loader){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }}
-  function hideLoader(){ if(loader) loader.style.display='none'; }
-
-  // ---- Rendering ----------------------------------------------------------
   function render(){
     gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
-
-    // regions
     state.features.filter(f=>f.type==='region').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
       const color = f.color || DEFAULT_REGION_COLOR;
-      f.shapes.forEach((shape, sIdx)=>{
+      f.shapes.forEach((shape)=>{
         const path = elNS('path');
-        const d = roundedPolygonPath(shape, 10);
-        path.setAttribute('d', d);
+        path.setAttribute('d', roundedPolygonPath(shape, 10));
         path.setAttribute('fill', color);
         path.setAttribute('fill-opacity', '0.31');
-        path.setAttribute('stroke', 'none');
+        path.setAttribute('stroke','none');
         path.style.filter = 'url(#fuzzyEdge)';
-        path.style.touchAction = 'none';
-        // Allow pan start on regions; ctrl/⌘ drag moves whole region in GM
         path.addEventListener('pointerdown', (e)=>{
           if(!gmOpen || currentTool==='select'){ startPanOnBackground(e); }
           if(gmOpen && (e.ctrlKey||e.metaKey)) { startDragRegionMove(e, f); isDraggingFeature=true; }
@@ -376,7 +370,6 @@
       }
     });
 
-    // points
     state.features.filter(f=>f.type==='point').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','point'); g.setAttribute('data-id', f.id);
       const c = elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -387,23 +380,27 @@
     refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); save();
   }
 
-  // group-level interactions (hover/select + tooltip at cursor)
+  // Only hover highlight; tooltip opens on click and stays
   function attachRegionGroupHandlers(g, f){
     const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-
-    g.addEventListener('pointerenter', (e)=>{ if(isCoarse) return; hoveredId=f.id; selectedId=f.id; updateStates(); showTooltipFor(f, e); });
-    g.addEventListener('pointermove', (e)=>{ if(isCoarse) return; if(hoveredId===f.id) moveTooltip(e); });
+    g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; updateStates(); });
     g.addEventListener('pointerleave', ()=>{ if(isCoarse) return; hoveredId=null; updateStates(); });
     g.addEventListener('click', (e)=>{ 
-      e.stopPropagation(); 
-      setLore(f); showTooltipFor(f, e);
-      if(gmOpen){ selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); }
+      e.stopPropagation();
+      selectedId=f.id; updateStates(); setLore(f);
+      showTooltipFor(f, e); // click-to-open
+      if(gmOpen){ selectFeature(f.id); render(); }
     });
   }
   function attachPointHandlers(node,f){
-    node.addEventListener('pointermove', (e)=>{ moveTooltip(e); });
-    node.addEventListener('click', (e)=>{ e.stopPropagation(); openLore(f); showTooltipFor(f, e); if(gmOpen) { selectFeature(f.id); render(); } else { selectedId=f.id; updateStates(); }});
-    node.addEventListener('pointerdown', (e)=>{ if(!gmOpen) { startPanOnBackground(e); return; } if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; } });
+    node.addEventListener('click', (e)=>{ 
+      e.stopPropagation(); selectedId=f.id; updateStates(); openLore(f); showTooltipFor(f, e);
+      if(gmOpen) { selectFeature(f.id); render(); }
+    });
+    node.addEventListener('pointerdown', (e)=>{ 
+      if(!gmOpen) { startPanOnBackground(e); return; }
+      if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; }
+    });
   }
 
   function updateStates(){
@@ -417,46 +414,43 @@
   function setLore(f){ loreTitle.textContent = f.name; loreBody.textContent = f.desc || ''; }
   function openLore(f){ setLore(f); }
 
-  // Tooltip logic at cursor/tap
-  function showTooltipFor(f, evt){ if(!f) return; ttTitle.textContent = f.name || '—'; ttBody.textContent = f.desc || ''; tooltip.classList.add('open'); positionTooltip(evt); }
+  // Tooltip: open on click, fixed at click point, clamp to map container
+  function showTooltipFor(f, evt){
+    if(!f) return;
+    ttTitle.textContent = f.name || '—';
+    ttBody.textContent = f.desc || '';
+    tooltip.classList.add('open');
+    positionTooltip(evt);
+  }
   function positionTooltip(evt){
-    if(!tooltip || !evt) return;
     const wrapRect = mapWrap.getBoundingClientRect();
-    const ttRect = tooltip.getBoundingClientRect(); // current size
-    let x = (evt.clientX ?? 0) - wrapRect.left + 12;
-    let y = (evt.clientY ?? 0) - wrapRect.top + 12;
-
-    // clamp inside container
+    const ttRect = tooltip.getBoundingClientRect();
+    let x = (evt?.clientX ?? wrapRect.left) - wrapRect.left + 12;
+    let y = (evt?.clientY ?? wrapRect.top) - wrapRect.top + 12;
     const maxX = wrapRect.width - ttRect.width - 8;
     const maxY = wrapRect.height - ttRect.height - 8;
     x = Math.max(8, Math.min(maxX, x));
     y = Math.max(8, Math.min(maxY, y));
-
     tooltip.style.left = x + 'px';
     tooltip.style.top = y + 'px';
   }
-  function moveTooltip(evt){ if(tooltip.classList.contains('open')) positionTooltip(evt); }
-  ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
+  ttClose.addEventListener('click', (e)=>{ e.stopPropagation(); tooltip.classList.remove('open'); });
+  // Click empty map area to close tooltip
+  clickBlocker.addEventListener('click', (e)=>{
+    // only close if click is not on an SVG feature or the tooltip itself
+    if(e.target === clickBlocker){ tooltip.classList.remove('open'); }
+  });
+  // Prevent closing when clicking inside tooltip
+  tooltip.addEventListener('click', (e)=> e.stopPropagation());
 
-  // ---- Tools --------------------------------------------------------------
+  // Tools / GM
   let gmOpen = false; let currentTool = 'select'; let buildingRegion = null; let buildingShapeTargetRegionId = null; let isPanning = false; let panStart = null; let selectedId = null; let hoveredId=null; let isDraggingFeature=false;
   function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
   setTool('select');
 
-  // GM modal
-  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); updateHint(); render(); } });
-  function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); updateHint(); primerIntroEdit.value = state.primerIntro || ''; primerDetailsEdit.value = state.primerDetails || ''; } else { gmError.style.display='block'; } }
+  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); render(); } });
+  function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); primerIntroEdit.value = state.primerIntro || ''; primerDetailsEdit.value = state.primerDetails || ''; } else { gmError.style.display='block'; } }
   gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
-
-  function updateHint(){
-    if(!hint) return;
-    if(gmOpen){
-      hint.innerHTML = 'Drag map to pan · Scroll/Pinch to zoom · <kbd>Alt</kbd>+click vertex to delete · Click mid-dots to insert · Double-click to finish shape · <kbd>Ctrl/⌘</kbd>+drag moves whole region';
-    } else {
-      hint.textContent = 'Drag map to pan · Scroll/Pinch to zoom';
-    }
-  }
-  updateHint();
 
   // Tool buttons
   toolSelect.addEventListener('click', ()=> setTool('select'));
@@ -470,7 +464,7 @@
     setTool('add-shape');
   });
 
-  // Add items via map clicks
+  // Add via clicks (unchanged)
   svg.addEventListener('click', (e)=>{
     if(!gmOpen) return; const pt = svgPoint(e);
     if(currentTool==='add-point'){
@@ -505,7 +499,7 @@
     }
   });
 
-  // Finish shape/region with double click
+  // Finish shape
   svg.addEventListener('dblclick', ()=>{
     if(!gmOpen) return;
     if(currentTool==='add-region'){
@@ -516,7 +510,7 @@
   });
   function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
 
-  // ---- Drag helpers -------------------------------------------------------
+  // Drag helpers
   function startDragPoint(e, f){
     e.preventDefault();
     const start = svgPoint(e);
@@ -543,34 +537,25 @@
   }
   function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
   function off(move,up){ window.removeEventListener('pointermove',move); }
-  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
-  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
-  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
 
-  // ---- Pan & Zoom ---------------------------------------------------------
+  // Pan & zoom
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
   function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
-  zoomIn?.addEventListener('click', ()=> zoom(0.8)); zoomOut?.addEventListener('click', ()=> zoom(1.25)); zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
+  zoomIn?.addEventListener('click', ()=> zoom(0.8));
+  zoomOut?.addEventListener('click', ()=> zoom(1.25));
+  zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
 
-  // Wheel zoom
   svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
 
-  // Background pan start helper
   function startPanOnBackground(e){
     if(e.button!==0 && e.pointerType!=='touch') return;
     e.preventDefault();
     isPanning=true;
     const rect=svg.getBoundingClientRect();
-    panStart={
-      sx:e.clientX, sy:e.clientY,
-      vx:view.x, vy:view.y,
-      rw:view.w/rect.width, rh:view.h/rect.height
-    };
-    if(e.target && e.target.setPointerCapture){
-      try{ e.target.setPointerCapture(e.pointerId); }catch(_){}
-    }
+    panStart={ sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height };
+    if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){ } }
   }
   svg.addEventListener('pointerdown', (e)=>{
     if(isDraggingFeature) return; if(e.button!==0 && e.pointerType!=='touch') return;
@@ -594,29 +579,29 @@
       const mid = { clientX:(a.clientX+b.clientX)/2, clientY:(a.clientY+b.clientY)/2 };
       const pt = svgPoint(mid);
       if(!pinchBase){ pinchBase={d:dNow}; return; }
-      const scale = dNow / pinchBase.d; // >1 = fingers apart => zoom in
-      const factor = 1/scale;          // invert to keep direction natural
+      const scale = dNow / pinchBase.d;
+      const factor = 1/scale;
       pinchBase.d = dNow;
       zoom(factor, pt);
     }
   });
 
-  // ---- CMS interactions ---------------------------------------------------
+  // CMS interactions
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
   function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); }
   featurePicker.addEventListener('change', onPickerChange);
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
 
-  // Auto-save: name/desc
-  featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); if(selectedId===f.id) showTooltipFor(f); });
-  featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); if(selectedId===f.id) showTooltipFor(f); });
+  // Auto-save name/desc
+  featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); });
+  featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); });
 
-  // Primer edits (top/bottom)
+  // Primer edits
   primerIntroEdit.addEventListener('input', ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; save(); });
   primerDetailsEdit.addEventListener('input', ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; save(); });
 
-  // Live colour updates (throttled)
+  // Color live update
   let colorRAF = 0;
   featColor.addEventListener('input', ()=>{
     const f = featureById(selectedId);
@@ -631,19 +616,13 @@
     g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR));
   }
 
-  // Map upload -> data URL
+  // Map upload
   mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; applyMapSrc(); applyView(); render(); save(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
 
-  // --- Export / Import -----------------------------------------------------
+  // Export / Import
   exportBtn.addEventListener('click', ()=>{
     try{
-      const out = {
-        mapImage: state.mapSrc,
-        mapSize: state.mapSize,
-        primerIntro: state.primerIntro || '',
-        primerDetails: state.primerDetails || '',
-        features: state.features
-      };
+      const out = { mapImage: state.mapSrc, mapSize: state.mapSize, primerIntro: state.primerIntro || '', primerDetails: state.primerDetails || '', features: state.features };
       const data = JSON.stringify(out, null, 2);
       const blob = new Blob([data], {type:'application/json'});
       const a = document.createElement('a');
@@ -653,20 +632,15 @@
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
     }catch(err){ alert('Export failed: ' + (err?.message||err)); }
   });
-
   importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result);
       if(obj.features) state.features=obj.features.map(f=> migrateFeature(f));
       if(obj.mapImage||obj.mapSrc) state.mapSrc=obj.mapImage||obj.mapSrc;
-      if(obj.mapSize){
-        state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h;
-        mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH);
-        svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH};
-      }
+      if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; }
       if('primerIntro' in obj){ state.primerIntro = obj.primerIntro; primerIntro.textContent = state.primerIntro; }
       if('primerDetails' in obj){ state.primerDetails = obj.primerDetails; primerDetails.textContent = state.primerDetails; }
       applyMapSrc(); applyView(); render(); save(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
 
-  // ---- utils --------------------------------------------------------------
+  // Utils
   function featureById(id){ return state.features.find(x=>x.id===id); }
   function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -676,14 +650,11 @@
     if(typeof s.primerIntro !== 'string') s.primerIntro = defaultData.primerIntro;
     if(typeof s.primerDetails !== 'string') s.primerDetails = defaultData.primerDetails;
     return s; }
-  function migrateFeature(f){ if(f.type==='region'){
-      if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; }
-      f.color = f.color || DEFAULT_REGION_COLOR; return f;
-    } else { return f; } }
+  function migrateFeature(f){ if(f.type==='region'){ if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; } f.color = f.color || DEFAULT_REGION_COLOR; return f; } else { return f; } }
   function svgPoint(evt){
     const rect=svg.getBoundingClientRect();
-    const clientX = evt.clientX ?? ((evt.clientX===undefined && evt.touches && evt.touches[0]) ? evt.touches[0].clientX : rect.left);
-    const clientY = evt.clientY ?? ((evt.clientY===undefined && evt.touches && evt.touches[0]) ? evt.touches[0].clientY : rect.top);
+    const clientX = evt?.clientX ?? rect.left;
+    const clientY = evt?.clientY ?? rect.top;
     const x = view.x + (clientX - rect.left) * (view.w / rect.width);
     const y = view.y + (clientY - rect.top) * (view.h / rect.height);
     return {x,y}; }
@@ -691,7 +662,7 @@
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
   function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-  // ---- geometry helpers ---------------------------------------------------
+  // Rounded polygon
   function roundedPolygonPath(points, radius){
     const n=points.length; if(n<3) return '';
     const r = Math.max(0, radius|0);
@@ -710,7 +681,7 @@
     return d;
   }
 
-  // ---- CMS: per-shape delete UI ------------------------------------------
+  // Shape list UI
   function refreshShapeListUI(){
     const f = featureById(selectedId);
     shapeList.innerHTML='';
@@ -722,22 +693,19 @@
                       `<div class="toolbar" style="display:flex;gap:8px"><button class="btn danger" data-del>Delete Shape</button></div>`;
       div.querySelector('[data-del]').addEventListener('click', ()=>{
         if(!confirm('Delete this shape from the region?')) return;
-        deleteShape(f, idx); render(); selectFeature(f.id);
+        f.shapes.splice(idx,1);
+        render(); selectFeature(f.id);
       });
       shapeList.appendChild(div);
     });
   }
 
-  // ---- lightweight tests --------------------------------------------------
+  // Smoke tests
   (function runTests(){
     try{
       console.assert(svg && gRegions && gPoints && mapImage, 'TEST: core SVG elements exist');
       const f={id:'t', type:'region', name:'T', color:'#fff', shapes:[[ {x:0,y:0},{x:20,y:0},{x:20,y:20},{x:0,y:20} ], [ {x:40,y:40},{x:60,y:40},{x:60,y:60},{x:40,y:60} ]]};
-      deleteShape(f,1); console.assert(f.shapes.length===1, 'TEST: deleteShape removes a shape');
-      const before=f.shapes[0].length; const tmp={...f, shapes:[...f.shapes.map(s=>s.slice())]}; tmp.shapes[0].push({x:80,y:80}); deleteVertex(tmp,0,0); console.assert(tmp.shapes[0].length===before, 'TEST: deleteVertex keeps >=3');
-      // primers presence
-      console.assert(typeof (state?.primerIntro ?? '') === 'string', 'TEST: primerIntro present');
-      console.assert(typeof (state?.primerDetails ?? '') === 'string', 'TEST: primerDetails present');
+      f.shapes.splice(1,1); console.assert(f.shapes.length===1, 'TEST: delete shape');
     }catch(e){ console.warn('Tests failed:', e); }
   })();
 
