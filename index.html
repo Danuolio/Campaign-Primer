@@ -1,96 +1,95 @@
-<!-- FULL index.html with click-to-open, fixed-position tooltips + smaller map (v24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The World of Draelon – Campaign Primer (v24)</title>
-<style>
-  :root{
-    --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
-  }
-  html,body{height:100%}
-  body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
-  .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
-  /* Cap the map/side panels' height so no page scroll is needed */
-  .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-  svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
-  .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-  .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
-  .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
-  .side .content{padding:16px;overflow:auto}
-  .lore-title{font-weight:700;margin:0 0 8px;font-size:18px}
-  .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
-  .muted{color:var(--muted);font-size:12px}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The World of Draelon – Campaign Primer (v25 – fix tooltip/pan/select)</title>
+  <style>
+    :root{
+      --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
+    }
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
+    .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
+    /* Fit on screen without scrolling */
+    .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
+    .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
+    .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
+    .side .content{padding:16px;overflow:auto}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:18px}
+    .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
+    .muted{color:var(--muted);font-size:12px}
 
-  /* Loader (top-left) */
-  .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+    /* Loader (top-left) */
+    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* GM button + modal */
-  .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-  .gm-btn:hover{filter:brightness(1.1)}
-  .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
-  .gm-modal.open{display:flex}
-  .gm-modal-backdrop{position:absolute;inset:0;background:rgba(5,9,16,.65);backdrop-filter:blur(2px)}
-  .gm-modal-card{position:relative;width:min(92%,360px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
-  .gm-modal-card h3{margin:0 0 8px;font-size:16px}
-  .gm-modal-card input{width:100%;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px;box-sizing:border-box;margin:8px 0 10px}
-  .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
-  .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
+    /* GM button + modal */
+    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+    .gm-btn:hover{filter:brightness(1.1)}
+    .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
+    .gm-modal.open{display:flex}
+    .gm-modal-backdrop{position:absolute;inset:0;background:rgba(5,9,16,.65);backdrop-filter:blur(2px)}
+    .gm-modal-card{position:relative;width:min(92%,360px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
+    .gm-modal-card h3{margin:0 0 8px;font-size:16px}
+    .gm-modal-card input{width:100%;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px;box-sizing:border-box;margin:8px 0 10px}
+    .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
+    .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
 
-  /* CMS */
-  .cms{position:absolute;top:56px;right:12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
-  .cms.open{display:flex;flex-direction:column}
-  .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
-  .cms header h2{font-size:14px;margin:0}
-  .cms .cms-body{padding:12px;overflow:auto;display:grid;gap:10px}
-  .row{display:grid;gap:6px}
-  .row label{font-size:12px;color:#cbd5e1}
-  .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px}
-  .row textarea{min-height:100px;resize:vertical}
-  .list{border-top:1px dashed #33405a;padding-top:8px;display:grid;gap:6px}
-  .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#0f1420;border:1px solid #2b354a;border-radius:10px}
-  .item .meta{display:flex;gap:10px;align-items:center}
-  .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
+    /* CMS */
+    .cms{position:absolute;top:56px;right:12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
+    .cms.open{display:flex;flex-direction:column}
+    .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
+    .cms header h2{font-size:14px;margin:0}
+    .cms .cms-body{padding:12px;overflow:auto;display:grid;gap:10px}
+    .row{display:grid;gap:6px}
+    .row label{font-size:12px;color:#cbd5e1}
+    .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px}
+    .row textarea{min-height:100px;resize:vertical}
+    .list{border-top:1px dashed #33405a;padding-top:8px;display:grid;gap:6px}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#0f1420;border:1px solid #2b354a;border-radius:10px}
+    .item .meta{display:flex;gap:10px;align-items:center}
+    .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
 
-  /* Map features */
-  .feature{cursor:pointer}
-  .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
-  .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
+    /* Map features */
+    .feature{cursor:pointer}
+    .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
+    .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
 
-  /* Regions visual states */
-  .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; touch-action:none}
-  .feature.region.hover path{fill-opacity:.35}
-  .feature.region.selected path{fill-opacity:.42}
+    /* Regions visual states */
+    .feature.region path{stroke-width:0;transition:fill-opacity .12s linear}
+    .feature.region.hover path{fill-opacity:.35}
+    .feature.region.selected path{fill-opacity:.42}
 
-  /* Edit handles */
-  .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
-  .edit-handle:active{cursor:grabbing}
-  .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
+    /* Edit handles */
+    .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
+    .edit-handle:active{cursor:grabbing}
+    .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
 
-  /* Zoom controls & hints */
-  .zoombar{position:absolute;left:12px;top:48px;display:flex;flex-direction:column;gap:8px;z-index:8}
-  .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-  .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
-  .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
+    /* Zoom controls & hints */
+    .zoombar{position:absolute;left:12px;top:48px;display:flex;flex-direction:column;gap:8px;z-index:8}
+    .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
+    .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
 
-  /* Tooltip card (click-to-open, fixed position) */
-  .tooltip{position:absolute;min-width:240px;max-width:360px;background:rgba(13,17,26,.98);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto}
-  .tooltip.open{display:block}
-  .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
-  .tooltip header h3{margin:0;font-size:14px}
-  .tooltip .close{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
-  .tooltip .body{padding:10px 12px;color:#e7eefb;line-height:1.4}
+    /* Tooltip card */
+    .tooltip{position:absolute;min-width:240px;max-width:360px;background:rgba(13,17,26,.98);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto}
+    .tooltip.open{display:block}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
+    .tooltip header h3{margin:0;font-size:14px}
+    .tooltip .close{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
+    .tooltip .body{padding:10px 12px;color:#e7eefb;line-height:1.4}
 
-  /* Primer above/below */
-  .primer{margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:16px}
-  .primer h2{margin:0 0 8px 0;font-size:20px}
+    /* Primer blocks */
+    .primer{margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:16px}
+    .primer h2{margin:0 0 8px 0;font-size:20px}
 
-  @media (max-width: 900px){.app{grid-template-columns:1fr}.side{grid-row:2;margin:0 16px 16px 16px}}
-</style>
+    @media (max-width: 900px){.app{grid-template-columns:1fr}.side{grid-row:2;margin:0 16px 16px 16px}}
+  </style>
 </head>
 <body>
   <div class="primer" id="primerTop">
@@ -176,7 +175,7 @@
         </div>
       </div>
 
-      <!-- Tooltip (click-to-open, fixed position) -->
+      <!-- Tooltip (click-to-open at cursor, fixed) -->
       <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
         <header>
           <h3 id="ttTitle">Title</h3>
@@ -188,6 +187,7 @@
       <!-- Map & overlays -->
       <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
         <defs>
+          <!-- Soft fuzzy edge only -->
           <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
@@ -198,12 +198,7 @@
         <g id="points"></g>
         <g id="editHandles"></g>
       </svg>
-
-      <!-- Close tooltip on empty click -->
-      <div id="clickBlocker" style="position:absolute;inset:0;"></div>
-
-      <!-- Mobile drawer (unused for regions now) -->
-      <div class="drawer" id="drawer"></div>
+      <!-- (Removed clickBlocker overlay to restore panning/selection) -->
     </div>
 
     <aside class="side" id="sidePanel">
@@ -225,27 +220,29 @@
 
 <script>
 (function(){
+  // ---- Config -------------------------------------------------------------
   const JSON_PATH = './world-data.json';
   const DEFAULT_MAP_PATH = './map/world-map.png';
-  const STORAGE_KEY = 'signika.world.v24';
+  const STORAGE_KEY = 'signika.world.v25';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
 
+  // ---- Defaults -----------------------------------------------------------
   const defaultData = {
     mapSrc: DEFAULT_MAP_PATH,
     mapSize: {w:1000,h:600},
     primerIntro: 'This is your editable campaign introduction. Enable GM mode to edit this text.',
     primerDetails: 'Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.',
     features: [
-      { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[{x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230}]] },
-      { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[{x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410}]] },
-      { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[{x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520}], [{x:600,y:480},{x:640,y:500},{x:620,y:530}]] },
+      { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', shapes:[[ {x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230} ]] },
+      { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', shapes:[[ {x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410} ]] },
+      { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', shapes:[[ {x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520} ], [ {x:600,y:480},{x:640,y:500},{x:620,y:530} ]] },
       { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 }
     ]
   };
 
   let state = null;
 
-  // Elements
+  // ---- Elements -----------------------------------------------------------
   const svg = document.getElementById('world');
   const mapWrap = document.getElementById('mapWrap');
   const gRegions = document.getElementById('regions');
@@ -256,7 +253,6 @@
   const mapImage = document.getElementById('mapImage');
   const loader = document.getElementById('loader');
   const loaderText = document.getElementById('loaderText');
-  const clickBlocker = document.getElementById('clickBlocker');
 
   const primerIntro = document.getElementById('primerIntro');
   const primerDetails = document.getElementById('primerDetails');
@@ -296,17 +292,18 @@
   const ttBody = document.getElementById('ttBody');
   const ttClose = document.getElementById('ttClose');
 
-  // Map state
+  // ---- Map state (pan/zoom) ----------------------------------------------
   let mapW = 1000, mapH = 600;
   let view = {x:0,y:0,w:1000,h:600};
   function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
   function applyMapSrc(){ if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); } mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH); }
 
+  // ---- Load ---------------------------------------------------------------
   init();
   async function init(){
     showLoader('Loading world…');
     try{
-      const res = await fetch('./world-data.json', {cache:'no-store'});
+      const res = await fetch(JSON_PATH, {cache:'no-store'});
       if(!res.ok) throw new Error('JSON not found');
       const data = await res.json();
       state = migrate({
@@ -316,7 +313,8 @@
         primerIntro: data.primerIntro ?? defaultData.primerIntro,
         primerDetails: data.primerDetails ?? defaultData.primerDetails
       });
-    }catch(e){
+    }catch(err){
+      console.warn('Falling back to defaults/localStorage:', err);
       state = migrate(load()) || defaultData;
     }
     mapW = state.mapSize?.w || 1000; mapH = state.mapSize?.h || 600;
@@ -327,11 +325,15 @@
     render();
     hideLoader();
   }
+
   function showLoader(msg){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }
   function hideLoader(){ loader.style.display='none'; }
 
+  // ---- Rendering ----------------------------------------------------------
   function render(){
     gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
+
+    // Regions
     state.features.filter(f=>f.type==='region').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
       const color = f.color || DEFAULT_REGION_COLOR;
@@ -370,6 +372,7 @@
       }
     });
 
+    // Points
     state.features.filter(f=>f.type==='point').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','point'); g.setAttribute('data-id', f.id);
       const c = elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -380,7 +383,7 @@
     refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); save();
   }
 
-  // Only hover highlight; tooltip opens on click and stays
+  // ---- Interactions -------------------------------------------------------
   function attachRegionGroupHandlers(g, f){
     const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; updateStates(); });
@@ -403,6 +406,14 @@
     });
   }
 
+  // Close tooltip when clicking empty map area (no overlay used)
+  mapWrap.addEventListener('click', (e)=>{
+    if(!tooltip.classList.contains('open')) return;
+    if(e.target.closest('.tooltip')) return;
+    if(e.target.closest('.feature')) return; // clicks on features handled above
+    tooltip.classList.remove('open');
+  });
+
   function updateStates(){
     gRegions.querySelectorAll('.feature.region').forEach(g=>{
       const id=g.getAttribute('data-id');
@@ -414,13 +425,10 @@
   function setLore(f){ loreTitle.textContent = f.name; loreBody.textContent = f.desc || ''; }
   function openLore(f){ setLore(f); }
 
-  // Tooltip: open on click, fixed at click point, clamp to map container
+  // Tooltip helpers
   function showTooltipFor(f, evt){
-    if(!f) return;
-    ttTitle.textContent = f.name || '—';
-    ttBody.textContent = f.desc || '';
-    tooltip.classList.add('open');
-    positionTooltip(evt);
+    if(!f) return; ttTitle.textContent = f.name || '—'; ttBody.textContent = f.desc || '';
+    tooltip.classList.add('open'); positionTooltip(evt);
   }
   function positionTooltip(evt){
     const wrapRect = mapWrap.getBoundingClientRect();
@@ -435,15 +443,8 @@
     tooltip.style.top = y + 'px';
   }
   ttClose.addEventListener('click', (e)=>{ e.stopPropagation(); tooltip.classList.remove('open'); });
-  // Click empty map area to close tooltip
-  clickBlocker.addEventListener('click', (e)=>{
-    // only close if click is not on an SVG feature or the tooltip itself
-    if(e.target === clickBlocker){ tooltip.classList.remove('open'); }
-  });
-  // Prevent closing when clicking inside tooltip
-  tooltip.addEventListener('click', (e)=> e.stopPropagation());
 
-  // Tools / GM
+  // ---- Tools --------------------------------------------------------------
   let gmOpen = false; let currentTool = 'select'; let buildingRegion = null; let buildingShapeTargetRegionId = null; let isPanning = false; let panStart = null; let selectedId = null; let hoveredId=null; let isDraggingFeature=false;
   function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
   setTool('select');
@@ -452,7 +453,6 @@
   function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); primerIntroEdit.value = state.primerIntro || ''; primerDetailsEdit.value = state.primerDetails || ''; } else { gmError.style.display='block'; } }
   gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
 
-  // Tool buttons
   toolSelect.addEventListener('click', ()=> setTool('select'));
   toolAddPoint.addEventListener('click', ()=> setTool('add-point'));
   toolAddRegion.addEventListener('click', ()=> setTool('add-region'));
@@ -464,7 +464,6 @@
     setTool('add-shape');
   });
 
-  // Add via clicks (unchanged)
   svg.addEventListener('click', (e)=>{
     if(!gmOpen) return; const pt = svgPoint(e);
     if(currentTool==='add-point'){
@@ -474,7 +473,7 @@
     if(currentTool==='add-region'){
       if(!buildingRegion){
         const r = { id:uid(), type:'region', name:'New Region', color: DEFAULT_REGION_COLOR, desc:'', shapes:[[ {x:pt.x,y:pt.y} ]] };
-        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id); 
+        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id);
       } else {
         const shape = buildingRegion.shapes[ buildingRegion.shapes.length-1 ];
         shape.push({x:pt.x,y:pt.y}); render(); selectFeature(buildingRegion.id);
@@ -499,7 +498,6 @@
     }
   });
 
-  // Finish shape
   svg.addEventListener('dblclick', ()=>{
     if(!gmOpen) return;
     if(currentTool==='add-region'){
@@ -510,7 +508,7 @@
   });
   function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
 
-  // Drag helpers
+  // ---- Drag helpers -------------------------------------------------------
   function startDragPoint(e, f){
     e.preventDefault();
     const start = svgPoint(e);
@@ -537,8 +535,11 @@
   }
   function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
   function off(move,up){ window.removeEventListener('pointermove',move); }
+  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
+  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
+  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
 
-  // Pan & zoom
+  // ---- Pan & Zoom ---------------------------------------------------------
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
@@ -549,59 +550,45 @@
 
   svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
 
-  function startPanOnBackground(e){
-    if(e.button!==0 && e.pointerType!=='touch') return;
-    e.preventDefault();
-    isPanning=true;
-    const rect=svg.getBoundingClientRect();
-    panStart={ sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height };
-    if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){ } }
-  }
-  svg.addEventListener('pointerdown', (e)=>{
-    if(isDraggingFeature) return; if(e.button!==0 && e.pointerType!=='touch') return;
-    if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){ startPanOnBackground(e); }
-  });
+  function startPanOnBackground(e){ if(e.button!==0 && e.pointerType!=='touch') return; e.preventDefault(); isPanning=true; const rect=svg.getBoundingClientRect(); panStart={ sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height }; if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){ } } }
+  svg.addEventListener('pointerdown', (e)=>{ if(isDraggingFeature) return; if(e.button!==0 && e.pointerType!=='touch') return; if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){ startPanOnBackground(e); } });
   svg.addEventListener('pointermove', (e)=>{ if(!isPanning) return; const dx=(e.clientX-panStart.sx)*panStart.rw; const dy=(e.clientY-panStart.sy)*panStart.rh; view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w)); view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h)); applyView(); });
   svg.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
 
   // Touch pinch zoom
-  let touches = new Map();
+  let touches = new Map(); let pinchBase=null;
   svg.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch'){ touches.set(e.pointerId, e); try{ svg.setPointerCapture(e.pointerId);}catch(_){} }});
   svg.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
   svg.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
-  let pinchBase=null;
   svg.addEventListener('pointermove', (e)=>{
-    if(e.pointerType!=='touch') return;
-    if(touches.has(e.pointerId)) touches.set(e.pointerId,e);
+    if(e.pointerType!=='touch') return; if(touches.has(e.pointerId)) touches.set(e.pointerId,e);
     if(touches.size===2){
       const [a,b]=[...touches.values()];
       const dNow = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
       const mid = { clientX:(a.clientX+b.clientX)/2, clientY:(a.clientY+b.clientY)/2 };
       const pt = svgPoint(mid);
       if(!pinchBase){ pinchBase={d:dNow}; return; }
-      const scale = dNow / pinchBase.d;
-      const factor = 1/scale;
+      const scale = dNow / pinchBase.d; // >1 fingers apart => zoom in
+      const factor = 1/scale;          // invert for natural feel
       pinchBase.d = dNow;
       zoom(factor, pt);
     }
   });
 
-  // CMS interactions
+  // ---- CMS interactions ---------------------------------------------------
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
   function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); }
   featurePicker.addEventListener('change', onPickerChange);
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
 
-  // Auto-save name/desc
   featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); });
   featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); });
 
-  // Primer edits
   primerIntroEdit.addEventListener('input', ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; save(); });
   primerDetailsEdit.addEventListener('input', ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; save(); });
 
-  // Color live update
+  // Live colour updates
   let colorRAF = 0;
   featColor.addEventListener('input', ()=>{
     const f = featureById(selectedId);
@@ -616,7 +603,7 @@
     g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR));
   }
 
-  // Map upload
+  // Map upload -> data URL
   mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; applyMapSrc(); applyView(); render(); save(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
 
   // Export / Import
@@ -634,13 +621,12 @@
   });
   importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result);
       if(obj.features) state.features=obj.features.map(f=> migrateFeature(f));
-      if(obj.mapImage||obj.mapSrc) state.mapSrc=obj.mapImage||obj.mapSrc;
-      if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; }
+      if(obj.mapImage||obj.mapSrc) state.mapSrc=obj.mapImage||obj.mapSrc; if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; }
       if('primerIntro' in obj){ state.primerIntro = obj.primerIntro; primerIntro.textContent = state.primerIntro; }
       if('primerDetails' in obj){ state.primerDetails = obj.primerDetails; primerDetails.textContent = state.primerDetails; }
       applyMapSrc(); applyView(); render(); save(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
 
-  // Utils
+  // ---- Utils --------------------------------------------------------------
   function featureById(id){ return state.features.find(x=>x.id===id); }
   function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -662,7 +648,7 @@
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
   function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-  // Rounded polygon
+  // Rounded polygon path (smooth corners)
   function roundedPolygonPath(points, radius){
     const n=points.length; if(n<3) return '';
     const r = Math.max(0, radius|0);
@@ -693,8 +679,7 @@
                       `<div class="toolbar" style="display:flex;gap:8px"><button class="btn danger" data-del>Delete Shape</button></div>`;
       div.querySelector('[data-del]').addEventListener('click', ()=>{
         if(!confirm('Delete this shape from the region?')) return;
-        f.shapes.splice(idx,1);
-        render(); selectFeature(f.id);
+        deleteShape(f, idx); render(); selectFeature(f.id);
       });
       shapeList.appendChild(div);
     });
@@ -705,7 +690,7 @@
     try{
       console.assert(svg && gRegions && gPoints && mapImage, 'TEST: core SVG elements exist');
       const f={id:'t', type:'region', name:'T', color:'#fff', shapes:[[ {x:0,y:0},{x:20,y:0},{x:20,y:20},{x:0,y:20} ], [ {x:40,y:40},{x:60,y:40},{x:60,y:60},{x:40,y:60} ]]};
-      f.shapes.splice(1,1); console.assert(f.shapes.length===1, 'TEST: delete shape');
+      deleteShape(f,1); console.assert(f.shapes.length===1, 'TEST: deleteShape removes a shape');
     }catch(e){ console.warn('Tests failed:', e); }
   })();
 
