@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v21, repo-absolute paths)</title>
+  <title>The World of Draelon – Campaign Primer (v22, pan fix)</title>
   <style>
     :root{
       --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
@@ -13,6 +13,7 @@
     .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px;min-height:100%}
     .map-wrap{position:relative;min-height:70vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
     svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
+    .feature.region path{ touch-action: none; }
     .side{display:flex;flex-direction:column;min-height:70vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
     .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
     .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
@@ -21,12 +22,10 @@
     .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
     .muted{color:var(--muted);font-size:12px}
 
-    /* Loader (top-left) */
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* GM button + modal */
     .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
     .gm-btn:hover{filter:brightness(1.1)}
     .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
@@ -39,7 +38,6 @@
     .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
     .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
 
-    /* CMS */
     .cms{position:absolute;top:56px;right:12px;width:min(520px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
     .cms.open{display:flex;flex-direction:column}
     .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
@@ -54,32 +52,25 @@
     .item .meta{display:flex;gap:10px;align-items:center}
     .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
 
-    /* Map features */
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
 
-    /* Regions visual states */
     .feature.region path{stroke-width:0;transition:fill-opacity .12s linear}
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
 
-    /* Edit handles */
     .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
     .edit-handle:active{cursor:grabbing}
     .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
 
-    /* Zoom controls & hints */
     .zoombar{position:absolute;left:12px;top:48px;display:flex;flex-direction:column;gap:8px;z-index:8}
     .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
     .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
     .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
 
-    /* Drawer (mobile quick lore) – unused for regions now */
     .drawer{position:absolute;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .25s ease;background:var(--panel-2);border-top-left-radius:16px;border-top-right-radius:16px;max-height:60%;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
-    .drawer.open{transform:translateY(0)}
 
-    /* Tooltip card */
     .tooltip{position:absolute;right:12px;top:12px;min-width:260px;max-width:380px;background:rgba(13,17,26,.92);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
@@ -87,7 +78,6 @@
     .tooltip .close{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
     .tooltip .body{padding:10px 12px;color:#e7eefb;line-height:1.4}
 
-    /* Primer above/below */
     .primer{margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:16px}
     .primer h2{margin:0 0 8px 0;font-size:20px}
 
@@ -102,10 +92,8 @@
 
   <div class="app">
     <div class="map-wrap">
-      <!-- Loader (top-left) -->
       <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
 
-      <!-- Zoom bar -->
       <div class="zoombar" aria-hidden="false">
         <button class="btn" id="zoomIn" title="Zoom in" type="button">＋</button>
         <button class="btn" id="zoomOut" title="Zoom out" type="button">－</button>
@@ -113,7 +101,6 @@
       </div>
       <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom</div>
 
-      <!-- GM Mode -->
       <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
       <div class="gm-modal" id="gmModal" aria-hidden="true">
         <div class="gm-modal-backdrop" id="gmBackdrop"></div>
@@ -174,7 +161,6 @@
         </div>
       </div>
 
-      <!-- Tooltip -->
       <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
         <header>
           <h3 id="ttTitle">Title</h3>
@@ -183,10 +169,8 @@
         <div class="body" id="ttBody">Description…</div>
       </div>
 
-      <!-- Map & overlays -->
       <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
         <defs>
-          <!-- Soft fuzzy edge only -->
           <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
@@ -198,7 +182,6 @@
         <g id="editHandles"></g>
       </svg>
 
-      <!-- Mobile drawer (not used for regions now) -->
       <div class="drawer" id="drawer"></div>
     </div>
 
@@ -216,18 +199,15 @@
 
   <div class="primer" id="primerBottom">
     <h2>Primer – Details</h2>
-    <div id="primerDetails">Primer Details.</div>
+    <div id="primerDetails">Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section in the JSON later (future work) or hard-edit the file for now.</div>
   </div>
 
 <script>
 (function(){
-  // ---- Config (GitHub Pages, repo-absolute) ------------------------------
-  // Use a leading slash so paths resolve under https://<user>.github.io/<repo>/
   const JSON_PATH = '/Campaign-Primer/world-data.json';
   const DEFAULT_MAP_PATH = '/Campaign-Primer/map/world-map.png';
 
-  // ---- Data layer ---------------------------------------------------------
-  const STORAGE_KEY = 'signika.world.v21';
+  const STORAGE_KEY = 'signika.world.v22';
   const DEFAULT_REGION_COLOR = '#8ad9ff';
   const defaultData = {
     mapSrc: DEFAULT_MAP_PATH,
@@ -241,9 +221,8 @@
     ]
   };
 
-  let state = null; // will set after load
+  let state = null;
 
-  // ---- Elements -----------------------------------------------------------
   const svg = document.getElementById('world');
   const gRegions = document.getElementById('regions');
   const gPoints = document.getElementById('points');
@@ -258,7 +237,6 @@
   const primerIntro = document.getElementById('primerIntro');
   const primerIntroEdit = document.getElementById('primerIntroEdit');
 
-  // CMS elements
   const gmBtn = document.getElementById('gmBtn');
   const cms = document.getElementById('cms');
   const mapFile = document.getElementById('mapFile');
@@ -277,7 +255,6 @@
   const shapeList = document.getElementById('shapeList');
   const featureList = document.getElementById('featureList');
 
-  // GM modal elements
   const gmModal = document.getElementById('gmModal');
   const gmBackdrop = document.getElementById('gmBackdrop');
   const gmPass = document.getElementById('gmPass');
@@ -285,20 +262,17 @@
   const gmCancel = document.getElementById('gmCancel');
   const gmError = document.getElementById('gmError');
 
-  // Tooltip
   const tooltip = document.getElementById('tooltip');
   const ttTitle = document.getElementById('ttTitle');
   const ttBody = document.getElementById('ttBody');
   const ttClose = document.getElementById('ttClose');
 
-  // ---- Map state (pan/zoom) ----------------------------------------------
   let mapW = 1000; let mapH = 600;
   let view = {x:0, y:0, w:1000, h:600};
   function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
 
   function applyMapSrc(){ if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); } mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH); }
 
-  // ---- Load world-data.json ----------------------------------------------
   init();
   async function init(){
     showLoader('Loading world…');
@@ -317,7 +291,7 @@
       state = migrate(load()) || defaultData;
     }
     mapW = state.mapSize?.w || 1000; mapH = state.mapSize?.h || 600;
-    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7}; // start slightly zoomed & panned
+    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7};
     primerIntro.textContent = state.primerIntro || '';
     applyMapSrc(); applyView();
     render();
@@ -327,11 +301,9 @@
   function showLoader(msg){ if(loader){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }}
   function hideLoader(){ if(loader) loader.style.display='none'; }
 
-  // ---- Rendering ----------------------------------------------------------
   function render(){
     gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
 
-    // regions
     state.features.filter(f=>f.type==='region').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
       const color = f.color || DEFAULT_REGION_COLOR;
@@ -340,12 +312,12 @@
         const d = roundedPolygonPath(shape, 10);
         path.setAttribute('d', d);
         path.setAttribute('fill', color);
-        path.setAttribute('fill-opacity', '0.31');
+        path.setAttribute('fill-opacity', '0.34');
         path.setAttribute('stroke', 'none');
         path.style.filter = 'url(#fuzzyEdge)';
         path.addEventListener('pointerdown', (e)=>{
-          // Allow panning even when starting on a region (unless actively editing move)
-          if(!gmOpen || currentTool==='select') startPanOnBackground(e);
+          // Always allow pan start on regions unless we're actively moving/editing with a drag
+          if(!gmOpen || currentTool==='select'){ startPanOnBackground(e); }
           if(gmOpen && (e.ctrlKey||e.metaKey)) { startDragRegionMove(e, f); isDraggingFeature=true; }
         });
         g.appendChild(path);
@@ -372,7 +344,6 @@
       }
     });
 
-    // points
     state.features.filter(f=>f.type==='point').forEach(f=>{
       const g = elNS('g'); g.classList.add('feature','point'); g.setAttribute('data-id', f.id);
       const c = elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -383,7 +354,6 @@
     refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); save();
   }
 
-  // group-level interactions (hover/select)
   function attachRegionGroupHandlers(g, f){
     const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; selectedId=f.id; updateStates(); showTooltipFor(f); });
@@ -412,16 +382,13 @@
   }
   function openLore(f){ setLore(f); }
 
-  // Tooltip logic
   function showTooltipFor(f){ if(!f) return; ttTitle.textContent = f.name || '—'; ttBody.textContent = f.desc || ''; tooltip.classList.add('open'); }
   ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
 
-  // ---- Tools --------------------------------------------------------------
   let gmOpen = false; let currentTool = 'select'; let buildingRegion = null; let buildingShapeTargetRegionId = null; let isPanning = false; let panStart = null; let selectedId = null; let hoveredId=null; let isDraggingFeature=false;
   function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
   setTool('select');
 
-  // GM modal
   gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); updateHint(); render(); } });
   function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); updateHint(); primerIntroEdit.value = state.primerIntro || ''; } else { gmError.style.display='block'; } }
   gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
@@ -436,7 +403,6 @@
   }
   updateHint();
 
-  // Tool buttons
   toolSelect.addEventListener('click', ()=> setTool('select'));
   toolAddPoint.addEventListener('click', ()=> setTool('add-point'));
   toolAddRegion.addEventListener('click', ()=> setTool('add-region'));
@@ -448,7 +414,6 @@
     setTool('add-shape');
   });
 
-  // Add items via map clicks
   svg.addEventListener('click', (e)=>{
     if(!gmOpen) return; const pt = svgPoint(e);
     if(currentTool==='add-point'){
@@ -483,7 +448,6 @@
     }
   });
 
-  // Finish shape/region with double click
   svg.addEventListener('dblclick', ()=>{
     if(!gmOpen) return;
     if(currentTool==='add-region'){
@@ -494,19 +458,11 @@
   });
   function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
 
-  // ---- Drag helpers -------------------------------------------------------
   function startDragPoint(e, f){
     e.preventDefault();
     const start = svgPoint(e);
     const offset = { x: f.x - start.x, y: f.y - start.y };
     const move=(ev)=>{ const p=svgPoint(ev); f.x=clamp(p.x + offset.x,0,mapW); f.y=clamp(p.y + offset.y,0,mapH); render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
-    on(move,up);
-  }
-  function startDragShapeMove(e, f, sIdx){
-    const p=svgPoint(e);
-    const offset={x:p.x,y:p.y};
-    const move=(ev)=>{ const q=svgPoint(ev); const dx=q.x-offset.x, dy=q.y-offset.y; f.shapes[sIdx]=f.shapes[sIdx].map(pt=>({x:clamp(pt.x+dx,0,mapW),y:clamp(pt.y+dy,0,mapH)})); offset.x=q.x; offset.y=q.y; render(); selectFeature(f.id,false); };
     const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
     on(move,up);
   }
@@ -528,34 +484,50 @@
   }
   function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
   function off(move,up){ window.removeEventListener('pointermove',move); }
-  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
-  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
-  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
 
-  // ---- Pan & Zoom ---------------------------------------------------------
+  // --------- PAN & ZOOM (fixed pointer capture) ---------
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
   function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
   zoomIn?.addEventListener('click', ()=> zoom(0.8)); zoomOut?.addEventListener('click', ()=> zoom(1.25)); zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
 
-  // Wheel zoom
   svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
 
-  // Background pan start helper (even on regions)
-  function startPanOnBackground(e){ if(e.button!==0) return; isPanning=true; const rect=svg.getBoundingClientRect(); panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height}; svg.setPointerCapture(e.pointerId); }
+  function startPanOnBackground(e){
+    if(e.button!==0) return;
+    e.preventDefault();
+    isPanning=true;
+    const rect=svg.getBoundingClientRect();
+    panStart={sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height};
+    // Pointer capture on the element that actually got the event (path, image, or svg)
+    if(e.target && e.target.setPointerCapture){
+      try{ e.target.setPointerCapture(e.pointerId); }catch(_){}
+    }
+  }
   svg.addEventListener('pointerdown', (e)=>{
-    if(isDraggingFeature) return; if(e.button!==0) return; // left only
-    if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){ startPanOnBackground(e); }
+    if(isDraggingFeature) return;
+    if(e.button!==0) return;
+    // Start pan when clicking svg, map image, or any feature (so panning works when finger starts on a region)
+    if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){
+      startPanOnBackground(e);
+    }
   });
-  svg.addEventListener('pointermove', (e)=>{ if(!isPanning) return; const dx=(e.clientX-panStart.sx)*panStart.rw; const dy=(e.clientY-panStart.sy)*panStart.rh; view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w)); view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h)); applyView(); });
-  svg.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
+  svg.addEventListener('pointermove', (e)=>{
+    if(!isPanning) return;
+    const dx=(e.clientX-panStart.sx)*panStart.rw;
+    const dy=(e.clientY-panStart.sy)*panStart.rh;
+    view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w));
+    view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h));
+    applyView();
+  });
+  window.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
 
-  // Touch pinch zoom
+  // Touch pinch zoom (natural direction)
   let touches = new Map();
-  svg.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch'){ touches.set(e.pointerId, e); svg.setPointerCapture(e.pointerId); }});
-  svg.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
-  svg.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
+  svg.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch'){ touches.set(e.pointerId, e); if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){}} }});
+  svg.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; } });
+  svg.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; } });
   let pinchBase=null;
   svg.addEventListener('pointermove', (e)=>{
     if(e.pointerType!=='touch') return;
@@ -566,28 +538,24 @@
       const mid = { clientX:(a.clientX+b.clientX)/2, clientY:(a.clientY+b.clientY)/2 };
       const pt = svgPoint(mid);
       if(!pinchBase){ pinchBase={d:dNow}; return; }
-      const scale = dNow / pinchBase.d; // >1 = fingers apart => zoom in
-      const factor = 1/scale; // invert so it feels natural
+      const scale = dNow / pinchBase.d; // >1 fingers apart => zoom in
+      const factor = 1/scale; // invert for natural feel
       pinchBase.d = dNow;
       zoom(factor, pt);
     }
   });
 
-  // ---- CMS interactions ---------------------------------------------------
   function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
   function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
   function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||''; if(f.type==='region'){ rowColor.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); shapeManager.style.display='grid'; } else { rowColor.style.display='none'; shapeManager.style.display='none'; } updateStates(); refreshShapeListUI(); }
   featurePicker.addEventListener('change', onPickerChange);
   function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
 
-  // Auto-save: name/desc
   featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); if(selectedId===f.id) showTooltipFor(f); });
   featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); if(selectedId===f.id) showTooltipFor(f); });
 
-  // Primer intro edit
   primerIntroEdit.addEventListener('input', ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; save(); });
 
-  // Live colour updates (throttled, direct DOM)
   let colorRAF = 0;
   featColor.addEventListener('input', ()=>{
     const f = featureById(selectedId);
@@ -602,10 +570,8 @@
     g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR));
   }
 
-  // Map upload -> data URL
   mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; applyMapSrc(); applyView(); render(); save(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
 
-  // --- Export / Import -----------------------------------------------------
   exportBtn.addEventListener('click', ()=>{
     try{
       const out = { mapImage: state.mapSrc, mapSize: state.mapSize, primerIntro: state.primerIntro, features: state.features };
@@ -625,7 +591,6 @@
       if(obj.primerIntro) { state.primerIntro = obj.primerIntro; primerIntro.textContent = state.primerIntro; }
       applyMapSrc(); applyView(); render(); save(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
 
-  // ---- utils --------------------------------------------------------------
   function featureById(id){ return state.features.find(x=>x.id===id); }
   function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -648,7 +613,6 @@
   function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
   function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-  // ---- geometry helpers ---------------------------------------------------
   function roundedPolygonPath(points, radius){
     const n=points.length; if(n<3) return '';
     const r = Math.max(0, radius|0);
@@ -661,13 +625,12 @@
       const pA = lerp(p1, p0, rr/dist(p1,p0));
       const pB = lerp(p1, p2, rr/dist(p1,p2));
       if(i===0){ d += `M ${pA.x} ${pA.y} `; }
-     d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
+      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
     }
     d += 'Z';
     return d;
   }
 
-  // ---- CMS: per-shape delete UI ------------------------------------------
   function refreshShapeListUI(){
     const f = featureById(selectedId);
     shapeList.innerHTML='';
@@ -684,8 +647,10 @@
       shapeList.appendChild(div);
     });
   }
+  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
+  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
+  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
 
-  // ---- lightweight tests --------------------------------------------------
   (function runTests(){
     try{
       console.assert(svg && gRegions && gPoints && mapImage, 'TEST: core SVG elements exist');
@@ -699,4 +664,3 @@
 </script>
 </body>
 </html>
-
