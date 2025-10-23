@@ -4,15 +4,15 @@
     "w": 4080,
     "h": 3072
   },
-  "primerIntro": "Primer Intro",
-  "primerDetails": "Primer Details",
+  "primerIntro": "Draelon is a fractured world bound by ancient magic and fading empires. From the frozen northern isles to the burning southern deserts, its people cling to power, faith, and secrets buried beneath their feet.",
+  "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
       "type": "region",
       "name": "Oscana",
       "color": "#ff000d",
-      "desc": "Western continent of divided kingdoms and feudal intrigue.",
+      "desc": "A land of crumbling thrones and proud banners. Its knights wage endless wars of honour while the peasants whisper of ancient pacts sealed in blood.",
       "shapes": [
         [
           {
@@ -669,7 +669,7 @@
       "type": "region",
       "name": "Athium",
       "color": "#001eff",
-      "desc": "Athium Empire",
+      "desc": "An empire forged by discipline and fire. Cities of marble and brass rise where forests once stood, feeding the ambitions of its war councils.",
       "shapes": [
         [
           {
@@ -1292,7 +1292,7 @@
       "type": "region",
       "name": "Eturia",
       "color": "#25db00",
-      "desc": "Magocracy to the south—politics by spellbook.",
+      "desc": "A realm of towers and tomes. Knowledge is power here, and power is bought with perilous bargains whispered in candlelight.",
       "shapes": [
         [
           {
@@ -1904,7 +1904,7 @@
       "id": "akazj70lcemh0h2v6u",
       "type": "point",
       "name": "Signika",
-      "desc": "A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.",
+      "desc": "An island adrift in the northern sea—where monsters glow with magic and factions vie to claim its secrets before the storm claims them all.",
       "x": 1497.8550326046186,
       "y": 730.6223333710882
     },
@@ -1913,7 +1913,7 @@
       "type": "region",
       "name": "Letrylor",
       "color": "#fbff00",
-      "desc": "Druid Bin",
+      "desc": "A continent swallowed by emerald jungles and ruin. Once home to radiant gods, now only beasts and wanderers hear their echoes beneath the canopy.",
       "shapes": [
         [
           {
