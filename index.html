@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v41)</title>
+  <title>The World of Draelon – Campaign Primer (v42)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -42,11 +42,7 @@
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
     }
     .primer{margin:16px; padding:18px 18px 14px}
-    .primer h2{
-      margin:0 0 10px 0; font-size:26px; letter-spacing:.5px;
-      text-transform:uppercase; font-weight:700;
-      border-bottom:2px solid var(--rule); padding-bottom:6px;
-    }
+    .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
     .app{ display:grid; grid-template-columns: 1fr; gap:0; }
     .map-row{display:flex; justify-content:center}
     .map-wrap{
@@ -92,7 +88,6 @@
     .tooltip .media img{width:100%;height:auto;display:block}
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
-    /* Mobile bottom-sheet tooltip */
     @media (max-width: 760px){
       .tooltip{
         left:50% !important; transform:translateX(-50%) !important;
@@ -177,7 +172,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v41';
+  const STORAGE_KEY = 'signika.world.v42';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -218,23 +213,41 @@
     return d+'Z';
   }
 
-  function makeBoundedNavigator(svgEl, imgW, imgH, opts={}){
-    const zoomNotches = opts.notches ?? 4;
-    const notchScale = Math.pow(0.9, zoomNotches); // 0.9 per notch
-    const maxOutW = imgW * notchScale;
-    const maxOutH = imgH * notchScale;
+  function computeCoverCrop(imgW, imgH, svgW, svgH){
+    const aspect = svgW / svgH;
+    // Try width-first
+    let vw = Math.min(imgW, imgH * aspect);
+    let vh = vw / aspect;
+    if (vh > imgH) {
+      // fall back to height-first
+      vh = imgH;
+      vw = vh * aspect;
+      if (vw > imgW) { vw = imgW; vh = vw / aspect; }
+    }
+    return {vw, vh};
+  }
 
-    // max zoom-out (i.e., largest viewBox) is the "starting" zoomed-in crop
+  function makeBoundedNavigator(svgEl, imgW, imgH){
+    // Compute "cover" crop based on rendered SVG size
+    function initialView(){
+      const rect = svgEl.getBoundingClientRect();
+      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+      const vx = (imgW - vw) / 2;
+      const vy = (imgH - vh) / 2;
+      return {vx, vy, vw, vh};
+    }
+    let {vx,vy,vw,vh} = initialView();
+    svgEl.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+
     const nav={
-      viewBox:[(imgW-maxOutW)/2, (imgH-maxOutH)/2, maxOutW, maxOutH],
-      minW: imgW*0.08, minH: imgH*0.08, // deepest zoom-in
-      maxW: maxOutW, maxH: maxOutH,     // shallowest zoom-out (can't go beyond)
+      viewBox:[vx,vy,vw,vh],
+      minW: imgW*0.08, minH: imgH*0.08, // deep zoom
+      maxW: vw, maxH: vh,               // max zoom-out == cover
       panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0},
       pointers:new Map(), initialPinchDist:0, initialViewBox:null
     };
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
     const atFull=()=> (Math.abs(nav.viewBox[2]-nav.maxW)<0.5 && Math.abs(nav.viewBox[3]-nav.maxH)<0.5);
-    apply();
 
     function setTouchMode(){
       if(atFull() && nav.pointers.size <= 1){ svgEl.style.touchAction = 'pan-y'; }
@@ -244,7 +257,7 @@
     svgEl.addEventListener('wheel', (e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
       const full = atFull();
-      if(full && e.deltaY > 0){ return; } // allow page scroll down at max-out
+      if(full && e.deltaY > 0){ return; } // let page scroll when scrolling down at full
       e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
@@ -255,7 +268,7 @@
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }, {passive:false});
 
-    // Cancel synthetic click after panning on touch; keeps next tap working.
+    // Cancel synthetic click after panning on touch
     svgEl.addEventListener('pointerup', (e)=>{
       if(nav.panning){ if(e.cancelable) e.preventDefault(); }
     }, {passive:false, capture:true});
@@ -280,11 +293,11 @@
       nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
 
       if(nav.pointers.size===2){
-        // Pinch zoom (2 fingers)
+        // Pinch zoom
         const pts=[...nav.pointers.values()];
         const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         if(nav.initialPinchDist>0){
-          const scale = nav.initialPinchDist / dist; // pinch out => scale < 1 => zoom in
+          const scale = nav.initialPinchDist / dist;
           const [vx,vy,vw,vh] = nav.initialViewBox;
           let nw = clamp(vw * scale, nav.minW, nav.maxW);
           let nh = clamp(vh * scale, nav.minH, nav.maxH);
@@ -297,7 +310,7 @@
         return;
       }
 
-      // Single-finger panning with threshold
+      // Single-finger pan with strong clamp
       if(nav.dragCandidate){
         const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -309,7 +322,9 @@
       let [vx,vy,vw,vh]=nav.viewBox;
       const dx=(e.clientX-nav.last.x)*(vw/svgEl.clientWidth);
       const dy=(e.clientY-nav.last.y)*(vh/svgEl.clientHeight);
-      vx=clamp(vx-dx,0,Math.max(0,imgW-vw)); vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
+      // Strict clamp so edges never cross wrapper
+      vx=clamp(vx-dx, 0, imgW - vw);
+      vy=clamp(vy-dy, 0, imgH - vh);
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
 
@@ -325,8 +340,27 @@
     svgEl.addEventListener('pointercancel', endPointer);
     svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
 
+    // On resize, recompute "cover" and keep current center if possible
+    window.addEventListener('resize', ()=>{
+      const rect = svgEl.getBoundingClientRect();
+      const centerX = nav.viewBox[0] + nav.viewBox[2]/2;
+      const centerY = nav.viewBox[1] + nav.viewBox[3]/2;
+      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+      nav.maxW = vw; nav.maxH = vh;
+      let nw = clamp(nav.viewBox[2], nav.minW, nav.maxW);
+      let nh = clamp(nav.viewBox[3], nav.minH, nav.maxH);
+      let nx = clamp(centerX - nw/2, 0, imgW - nw);
+      let ny = clamp(centerY - nh/2, 0, imgH - nh);
+      nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
+    });
+
     return { reset:()=>{
-      nav.viewBox=[(imgW-maxOutW)/2, (imgH-maxOutH)/2, maxOutW, maxOutH]; apply(); setTouchMode();
+      const rect = svgEl.getBoundingClientRect();
+      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+      const vx = (imgW - vw) / 2;
+      const vy = (imgH - vh) / 2;
+      nav.maxW = vw; nav.maxH = vh;
+      nav.viewBox=[vx,vy,vw,vh]; apply(); setTouchMode();
     } };
   }
 
@@ -348,7 +382,7 @@
     islandImg.alt = "Signika island map";
 
     renderFeatures();
-    makeBoundedNavigator(svgWorld, wSize.w, wSize.h, {notches:4}); // 4 notch start + clamp
+    makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
 
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
     svgWorld.addEventListener('click', (e)=>{
