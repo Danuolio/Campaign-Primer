@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v35)</title>
+  <title>The World of Draelon – Campaign Primer (v36)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
       --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
+      --wrap:895px;
     }
     html,body{height:100%}
     body{
@@ -43,23 +44,22 @@
       border-bottom:2px solid var(--rule); padding-bottom:6px;
     }
 
-    /* Layout: two columns; left column width capped for the map */
+    /* Single-column layout: world map row, then side panel row */
     .app{
       display:grid;
-      grid-template-columns: minmax(0, 895px) minmax(320px, 440px);
-      gap:16px;
-      align-items:start;
-      justify-content:center; /* center whole grid */
-      padding:0 16px;
+      grid-template-columns: 1fr;
+      gap:0;
     }
 
+    /* World map wrap centered, capped width */
+    .map-row{display:flex; justify-content:center}
     .map-wrap{
       position:relative;
       width:100%;
-      max-width:895px;  /* requested cap */
+      max-width:var(--wrap);
       min-height:58vh;
       max-height:74vh;
-      margin:16px auto; /* center; plays nice on wide screens */
+      margin:16px; /* keeps panel spacing */
       overflow:hidden;
     }
     .map-wrap svg{
@@ -68,11 +68,23 @@
       display:block;
       background:#efe6c8;
       touch-action:none;
-      cursor:grab;           /* visible grab cursor to avoid red cancel */
+      cursor:grab;
     }
-    .map-wrap.svg--dragging{
-      cursor:grabbing;
+
+    /* Side panel below world map, same width for rhythm */
+    .side-row{display:flex; justify-content:center}
+    .side{
+      width:100%;
+      max-width:var(--wrap);
+      display:flex;flex-direction:column;
+      min-height:unset; max-height:none;
+      margin:0 16px 16px 16px; overflow:hidden;
     }
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+    .side .content{padding:16px;overflow:visible}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+    .lore-body{line-height:1.6;white-space:pre-wrap}
 
     .muted{color:var(--ink-soft);font-size:12px}
 
@@ -80,18 +92,6 @@
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
-
-    /* Sidebar */
-    .side{
-      display:flex;flex-direction:column;
-      min-height:58vh;max-height:74vh;
-      margin:16px 16px 16px 0;overflow:hidden
-    }
-    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
-    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
-    .side .content{padding:16px;overflow:auto}
-    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-    .lore-body{line-height:1.6;white-space:pre-wrap}
 
     /* Feature styling */
     .feature{cursor:pointer}
@@ -112,27 +112,33 @@
     .tooltip .body{padding:10px 12px;line-height:1.5}
     .tooltip .body p{margin:0}
 
-    /* Island Section */
+    /* Island Section (campaign map area) */
     .section{margin:8px 16px 16px 16px}
-    .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
-    .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
-    .island-grid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;max-width:1280px;margin:0 auto}
-    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
-      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
-      display:inline-block; max-width:min(50vw, 1024px); }
+    .island-grid{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:16px;
+      align-items:start;
+      /* no global centering here; keep natural flow */
+      max-width: 1280px;
+      margin: 0 16px;
+    }
+    .island-card{
+      margin:0; padding:12px;
+      background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge); border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display:inline-block;
+      max-width:min(50vw, 1024px);
+    }
     .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
-    @media (max-width: 1100px){
-      .app{grid-template-columns: 1fr}
-      .side{grid-row:2;margin:0 16px 16px 16px}
-      .map-wrap{margin:0 auto 16px auto}
-    }
     @media (max-width: 900px){
       .island-grid{grid-template-columns:1fr}
-      .island-card{justify-self:center; max-width:min(90vw, 1024px)}
+      .island-card{max-width:min(90vw, 1024px)}
     }
   </style>
 </head>
@@ -143,43 +149,46 @@
   </div>
 
   <div class="app">
-    <div class="map-wrap panel" id="mapWrap">
-      <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
-      <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
+    <div class="map-row">
+      <div class="map-wrap panel" id="mapWrap">
+        <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
+        <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
 
-      <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
-        <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
-        <header>
-          <h3 id="ttTitle">Title</h3>
-          <button class="close" id="ttClose" aria-label="Close">×</button>
-        </header>
-        <div class="body" id="ttBody"><p>Description…</p></div>
+        <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
+          <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
+          <header>
+            <h3 id="ttTitle">Title</h3>
+            <button class="close" id="ttClose" aria-label="Close">×</button>
+          </header>
+          <div class="body" id="ttBody"><p>Description…</p></div>
+        </div>
+
+        <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
+          <defs>
+            <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="in" />
+            </filter>
+          </defs>
+          <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
+          <g id="regions"></g>
+          <g id="points"></g>
+        </svg>
       </div>
-
-      <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
-        <defs>
-          <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="in" />
-          </filter>
-        </defs>
-        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
-        <g id="regions"></g>
-        <g id="points"></g>
-      </svg>
     </div>
 
-    <aside class="side panel" id="sidePanel">
-      <header><h1>Campaign Info</h1><span class="muted">Click the map to explore</span></header>
-      <div class="content">
-        <h3 class="lore-title" id="loreTitle">Welcome</h3>
-        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>.</div>
-      </div>
-    </aside>
+    <div class="side-row">
+      <aside class="side panel" id="sidePanel">
+        <header><h1>Campaign Info</h1><span class="muted">Click the map to explore</span></header>
+        <div class="content">
+          <h3 class="lore-title" id="loreTitle">Welcome</h3>
+          <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>.</div>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <section class="section">
-    <header><h2>Signika — Island Primer</h2><span class="muted">Reference map & lore</span></header>
     <div class="island-grid">
       <figure class="island-card"><img id="islandImg" src="" alt="Signika island map"/></figure>
       <div class="island-lore panel"><h3>Island Lore</h3><div id="islandLore" class="body">Add your Signika lore here — history, factions, features, and travel notes.</div></div>
@@ -196,7 +205,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v35';
+  const STORAGE_KEY = 'signika.world.v36';
 
   let state=null;
 
@@ -221,7 +230,7 @@
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
-  const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
   function roundedPolygonPath(points, r){
     if(!points || points.length<2) return '';
@@ -241,16 +250,15 @@
 
   function makeBoundedNavigator(svgEl, imgW, imgH){
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
-    const nav={viewBox:[0,0,imgW,imgH], maxZoomFactor:0.08, panning:false, last:{x:0,y:0}};
+    const nav={viewBox:[0,0,imgW,imgH], maxZoomFactor:0.08,
+               panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0}};
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
 
     svgEl.addEventListener('wheel', (e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
       const atFull = (vw >= imgW - 0.5 && vh >= imgH - 0.5);
       // Allow page scroll when fully zoomed out and scrolling down
-      if(atFull && e.deltaY > 0){
-        return; // don't preventDefault -> page scrolls
-      }
+      if(atFull && e.deltaY > 0){ return; } // no preventDefault -> page scrolls
       e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
@@ -261,15 +269,32 @@
       nav.viewBox=[nx,ny,nw,nh]; apply();
     }, {passive:false});
 
+    // Helper to suppress click after a drag, once
+    function suppressNextClick(){
+      const blocker = (ev)=>{ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener('click', blocker, true); };
+      window.addEventListener('click', blocker, true);
+    }
+
     svgEl.addEventListener('pointerdown', (e)=>{
-      // Only pan when clicking the background (not features), and show grabbing cursor
-      if(e.target && e.target.closest && e.target.closest('.feature')) return;
-      e.preventDefault(); // avoid "not-allowed" cursor glitch
-      nav.panning=true; nav.last={x:e.clientX,y:e.clientY};
-      svgEl.setPointerCapture(e.pointerId);
+      // We allow starting on features; decide later if it becomes a drag
+      nav.dragCandidate = true; nav.dragged = false;
+      nav.start = {x:e.clientX, y:e.clientY};
+      nav.last  = {x:e.clientX, y:e.clientY};
       svgEl.style.cursor='grabbing';
     });
+
     svgEl.addEventListener('pointermove', (e)=>{
+      if(!nav.dragCandidate && !nav.panning) return;
+      const dx0 = e.clientX - nav.start.x;
+      const dy0 = e.clientY - nav.start.y;
+      const dist2 = dx0*dx0 + dy0*dy0;
+      const threshold2 = 16; // ~4px movement threshold
+      if(nav.dragCandidate && dist2 > threshold2){
+        // Activate panning
+        nav.panning = true; nav.dragCandidate = false; nav.dragged = true;
+        try{ svgEl.setPointerCapture(e.pointerId); }catch{}
+        e.preventDefault(); // avoid not-allowed cursor and selection
+      }
       if(!nav.panning) return;
       let [vx,vy,vw,vh]=nav.viewBox;
       const dx=(e.clientX-nav.last.x)*(vw/svgEl.clientWidth);
@@ -278,9 +303,15 @@
       vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
-    const endPan=()=>{ nav.panning=false; svgEl.style.cursor='grab'; };
+
+    function endPan(e){
+      if(nav.panning){ suppressNextClick(); }
+      nav.panning=false; nav.dragCandidate=false; nav.dragged=false; svgEl.style.cursor='grab';
+      try{ svgEl.releasePointerCapture(e.pointerId); }catch{}
+    }
     svgEl.addEventListener('pointerup', endPan);
     svgEl.addEventListener('pointercancel', endPan);
+
     return { reset:()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); } };
   }
 
