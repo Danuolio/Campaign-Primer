@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v43)</title>
+  <title>The World of Draelon – Campaign Primer (v44)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -94,7 +94,7 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
-    /* On mobile, do NOT show tooltip over map */
+    /* On mobile, hide floating tooltip and keep Campaign Info usage */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
@@ -171,7 +171,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v43';
+  const STORAGE_KEY = 'signika.world.v44';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -216,11 +216,9 @@
 
   function computeCoverCrop(imgW, imgH, svgW, svgH){
     const aspect = svgW / svgH;
-    // Try width-first
     let vw = Math.min(imgW, imgH * aspect);
     let vh = vw / aspect;
     if (vh > imgH) {
-      // fall back to height-first
       vh = imgH;
       vw = vh * aspect;
       if (vw > imgW) { vw = imgW; vh = vw / aspect; }
@@ -388,7 +386,6 @@
       const isFeature = !!e.target.closest('.feature');
       const isMobile = window.matchMedia('(max-width: 760px)').matches;
       if(!isFeature){
-        // close overlay tooltip on desktop
         if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
       }
     });
@@ -460,7 +457,7 @@
     const src = f.img || f.image || f.imageUrl || null;
 
     if(isMobile){
-      // Render in side panel instead of overlay
+      // Mobile: render into Campaign Info WITH image, no auto-scroll
       loreTitle.textContent = name;
       loreBody.textContent = desc;
       if(src){
@@ -470,23 +467,22 @@
         loreImg.removeAttribute('src');
         loreMedia.style.display='none';
       }
-      // ensure overlay tooltip is closed
+      // Ensure floating tooltip stays closed on mobile
       tooltip.classList.remove('open');
-      // Smooth scroll to the side panel so content is visible
-      document.getElementById('sidePanel').scrollIntoView({behavior:'smooth', block:'start'});
     }else{
-      // Desktop: keep overlay tooltip behavior
+      // Desktop: floating tooltip only; panel mirrors TEXT ONLY (no image)
       ttTitle.textContent = name;
       ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
       else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
       tooltip.classList.add('open');
       positionTooltip(evt);
-      // Also mirror into side panel text
+
+      // Mirror text only
       loreTitle.textContent = name;
       loreBody.textContent = desc;
-      if(src){ loreImg.src = src; loreImg.alt = name + ' image'; loreMedia.style.display='block'; }
-      else { loreImg.removeAttribute('src'); loreMedia.style.display='none'; }
+      loreImg.removeAttribute('src');
+      loreMedia.style.display='none';
     }
   }
 
