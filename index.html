@@ -3,94 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v28 – Region Images)</title>
+  <title>The World of Draelon – Campaign Primer (v30 – Parchment & Island Panel)</title>
   <style>
+    /* ------------------------------------------------------------
+       Fantasy / Parchment Theme
+    ------------------------------------------------------------ */
     :root{
-      --bg:#0b0d12; --panel:#141821; --panel-2:#1b2130; --accent:#c6f06e; --accent-2:#8ad9ff; --text:#e8ecf3; --muted:#9aa3b2; --shadow:0 10px 30px rgba(0,0,0,.45); --radius:14px;
+      --bg:#efe7d2;
+      --paper:#fbf3dd;
+      --paper-2:#f6edd1;
+      --ink:#2c2416;
+      --ink-soft:#5c523f;
+      --accent:#8b5e34;      /* bronze ink */
+      --accent-2:#3a5a40;    /* deep green */
+      --rule:#d8caa6;
+      --edge:#cbb98f;
+      --shadow:0 18px 40px rgba(0,0,0,.25);
+      --radius:16px;
     }
+
+    @font-face{
+      font-family:"IMFellDW";
+      src: local("IM FELL DW Pica"), local("IMFellDW");
+      font-weight:400; font-style:normal;
+      /* Fallback to system serif if not present */
+    }
+
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 800px at 70% 10%, #151926, #0b0d12 60%, #07090e);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji");}
-    .app{display:grid;grid-template-columns:1fr minmax(320px,420px);gap:16px}
-    .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    svg#world{width:100%;height:100%;display:block;background:#0d111a;touch-action:none}
-    .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #232a3a;background:linear-gradient(180deg,#182034,#141a2a)}
-    .side header h1{font-size:16px;margin:0;letter-spacing:.2px;color:#d7def0}
-    .side .content{padding:16px;overflow:auto}
-    .lore-title{font-weight:700;margin:0 0 8px;font-size:18px}
-    .lore-body{color:#dbe2f6;line-height:1.45;white-space:pre-wrap}
-    .muted{color:var(--muted);font-size:12px}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      font-family: Georgia, "IMFellDW", "Iowan Old Style", "Palatino Linotype", serif;
+      line-height:1.4;
+    }
 
-    /* Loader (top-left) */
-    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.6);border:1px solid #2b354a;border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid #789; border-top-color:#c6f06e; animation:spin .8s linear infinite}
+    /* subtle paper grain w/ layered gradients */
+    body:before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none;
+      background:
+        radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
+        radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
+      mix-blend-mode:multiply; opacity:.6;
+    }
+
+    .primer, .panel{
+      background:
+        linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid var(--edge);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    .panel::after, .primer::after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
+    }
+
+    .primer{margin:16px; padding:18px 18px 14px}
+    .primer h2{
+      margin:0 0 10px 0; font-size:26px; letter-spacing:.5px;
+      text-transform:uppercase; font-weight:700;
+      border-bottom:2px solid var(--rule); padding-bottom:6px;
+    }
+
+    .app{display:grid;grid-template-columns:1fr minmax(320px,440px);gap:16px}
+    .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;overflow:hidden}
+    .map-wrap svg{width:100%;height:100%;display:block;background:#efe6c8;touch-action:none}
+    .muted{color:var(--ink-soft);font-size:12px}
+
+    /* World map loader and GM button */
+    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
+    .gm-btn:hover{filter:brightness(1.02)}
 
-    /* GM button + modal */
-    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:var(--panel-2);color:var(--text);border:1px solid #2b354a;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-    .gm-btn:hover{filter:brightness(1.1)}
+    /* GM modal + CMS */
     .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
     .gm-modal.open{display:flex}
-    .gm-modal-backdrop{position:absolute;inset:0;background:rgba(5,9,16,.65);backdrop-filter:blur(2px)}
-    .gm-modal-card{position:relative;width:min(92%,360px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
-    .gm-modal-card h3{margin:0 0 8px;font-size:16px}
-    .gm-modal-card input{width:100%;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px;box-sizing:border-box;margin:8px 0 10px}
-    .btn{background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:8px 12px;cursor:pointer}
-    .btn.primary{background:linear-gradient(180deg,#a7f35a,#87d93e);color:#0a0e15;font-weight:800;border:0}
-    .btn.danger{border-color:#503038;background:#2a0f14;color:#ffb4bf}
+    .gm-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(2px)}
+    .gm-modal-card{position:relative;width:min(92%,380px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
+    .gm-modal-card h3{margin:0 0 8px;font-size:18px}
+    .gm-modal-card input{width:100%;background:#fff8e7;color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:10px 12px;box-sizing:border-box;margin:8px 0 10px}
+    .btn{background:#fff6d8;color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:8px 12px;cursor:pointer}
+    .btn.primary{background:#c9a66b;color:#1e1406;font-weight:800;border:0}
 
-    /* CMS */
-    .cms{position:absolute;top:56px;right:12px;width:min(620px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--panel-2);border:1px solid #2b354a;border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
+    .cms{position:absolute;top:56px;right:12px;width:min(620px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
     .cms.open{display:flex;flex-direction:column}
-    .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #2b354a;flex-wrap:wrap}
-    .cms header h2{font-size:14px;margin:0}
+    .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+    .cms header h2{font-size:16px;margin:0}
     .cms .cms-body{padding:12px;overflow:auto;display:grid;gap:10px}
     .row{display:grid;gap:6px}
-    .row label{font-size:12px;color:#cbd5e1}
-    .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#101522;color:#e6edf8;border:1px solid #33405a;border-radius:10px;padding:10px 12px}
+    .row label{font-size:12px;color:var(--ink-soft)}
+    .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#fff6d8;color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:10px 12px}
     .row textarea{min-height:100px;resize:vertical}
-    .list{border-top:1px dashed #33405a;padding-top:8px;display:grid;gap:6px}
-    .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#0f1420;border:1px solid #2b354a;border-radius:10px}
-    .item .meta{display:flex;gap:10px;align-items:center}
-    .chip{font-size:11px;padding:2px 6px;border-radius:999px;background:#1a2335;border:1px solid #2b354a;color:#b9c4da}
+    .list{border-top:1px dashed var(--rule);padding-top:8px;display:grid;gap:6px}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#f5ecd0;border:1px solid var(--edge);border-radius:10px}
+
+    /* Sidebar */
+    .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;overflow:hidden}
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+    .side .content{padding:16px;overflow:auto}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+    .lore-body{line-height:1.6;white-space:pre-wrap}
 
     /* Map features */
     .feature{cursor:pointer}
-    .feature.point circle{stroke:var(--panel);stroke-width:3;fill:var(--accent)}
-    .feature.point .label{font-size:36px;fill:#eaf3ff;pointer-events:none;paint-order:stroke;stroke:#0b0e15;stroke-width:6px;stroke-linejoin:round}
-
-    /* Regions visual states */
+    .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
+    .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
     .feature.region path{stroke-width:0;transition:fill-opacity .12s linear}
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
 
-    /* Edit handles */
-    .edit-handle{fill:#fff;stroke:#000;stroke-width:1.5;cursor:grab}
-    .edit-handle:active{cursor:grabbing}
-    .edge-handle{fill:#8ad9ff;stroke:#0b0e15;stroke-width:1.2;opacity:.95;cursor:copy}
-
-    /* Zoom controls & hints */
-    .zoombar{position:absolute;left:12px;top:48px;display:flex;flex-direction:column;gap:8px;z-index:8}
-    .zoombar .btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-    .hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.35);border:1px solid #2b354a;border-radius:8px;padding:6px 8px;font-size:12px;color:#cbd5e1;z-index:8}
-    .hint kbd{background:#1b2130;border:1px solid #2b354a;padding:0 6px;border-radius:6px;font-size:11px}
-
-    /* Tooltip card with optional image */
-    .tooltip{position:absolute;min-width:260px;max-width:380px;background:rgba(13,17,26,.98);border:1px solid #2b354a;border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto;overflow:hidden}
+    /* Tooltip */
+    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
-    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2b354a}
-    .tooltip header h3{margin:0;font-size:15px}
-    .tooltip .close{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-size:16px}
-    .tooltip .media{width:100%;max-height:180px;overflow:hidden;background:#0d111a;border-bottom:1px solid #2b354a}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
+    .tooltip header h3{margin:0;font-size:16px}
+    .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
+    .tooltip .media{width:100%;max-height:180px;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
     .tooltip .media img{width:100%;height:auto;display:block}
-    .tooltip .body{padding:10px 12px;color:#e7eefb;line-height:1.45}
+    .tooltip .body{padding:10px 12px;line-height:1.5}
     .tooltip .body p{margin:0}
 
-    /* Primer blocks */
-    .primer{margin:16px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:16px}
-    .primer h2{margin:0 0 8px 0;font-size:20px}
+    /* Island Section (image-only, natural size) */
+    .section{margin:8px 16px 16px 16px}
+    .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
+    .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
+    .island-grid{
+      display:grid;
+      grid-template-columns: auto 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .island-card{
+      margin:0; padding:12px;
+      background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display:inline-block;
+    }
+    .island-card img{
+      display:block;
+      width:auto; height:auto;
+      max-width:100%;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+    .island-lore{
+      padding:16px;
+    }
+    .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
+    .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
-    @media (max-width: 900px){.app{grid-template-columns:1fr}.side{grid-row:2;margin:0 16px 16px 16px}}
+    @media (max-width: 900px){
+      .app{grid-template-columns:1fr}
+      .side{grid-row:2;margin:0 16px 16px 16px}
+      .map-wrap{margin:0 16px}
+      .island-grid{grid-template-columns: 1fr}
+      .island-card{justify-self:center}
+    }
   </style>
 </head>
 <body>
@@ -100,17 +179,9 @@
   </div>
 
   <div class="app">
-    <div class="map-wrap" id="mapWrap">
-      <!-- Loader (top-left) -->
+    <div class="map-wrap panel" id="mapWrap">
+      <!-- Loader -->
       <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
-
-      <!-- Zoom bar -->
-      <div class="zoombar" aria-hidden="false">
-        <button class="btn" id="zoomIn" title="Zoom in" type="button">＋</button>
-        <button class="btn" id="zoomOut" title="Zoom out" type="button">－</button>
-        <button class="btn" id="zoomReset" title="Reset view" type="button">⤾</button>
-      </div>
-      <div class="hint" id="hint">Drag map to pan · Scroll/Pinch to zoom · Click a region/point for details</div>
 
       <!-- GM Mode -->
       <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
@@ -123,7 +194,7 @@
             <button class="btn" id="gmCancel" type="button">Cancel</button>
             <button class="btn primary" id="gmSubmit" type="button">Unlock</button>
           </div>
-          <p class="muted" id="gmError" style="display:none;margin-top:8px;color:#ffb4bf">Wrong code. Try again.</p>
+          <p class="muted" id="gmError" style="display:none;margin-top:8px;color:#8b2b2b">Wrong code. Try again.</p>
         </div>
       </div>
 
@@ -131,10 +202,6 @@
         <header>
           <h2>GM Tools</h2>
           <div class="toolbar" style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="toolSelect" type="button">Select</button>
-            <button class="btn" id="toolAddPoint" type="button">Add Point</button>
-            <button class="btn" id="toolAddRegion" type="button">New Region</button>
-            <button class="btn" id="toolAddShape" type="button">Add Shape to Region</button>
             <button class="btn" id="toolExport" type="button">Export</button>
             <label class="btn" for="importFile" style="cursor:pointer;">Import</label>
             <input id="importFile" type="file" accept="application/json" style="display:none;" />
@@ -150,8 +217,8 @@
             <textarea id="primerDetailsEdit" placeholder="Edit the bottom primer details..."></textarea>
           </div>
           <div class="row">
-            <label>Map Image <span class="muted">(Upload to replace – CSP-safe)</span></label>
-            <input type="file" id="mapFile" accept="image/*" />
+            <label>Island Lore (auto-saves)</label>
+            <textarea id="islandLoreEdit" placeholder="Describe Signika's history, factions, landmarks..."></textarea>
           </div>
           <div class="row">
             <label>Selected Feature</label>
@@ -169,26 +236,14 @@
             <label for="featColor">Region Colour (live)</label>
             <input id="featColor" type="color" value="#8ad9ff" />
           </div>
-
-          <!-- NEW: Region image controls -->
-          <div class="row" id="rowImagePath" style="display:none;">
-            <label for="featImagePath">Region Image URL/Path (e.g., images/oscana.jpg)</label>
-            <input id="featImagePath" type="text" placeholder="images/oscana.jpg" />
+          <div class="row" id="rowImagePath">
+            <label for="featImagePath">Region Image URL/Path (optional)</label>
+            <input id="featImagePath" type="text" placeholder="map/oscana.jpg" />
           </div>
-          <div class="row" id="rowImageUpload" style="display:none;">
-            <label>Attach Image (optional – converts to data URL for quick preview)</label>
-            <input id="featImageFile" type="file" accept="image/*" />
-            <div class="muted">Tip: For GitHub Pages, set the URL/path field above and commit the file to your repo.</div>
-          </div>
-          <div class="row" id="shapeManager" style="display:none;">
-            <label>Shapes in Region</label>
-            <div id="shapeList" class="list"></div>
-          </div>
-          <div class="list" id="featureList"></div>
         </div>
       </div>
 
-      <!-- Tooltip (click-to-open at cursor, fixed) -->
+      <!-- Tooltip -->
       <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
         <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
         <header>
@@ -198,35 +253,51 @@
         <div class="body" id="ttBody"><p>Description…</p></div>
       </div>
 
-      <!-- Map & overlays -->
+      <!-- World Map (interactive) -->
       <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
         <defs>
-          <!-- Soft fuzzy edge only -->
           <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
           </filter>
         </defs>
-        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid meet" />
+        <!-- Use 'slice' to reduce empty gutters -->
+        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid slice" />
         <g id="regions"></g>
         <g id="points"></g>
-        <g id="editHandles"></g>
       </svg>
     </div>
 
-    <aside class="side" id="sidePanel">
+    <aside class="side panel" id="sidePanel">
       <header>
         <h1>Campaign Info</h1>
         <span class="muted">Click the map to explore</span>
       </header>
       <div class="content">
         <h3 class="lore-title" id="loreTitle">Welcome</h3>
-        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, click to open details. <br/><br/>GM Mode lets you add points and draw regions. Data is saved to your browser and can be exported as JSON for a future database.</div>
+        <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>. On mobile, tap points; on desktop, click to open details.</div>
       </div>
     </aside>
   </div>
 
-  <div class="primer" id="primerBottom">
+  <!-- Island Panel (image at natural size alongside island lore) -->
+  <section class="section">
+    <header>
+      <h2>Signika — Island Primer</h2>
+      <span class="muted">Reference map & lore</span>
+    </header>
+    <div class="island-grid">
+      <figure class="island-card">
+        <img id="islandImg" src="" alt="Signika island map"/>
+      </figure>
+      <div class="island-lore panel">
+        <h3>Island Lore</h3>
+        <div id="islandLore" class="body">Add your Signika lore here — history, factions, features, and travel notes.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="primer panel" id="primerBottom">
     <h2>Primer – Details</h2>
     <div id="primerDetails">Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.</div>
   </div>
@@ -235,539 +306,343 @@
 (function(){
   // ---- Config -------------------------------------------------------------
   const JSON_PATH = './world-data.json';
-  const DEFAULT_MAP_PATH = './map/world-map.png';
-  const STORAGE_KEY = 'signika.world.v28';
-  const DEFAULT_REGION_COLOR = '#8ad9ff';
+  const DEFAULT_WORLD_MAP = './map/world-map.png';
+  const DEFAULT_ISLAND_MAP = './map/campaign-map.png';
+  const STORAGE_KEY = 'signika.world.v30';
 
-  // ---- Defaults -----------------------------------------------------------
-  const defaultData = {
-    mapSrc: DEFAULT_MAP_PATH,
-    mapSize: {w:1000,h:600},
-    primerIntro: 'This is your editable campaign introduction. Enable GM mode to edit this text.',
-    primerDetails: 'Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.',
-    features: [
-      { id: uid(), type:'region', name:'Oscana', color: DEFAULT_REGION_COLOR, desc:'Western continent of divided kingdoms and feudal intrigue.', img:'images/oscana.jpg', shapes:[[ {x:195,y:140},{x:415,y:150},{x:430,y:250},{x:300,y:270},{x:200,y:230} ]] },
-      { id: uid(), type:'region', name:'Athium', color: DEFAULT_REGION_COLOR, desc:'Imperial power in the southeast; militarised and ambitious.', img:'images/athium.jpg', shapes:[[ {x:720,y:180},{x:900,y:190},{x:870,y:430},{x:690,y:410} ]] },
-      { id: uid(), type:'region', name:'Eturia', color: DEFAULT_REGION_COLOR, desc:'Magocracy to the south—politics by spellbook.', img:'images/eturia.jpg', shapes:[[ {x:480,y:450},{x:580,y:520},{x:520,y:580},{x:450,y:520} ], [ {x:600,y:480},{x:640,y:500},{x:620,y:530} ]] },
-      { id: uid(), type:'point', name:'Signika', desc:'A wild northern island. Greywake port at the south. Recently crawling with strange, empowered monsters.', x:560, y:160 }
-    ]
-  };
-
+  // ---- State --------------------------------------------------------------
   let state = null;
+  let gmOpen = false;
 
   // ---- Elements -----------------------------------------------------------
-  const svg = document.getElementById('world');
-  const mapWrap = document.getElementById('mapWrap');
-  const gRegions = document.getElementById('regions');
-  const gPoints = document.getElementById('points');
-  const editHandles = document.getElementById('editHandles');
-  const loreTitle = document.getElementById('loreTitle');
-  const loreBody = document.getElementById('loreBody');
-  const mapImage = document.getElementById('mapImage');
-  const loader = document.getElementById('loader');
-  const loaderText = document.getElementById('loaderText');
+  const svgWorld   = document.getElementById('world');
+  const mapImage   = document.getElementById('mapImage');
+  const gRegions   = document.getElementById('regions');
+  const gPoints    = document.getElementById('points');
+  const mapWrap    = document.getElementById('mapWrap');
 
+  const islandImg  = document.getElementById('islandImg');
+  const islandLore = document.getElementById('islandLore');
+
+  const loader     = document.getElementById('loader');
   const primerIntro = document.getElementById('primerIntro');
   const primerDetails = document.getElementById('primerDetails');
-  const primerIntroEdit = document.getElementById('primerIntroEdit');
-  const primerDetailsEdit = document.getElementById('primerDetailsEdit');
+  const loreTitle  = document.getElementById('loreTitle');
+  const loreBody   = document.getElementById('loreBody');
 
-  // CMS
+  // CMS bits
   const gmBtn = document.getElementById('gmBtn');
-  const cms = document.getElementById('cms');
-  const mapFile = document.getElementById('mapFile');
-  const toolSelect = document.getElementById('toolSelect');
-  const toolAddPoint = document.getElementById('toolAddPoint');
-  const toolAddRegion = document.getElementById('toolAddRegion');
-  const toolAddShape = document.getElementById('toolAddShape');
-  const exportBtn = document.getElementById('toolExport');
-  const importFile = document.getElementById('importFile');
-  const featurePicker = document.getElementById('featurePicker');
-  const featName = document.getElementById('featName');
-  const featDesc = document.getElementById('featDesc');
-  const featColor = document.getElementById('featColor');
-  const rowColor = document.getElementById('rowColor');
-  const rowImagePath = document.getElementById('rowImagePath');
-  const rowImageUpload = document.getElementById('rowImageUpload');
-  const featImagePath = document.getElementById('featImagePath');
-  const featImageFile = document.getElementById('featImageFile');
-  const shapeManager = document.getElementById('shapeManager');
-  const shapeList = document.getElementById('shapeList');
-  const featureList = document.getElementById('featureList');
-
-  // GM modal
   const gmModal = document.getElementById('gmModal');
   const gmBackdrop = document.getElementById('gmBackdrop');
   const gmPass = document.getElementById('gmPass');
   const gmSubmit = document.getElementById('gmSubmit');
   const gmCancel = document.getElementById('gmCancel');
   const gmError = document.getElementById('gmError');
+  const cms = document.getElementById('cms');
+
+  const primerIntroEdit = document.getElementById('primerIntroEdit');
+  const primerDetailsEdit = document.getElementById('primerDetailsEdit');
+  const islandLoreEdit = document.getElementById('islandLoreEdit');
+
+  const featurePicker = document.getElementById('featurePicker');
+  const featName = document.getElementById('featName');
+  const featDesc = document.getElementById('featDesc');
+  const featColor = document.getElementById('featColor');
+  const rowColor = document.getElementById('rowColor');
+  const featImagePath = document.getElementById('featImagePath');
+  const importFile = document.getElementById('importFile');
+  const exportBtn = document.getElementById('toolExport');
 
   // Tooltip
   const tooltip = document.getElementById('tooltip');
   const ttTitle = document.getElementById('ttTitle');
-  const ttBody = document.getElementById('ttBody');
-  const ttClose = document.getElementById('ttClose');
+  const ttBody  = document.getElementById('ttBody');
   const ttMedia = document.getElementById('ttMedia');
-  const ttImg = document.getElementById('ttImg');
+  const ttImg   = document.getElementById('ttImg');
+  const ttClose = document.getElementById('ttClose');
 
-  // ---- Map state (pan/zoom) ----------------------------------------------
-  let mapW = 1000, mapH = 600;
-  let view = {x:0,y:0,w:1000,h:600};
-  function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
-  function applyMapSrc(){ if(state.mapSrc){ mapImage.setAttribute('href', state.mapSrc); } mapImage.setAttribute('width', mapW); mapImage.setAttribute('height', mapH); }
+  // ---- Utility ------------------------------------------------------------
+  const uid = ()=> Math.random().toString(36).slice(2)+Date.now().toString(36);
+  const clamp = (v,min,max)=> Math.max(min, Math.min(max,v));
+  const escapeHTML = (s)=> (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  // ---- Load ---------------------------------------------------------------
-  init();
-  async function init(){
-    showLoader('Loading world…');
-    try{
-      const res = await fetch(JSON_PATH, {cache:'no-store'});
-      if(!res.ok) throw new Error('JSON not found');
-      const data = await res.json();
-      state = migrate({
-        mapSrc: data.mapImage || data.mapSrc || DEFAULT_MAP_PATH,
-        mapSize: data.mapSize || {w:1000,h:600},
-        features: data.features || [],
-        primerIntro: data.primerIntro ?? defaultData.primerIntro,
-        primerDetails: data.primerDetails ?? defaultData.primerDetails
-      });
-    }catch(err){
-      console.warn('Falling back to defaults/localStorage:', err);
-      state = migrate(load()) || defaultData;
-    }
-    mapW = state.mapSize?.w || 1000; mapH = state.mapSize?.h || 600;
-    view = {x: mapW*0.15, y: mapH*0.12, w: mapW*0.7, h: mapH*0.7};
-    primerIntro.textContent = state.primerIntro || '';
-    primerDetails.textContent = state.primerDetails || '';
-    applyMapSrc(); applyView();
-    render();
-    hideLoader();
+  function loadLocal(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): null; }catch(e){ return null; }
+  }
+  function saveLocal(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   }
 
-  function showLoader(msg){ loaderText.textContent = msg||'Loading…'; loader.style.display='flex'; }
-  function hideLoader(){ loader.style.display='none'; }
-
-  // ---- Rendering ----------------------------------------------------------
-  function render(){
-    gRegions.innerHTML=''; gPoints.innerHTML=''; editHandles.innerHTML='';
-
-    // Regions
-    state.features.filter(f=>f.type==='region').forEach(f=>{
-      const g = elNS('g'); g.classList.add('feature','region'); g.setAttribute('data-id', f.id);
-      const color = f.color || DEFAULT_REGION_COLOR;
-      (f.shapes||[]).forEach((shape)=>{
-        const path = elNS('path');
-        path.setAttribute('d', roundedPolygonPath(shape, 10));
-        path.setAttribute('fill', color);
-        path.setAttribute('fill-opacity', '0.31');
-        path.setAttribute('stroke','none');
-        path.style.filter = 'url(#fuzzyEdge)';
-        path.addEventListener('pointerdown', (e)=>{
-          if(!gmOpen || currentTool==='select'){ startPanOnBackground(e); }
-          if(gmOpen && (e.ctrlKey||e.metaKey)) { startDragRegionMove(e, f); isDraggingFeature=true; }
-        });
-        g.appendChild(path);
-      });
-      attachRegionGroupHandlers(g, f);
-      gRegions.appendChild(g);
-
-      if(selectedId===f.id && gmOpen){
-        (f.shapes||[]).forEach((shape, sIdx)=>{
-          shape.forEach((p,idx)=>{
-            const h = elNS('circle'); h.setAttribute('cx', p.x); h.setAttribute('cy', p.y); h.setAttribute('r', 6); h.classList.add('edit-handle');
-            h.addEventListener('pointerdown', (e)=> startDragVertex(e, f, sIdx, idx));
-            h.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); if(e.altKey){ deleteVertex(f, sIdx, idx); render(); } });
-            editHandles.appendChild(h);
-          });
-          for(let i=0;i<shape.length;i++){
-            const a=shape[i], b=shape[(i+1)%shape.length];
-            const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; const m = elNS('circle');
-            m.setAttribute('cx', mx); m.setAttribute('cy', my); m.setAttribute('r', 6); m.classList.add('edge-handle');
-            m.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); insertVertexAtEdge(f, sIdx, i, {x:mx, y:my}); render(); });
-            editHandles.appendChild(m);
-          }
-        });
-      }
-    });
-
-    // Points
-    state.features.filter(f=>f.type==='point').forEach(f=>{
-      const g = elNS('g'); g.classList.add('feature','point'); g.setAttribute('data-id', f.id);
-      const c = elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
-      const label = elNS('text'); label.setAttribute('x', f.x + 30); label.setAttribute('y', f.y - 30); label.classList.add('label'); label.textContent = f.name;
-      g.appendChild(c); g.appendChild(label); attachPointHandlers(g, f); gPoints.appendChild(g);
-    });
-
-    refreshPicker(); refreshList(); updateStates(); refreshShapeListUI(); save();
-  }
-
-  // ---- Tooltip helpers ----------------------------------------------------
-  function setLore(f){ loreTitle.textContent = f.name; loreBody.textContent = f.desc || ''; }
-  function openLore(f){ setLore(f); }
-
-  function showTooltipFor(f, evt){
-    if(!f) return;
-    ttTitle.textContent = f.name || '—';
-    ttBody.innerHTML = '<p>' + escapeHTML(f.desc || '') + '</p>';
-
-    // Region image if present
-    const src = f.img || f.image || f.imageUrl || null;
-    if(src){
-      ttImg.src = src;
-      ttImg.alt = f.name ? (f.name + ' illustration') : 'Region image';
-      ttMedia.style.display = 'block';
-    } else {
-      ttImg.removeAttribute('src');
-      ttMedia.style.display = 'none';
-    }
-
-    tooltip.classList.add('open'); positionTooltip(evt);
-  }
-  function positionTooltip(evt){
-    const wrapRect = mapWrap.getBoundingClientRect();
-    const ttRect = tooltip.getBoundingClientRect();
-    let x = (evt?.clientX ?? wrapRect.left) - wrapRect.left + 12;
-    let y = (evt?.clientY ?? wrapRect.top) - wrapRect.top + 12;
-    const maxX = wrapRect.width - ttRect.width - 8;
-    const maxY = wrapRect.height - ttRect.height - 8;
-    x = Math.max(8, Math.min(maxX, x));
-    y = Math.max(8, Math.min(maxY, y));
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
-  }
-
-  // ---- Interactions -------------------------------------------------------
-  function attachRegionGroupHandlers(g, f){
-    const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    g.addEventListener('pointerenter', ()=>{ if(isCoarse) return; hoveredId=f.id; updateStates(); });
-    g.addEventListener('pointerleave', ()=>{ if(isCoarse) return; hoveredId=null; updateStates(); });
-    g.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      selectedId=f.id; updateStates(); setLore(f);
-      showTooltipFor(f, e); // click-to-open
-      if(gmOpen){ selectFeature(f.id); render(); }
-    });
-  }
-  function attachPointHandlers(node,f){
-    node.addEventListener('click', (e)=>{
-      e.stopPropagation(); selectedId=f.id; updateStates(); openLore(f); showTooltipFor(f, e);
-      if(gmOpen) { selectFeature(f.id); render(); }
-    });
-    node.addEventListener('pointerdown', (e)=>{
-      if(!gmOpen) { startPanOnBackground(e); return; }
-      if(currentTool==='select' || currentTool==='add-point'){ selectFeature(f.id); startDragPoint(e, f); isDraggingFeature=true; }
-    });
-  }
-
-  // Close tooltip when clicking empty map area
-  mapWrap.addEventListener('click', (e)=>{
-    if(!tooltip.classList.contains('open')) return;
-    if(e.target.closest('.tooltip')) return;
-    if(e.target.closest('.feature')) return;
-    tooltip.classList.remove('open');
-  });
-  ttClose.addEventListener('click', (e)=>{ e.stopPropagation(); tooltip.classList.remove('open'); });
-
-  function updateStates(){
-    document.querySelectorAll('#regions .feature.region').forEach(g=>{
-      const id=g.getAttribute('data-id');
-      g.classList.toggle('hover', id===hoveredId);
-      g.classList.toggle('selected', id===selectedId);
-    });
-  }
-
-  // ---- Tools --------------------------------------------------------------
-  let gmOpen = false; let currentTool = 'select'; let buildingRegion = null; let buildingShapeTargetRegionId = null; let isPanning = false; let panStart = null; let selectedId = null; let hoveredId=null; let isDraggingFeature=false;
-  function setTool(t){ currentTool = t; [toolSelect, toolAddPoint, toolAddRegion, toolAddShape].forEach(btn=> btn && btn.classList.remove('primary')); if(t==='select') toolSelect?.classList.add('primary'); if(t==='add-point') toolAddPoint?.classList.add('primary'); if(t==='add-region') toolAddRegion?.classList.add('primary'); if(t==='add-shape') toolAddShape?.classList.add('primary'); }
-  setTool('select');
-
-  // GM auth
-  gmBtn?.addEventListener('click', ()=>{ if(!gmOpen){ gmModal?.classList.add('open'); gmError.style.display='none'; gmPass.value=''; setTimeout(()=> gmPass.focus(), 0); } else { gmOpen=false; cms?.classList.remove('open'); gmBtn.textContent='GM'; cancelBuild(); render(); } });
-  function unlockGM(){ if(gmPass.value==='1234'){ gmOpen=true; cms?.classList.add('open'); gmBtn.textContent='GM ✓'; gmModal?.classList.remove('open'); primerIntroEdit.value = state.primerIntro || ''; primerDetailsEdit.value = state.primerDetails || ''; } else { gmError.style.display='block'; } }
-  gmSubmit?.addEventListener('click', unlockGM); gmCancel?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmBackdrop?.addEventListener('click', ()=> gmModal?.classList.remove('open')); gmPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlockGM(); if(e.key==='Escape') gmModal?.classList.remove('open'); });
-
-  toolSelect.addEventListener('click', ()=> setTool('select'));
-  toolAddPoint.addEventListener('click', ()=> setTool('add-point'));
-  toolAddRegion.addEventListener('click', ()=> setTool('add-region'));
-  toolAddShape.addEventListener('click', ()=>{
-    const f = featureById(selectedId);
-    if(!f || f.type!=='region'){ alert('Select a region first'); return; }
-    buildingShapeTargetRegionId = f.id;
-    buildingRegion = { id:f.id, type:'region', addingShape:true, shape:[] };
-    setTool('add-shape');
-  });
-
-  svg.addEventListener('click', (e)=>{
-    if(!gmOpen) return; const pt = svgPoint(e);
-    if(currentTool==='add-point'){
-      const f = { id:uid(), type:'point', name:'New Point', desc:'', x:pt.x, y:pt.y };
-      state.features.push(f); render(); selectFeature(f.id); openLore(f); return;
-    }
-    if(currentTool==='add-region'){
-      if(!buildingRegion){
-        const r = { id:uid(), type:'region', name:'New Region', color: DEFAULT_REGION_COLOR, desc:'', shapes:[[ {x:pt.x,y:pt.y} ]] };
-        state.features.push(r); buildingRegion = r; selectedId=r.id; render(); selectFeature(r.id);
-      } else {
-        const shape = buildingRegion.shapes[ buildingRegion.shapes.length-1 ];
-        shape.push({x:pt.x,y:pt.y}); render(); selectFeature(buildingRegion.id);
-      }
-      return;
-    }
-    if(currentTool==='add-shape' && buildingRegion && buildingShapeTargetRegionId){
-      const r = featureById(buildingShapeTargetRegionId); if(!r) return;
-      if(!buildingRegion.shape.length){
-        const s = 24; const half = s/2;
-        const square = [
-          {x:pt.x-half, y:pt.y-half},
-          {x:pt.x+half, y:pt.y-half},
-          {x:pt.x+half, y:pt.y+half},
-          {x:pt.x-half, y:pt.y+half}
-        ];
-        r.shapes.push(square);
-        buildingRegion = null; buildingShapeTargetRegionId = null; setTool('select');
-        render(); selectFeature(r.id);
-      }
-      return;
-    }
-  });
-
-  svg.addEventListener('dblclick', ()=>{
-    if(!gmOpen) return;
-    if(currentTool==='add-region'){
-      const r = buildingRegion; if(!r) return; const shape = r.shapes[r.shapes.length-1];
-      if(shape.length<3){ alert('Need at least 3 points for a shape.'); return; }
-      buildingRegion = null; setTool('select'); render();
-    }
-  });
-  function cancelBuild(){ buildingRegion=null; buildingShapeTargetRegionId=null; }
-
-  // ---- Drag helpers -------------------------------------------------------
-  function startDragPoint(e, f){
-    e.preventDefault();
-    const start = svgPoint(e);
-    const offset = { x: f.x - start.x, y: f.y - start.y };
-    const move=(ev)=>{ const p=svgPoint(ev); f.x=clamp(p.x + offset.x,0,mapW); f.y=clamp(p.y + offset.y,0,mapH); render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
-    on(move,up);
-  }
-  function startDragRegionMove(e, f){
-    const p=svgPoint(e);
-    const offset={x:p.x,y:p.y};
-    const move=(ev)=>{ const q=svgPoint(ev); const dx=q.x-offset.x, dy=q.y-offset.y; f.shapes=f.shapes.map(shape=> shape.map(pt=>({x:clamp(pt.x+dx,0,mapW),y:clamp(pt.y+dy,0,mapH)})) ); offset.x=q.x; offset.y=q.y; render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
-    on(move,up);
-  }
-  function startDragVertex(e, f, sIdx, idx){
-    e.preventDefault(); e.stopPropagation();
-    const start = svgPoint(e);
-    const startPt = { x: f.shapes[sIdx][idx].x, y: f.shapes[sIdx][idx].y };
-    const offset = { x: startPt.x - start.x, y: startPt.y - start.y };
-    const move=(ev)=>{ const p=svgPoint(ev); f.shapes[sIdx][idx]={x:clamp(p.x + offset.x,0,mapW),y:clamp(p.y + offset.y,0,mapH)}; render(); selectFeature(f.id,false); };
-    const up=()=>{ off(move,up); isDraggingFeature=false; save(); };
-    on(move,up);
-  }
-  function on(move,up){ window.addEventListener('pointermove',move); window.addEventListener('pointerup',up, { once:true }); }
-  function off(move,up){ window.removeEventListener('pointermove',move); }
-  function insertVertexAtEdge(f,sIdx,i,p){ f.shapes[sIdx].splice(i+1,0,{x:p.x,y:p.y}); }
-  function deleteVertex(f,sIdx,idx){ if(f.shapes[sIdx].length<=3){ deleteShape(f, sIdx); return; } f.shapes[sIdx].splice(idx,1); }
-  function deleteShape(f, sIdx){ f.shapes.splice(sIdx,1); }
-
-  // ---- Pan & Zoom ---------------------------------------------------------
-  const zoomIn = document.getElementById('zoomIn');
-  const zoomOut = document.getElementById('zoomOut');
-  const zoomReset = document.getElementById('zoomReset');
-  function zoom(factor, center){ const cx=center?.x ?? (view.x+view.w/2); const cy=center?.y ?? (view.y+view.h/2); const nw=clamp(view.w*factor, 200, mapW); const nh=clamp(view.h*factor, 120, mapH); view.x=clamp(cx-nw/2,0,Math.max(0,mapW-nw)); view.y=clamp(cy-nh/2,0,Math.max(0,mapH-nh)); view.w=nw; view.h=nh; applyView(); }
-  zoomIn?.addEventListener('click', ()=> zoom(0.8));
-  zoomOut?.addEventListener('click', ()=> zoom(1.25));
-  zoomReset?.addEventListener('click', ()=>{ view={x:0,y:0,w:mapW,h:mapH}; applyView(); });
-
-  svg.addEventListener('wheel', (e)=>{ e.preventDefault(); const pt=svgPoint(e); const factor = e.deltaY>0 ? 1.15 : 0.85; zoom(factor, pt); }, {passive:false});
-
-  function startPanOnBackground(e){ if(e.button!==0 && e.pointerType!=='touch') return; e.preventDefault(); isPanning=true; const rect=svg.getBoundingClientRect(); panStart={ sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y, rw:view.w/rect.width, rh:view.h/rect.height }; if(e.target && e.target.setPointerCapture){ try{ e.target.setPointerCapture(e.pointerId);}catch(_){ } } }
-  svg.addEventListener('pointerdown', (e)=>{ if(isDraggingFeature) return; if(e.button!==0 && e.pointerType!=='touch') return; if(e.target === svg || e.target === mapImage || e.target.closest('g.feature')){ startPanOnBackground(e); } });
-  svg.addEventListener('pointermove', (e)=>{ if(!isPanning) return; const dx=(e.clientX-panStart.sx)*panStart.rw; const dy=(e.clientY-panStart.sy)*panStart.rh; view.x=clamp(panStart.vx-dx,0,Math.max(0,mapW-view.w)); view.y=clamp(panStart.vy-dy,0,Math.max(0,mapH-view.h)); applyView(); });
-  svg.addEventListener('pointerup', ()=>{ isPanning=false; panStart=null; });
-
-  // Touch pinch zoom
-  let touches = new Map(); let pinchBase=null;
-  svg.addEventListener('pointerdown', (e)=>{ if(e.pointerType==='touch'){ touches.set(e.pointerId, e); try{ svg.setPointerCapture(e.pointerId);}catch(_){} }});
-  svg.addEventListener('pointerup', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
-  svg.addEventListener('pointercancel', (e)=>{ if(e.pointerType==='touch'){ touches.delete(e.pointerId); if(touches.size<2) pinchBase=null; }});
-  svg.addEventListener('pointermove', (e)=>{
-    if(e.pointerType!=='touch') return; if(touches.has(e.pointerId)) touches.set(e.pointerId,e);
-    if(touches.size===2){
-      const [a,b]=[...touches.values()];
-      const dNow = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
-      const mid = { clientX:(a.clientX+b.clientX)/2, clientY:(a.clientY+b.clientY)/2 };
-      const pt = svgPoint(mid);
-      if(!pinchBase){ pinchBase={d:dNow}; return; }
-      const scale = dNow / pinchBase.d; // >1 fingers apart => zoom in
-      const factor = 1/scale;          // invert for natural feel
-      pinchBase.d = dNow;
-      zoom(factor, pt);
-    }
-  });
-
-  // ---- CMS interactions ---------------------------------------------------
-  function refreshPicker(){ const id=selectedId; featurePicker.innerHTML = state.features.map(f=>`<option value="${f.id}">${escapeHTML(f.name)} (${f.type})</option>`).join(''); if(id){ const idx=state.features.findIndex(f=>f.id===id); featurePicker.selectedIndex = idx>=0 ? idx : 0; } onPickerChange(); }
-  function refreshList(){ featureList.innerHTML=''; state.features.forEach(f=>{ const div=document.createElement('div'); div.className='item'; const tint = f.type==='region' ? `<span class="chip" style="background:${f.color||DEFAULT_REGION_COLOR};color:#0b0e15;border:none">&nbsp;&nbsp;</span>` : ''; div.innerHTML=`<div class="meta">${tint}<span class="chip">${f.type}</span><strong>${escapeHTML(f.name)}</strong></div><div class="toolbar" style="display:flex;gap:8px"><button class="btn" data-act="edit" type="button">Edit</button></div>`; div.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ selectFeature(f.id); }); featureList.appendChild(div); }); }
-  function onPickerChange(){ const id=featurePicker.value; if(!id) return; const f=state.features.find(x=>x.id===id); if(!f) return; selectedId=id; featName.value=f.name||''; featDesc.value=f.desc||'';
-    if(f.type==='region'){ rowColor.style.display='grid'; rowImagePath.style.display='grid'; rowImageUpload.style.display='grid'; featColor.value=(f.color||DEFAULT_REGION_COLOR); featImagePath.value = f.img || f.image || f.imageUrl || ''; shapeManager.style.display='grid'; }
-    else { rowColor.style.display='none'; rowImagePath.style.display='none'; rowImageUpload.style.display='none'; shapeManager.style.display='none'; }
-    updateStates(); refreshShapeListUI();
-  }
-  featurePicker.addEventListener('change', onPickerChange);
-  function selectFeature(id, updatePicker=true){ selectedId=id; if(updatePicker) refreshPicker(); onPickerChange(); }
-
-  featName.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.name=featName.value; refreshPicker(); refreshList(); save(); });
-  featDesc.addEventListener('input', ()=>{ const f=featureById(selectedId); if(!f) return; f.desc=featDesc.value; save(); });
-
-  primerIntroEdit.addEventListener('input', ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; save(); });
-  primerDetailsEdit.addEventListener('input', ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; save(); });
-
-  // Live colour updates
-  let colorRAF = 0;
-  featColor.addEventListener('input', ()=>{
-    const f = featureById(selectedId);
-    if(!f || f.type!=='region') return;
-    f.color = featColor.value || DEFAULT_REGION_COLOR;
-    if(colorRAF) cancelAnimationFrame(colorRAF);
-    colorRAF = requestAnimationFrame(()=>{ updateRegionColorDOM(f); save(); });
-  });
-  function updateRegionColorDOM(f){
-    const g = gRegions.querySelector(`.feature.region[data-id="${CSS.escape(f.id)}"]`);
-    if(!g) { render(); return; }
-    g.querySelectorAll('path').forEach(p=> p.setAttribute('fill', f.color || DEFAULT_REGION_COLOR));
-  }
-
-  // NEW: Image path field + optional upload (to data URL)
-  featImagePath.addEventListener('input', ()=>{
-    const f = featureById(selectedId); if(!f || f.type!=='region') return;
-    f.img = featImagePath.value.trim();
-    save();
-  });
-  featImageFile.addEventListener('change', (e)=>{
-    const f = featureById(selectedId); if(!f || f.type!=='region') return;
-    const file=e.target.files?.[0]; if(!file) return;
-    const reader=new FileReader();
-    reader.onload=()=>{ f.img = reader.result; featImagePath.value = f.img; save(); };
-    reader.readAsDataURL(file);
-  });
-
-  // Map upload -> data URL
-  mapFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const dataUrl=reader.result; const img=new Image(); img.onload=()=>{ mapW=img.naturalWidth; mapH=img.naturalHeight; state.mapSize={w:mapW,h:mapH}; view={x:0,y:0,w:mapW,h:mapH}; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); state.mapSrc=dataUrl; applyMapSrc(); applyView(); render(); save(); }; img.src=dataUrl; }catch(err){ alert('Could not load image'); } }; reader.readAsDataURL(file); });
-
-  // Export / Import
-  exportBtn.addEventListener('click', ()=>{
-    try{
-      const out = { mapImage: state.mapSrc, mapSize: state.mapSize, primerIntro: state.primerIntro || '', primerDetails: state.primerDetails || '', features: state.features };
-      const data = JSON.stringify(out, null, 2);
-      const blob = new Blob([data], {type:'application/json'});
-      const a = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      a.href = url; a.download = 'world-data.json';
-      document.body.appendChild(a); a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-    }catch(err){ alert('Export failed: ' + (err?.message||err)); }
-  });
-  importFile.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const obj=JSON.parse(reader.result);
-      if(obj.features) state.features=obj.features.map(f=> migrateFeature(f));
-      if(obj.mapImage||obj.mapSrc) state.mapSrc=obj.mapImage||obj.mapSrc; if(obj.mapSize){ state.mapSize=obj.mapSize; mapW=state.mapSize.w; mapH=state.mapSize.h; mapImage.setAttribute('width',mapW); mapImage.setAttribute('height',mapH); svg.setAttribute('viewBox',`0 0 ${mapW} ${mapH}`); view={x:0,y:0,w:mapW,h:mapH}; }
-      if('primerIntro' in obj){ state.primerIntro = obj.primerIntro; primerIntro.textContent = state.primerIntro; }
-      if('primerDetails' in obj){ state.primerDetails = obj.primerDetails; primerDetails.textContent = state.primerDetails; }
-      applyMapSrc(); applyView(); render(); save(); }catch(err){ alert('Invalid JSON'); } }; reader.readAsText(file); });
-
-  // ---- Utils --------------------------------------------------------------
-  function featureById(id){ return state.features.find(x=>x.id===id); }
-  function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-  function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
-  function load(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): null; }catch(e){ return null; } }
-  function migrate(s){ if(!s) return null; if(!s.mapSize){ s.mapSize={w:1000,h:600}; }
-    if(Array.isArray(s.features)) s.features = s.features.map(f=> migrateFeature(f));
-    if(typeof s.primerIntro !== 'string') s.primerIntro = defaultData.primerIntro;
-    if(typeof s.primerDetails !== 'string') s.primerDetails = defaultData.primerDetails;
-    return s; }
-  function migrateFeature(f){
-    if(f.type==='region'){
-      if(!f.shapes && f.points){ f.shapes=[f.points]; delete f.points; }
-      f.color = f.color || DEFAULT_REGION_COLOR;
-      if(f.image && !f.img) f.img = f.image; // support legacy "image"
-      return f;
-    } else {
-      return f;
-    }
-  }
-  function svgPoint(evt){
-    const rect=svg.getBoundingClientRect();
-    const clientX = evt?.clientX ?? rect.left;
-    const clientY = evt?.clientY ?? rect.top;
-    const x = view.x + (clientX - rect.left) * (view.w / rect.width);
-    const y = view.y + (clientY - rect.top) * (view.h / rect.height);
-    return {x,y}; }
-  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-  function elNS(name){ return document.createElementNS('http://www.w3.org/2000/svg', name); }
-  function escapeHTML(s){ return (s||'').replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-  // Rounded polygon path (smooth corners)
-  function roundedPolygonPath(points, radius){
-    const n=points.length; if(n<3) return '';
-    const r = Math.max(0, radius|0);
-    function lerp(a,b,t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; }
-    function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-    let d='';
+  function roundedPolygonPath(points, r){
+    if(!points || points.length<2) return '';
+    const n = points.length;
+    let d = '';
     for(let i=0;i<n;i++){
-      const p0=points[(i-1+n)%n], p1=points[i], p2=points[(i+1)%n];
-      const rr = Math.min(r, dist(p1,p0)/2, dist(p1,p2)/2);
-      const pA = lerp(p1, p0, rr/dist(p1,p0));
-      const pB = lerp(p1, p2, rr/dist(p1,p2));
-      if(i===0){ d += `M ${pA.x} ${pA.y} `; }
-      d += `L ${pA.x} ${pA.y} Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
+      const p0 = points[(i-1+n)%n], p1 = points[i], p2 = points[(i+1)%n];
+      const v1x = p1.x - p0.x, v1y = p1.y - p0.y;
+      const v2x = p2.x - p1.x, v2y = p2.y - p1.y;
+      const l1 = Math.hypot(v1x, v1y), l2 = Math.hypot(v2x, v2y);
+      const r1 = Math.min(r, l1/3), r2 = Math.min(r, l2/3);
+      const pA = {x: p1.x - v1x/l1*r1, y: p1.y - v1y/l1*r1};
+      const pB = {x: p1.x + v2x/l2*r2, y: p1.y + v2y/l2*r2};
+      if(i===0){ d += `M ${pA.x} ${pA.y} `; } else { d += `L ${pA.x} ${pA.y} `; }
+      d += `Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
     }
     d += 'Z';
     return d;
   }
 
-  // Shape list UI
-  function refreshShapeListUI(){
-    const f = featureById(selectedId);
-    shapeList.innerHTML='';
-    if(!f || f.type!=='region'){ shapeManager.style.display='none'; return; }
-    shapeManager.style.display='grid';
-    (f.shapes||[]).forEach((shape, idx)=>{
-      const div=document.createElement('div'); div.className='item';
-      div.innerHTML = `<div class="meta"><span class="chip">Shape ${idx+1}</span><span class="muted">${shape.length} pts</span></div>`+
-                      `<div class="toolbar" style="display:flex;gap:8px"><button class="btn danger" data-del>Delete Shape</button></div>`;
-      div.querySelector('[data-del]').addEventListener('click', ()=>{
-        if(!confirm('Delete this shape from the region?')) return;
-        deleteShape(f, idx); render(); selectFeature(f.id);
+  // Tight-fit initial view to minimize whitespace around world map
+  function fitViewTight(svgEl, imgW, imgH, padRatio=0.005){
+    const rect = svgEl.getBoundingClientRect();
+    const viewAR = rect.width / rect.height;
+    const imgAR = imgW / imgH;
+    let w = imgW, h = imgH;
+    if(imgAR > viewAR){ h = imgW / viewAR; } else { w = imgH * viewAR; }
+    const padW = imgW * padRatio, padH = imgH * padRatio;
+    const x = (imgW - Math.min(w, imgW-2*padW))/2;
+    const y = (imgH - Math.min(h, imgH-2*padH))/2;
+    const vb = `${clamp(x,0,imgW)} ${clamp(y,0,imgH)} ${clamp(Math.min(w, imgW-2*padW),1,imgW)} ${clamp(Math.min(h, imgH-2*padH),1,imgH)}`;
+    svgEl.setAttribute('viewBox', vb);
+    return vb;
+  }
+
+  // Basic navigator for world map only
+  function makeNavigator(svgEl){
+    const state = {viewBox: svgEl.getAttribute('viewBox').split(' ').map(Number), panning:false, last:{x:0,y:0}};
+    function apply(){ svgEl.setAttribute('viewBox', state.viewBox.join(' ')); }
+    svgEl.addEventListener('wheel', (e)=>{
+      e.preventDefault();
+      const [vx,vy,vw,vh] = state.viewBox;
+      const scale = (e.deltaY<0? 0.9: 1.1);
+      const mx = e.offsetX / svgEl.clientWidth;
+      const my = e.offsetY / svgEl.clientHeight;
+      const nw = vw*scale;
+      const nh = vh*scale;
+      const nx = vx + (vw - nw)*mx;
+      const ny = vy + (vh - nh)*my;
+      state.viewBox = [nx,ny,nw,nh]; apply();
+    }, {passive:false});
+    svgEl.addEventListener('pointerdown', (e)=>{ state.panning=true; state.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId); });
+    svgEl.addEventListener('pointermove', (e)=>{
+      if(!state.panning) return;
+      const dx = (e.clientX - state.last.x) * (state.viewBox[2]/svgEl.clientWidth);
+      const dy = (e.clientY - state.last.y) * (state.viewBox[3]/svgEl.clientHeight);
+      state.viewBox[0]-=dx; state.viewBox[1]-=dy; state.last={x:e.clientX,y:e.clientY}; apply();
+    });
+    svgEl.addEventListener('pointerup', ()=> state.panning=false);
+    return { reset: (imgW,imgH)=>{ fitViewTight(svgEl, imgW, imgH); state.viewBox = svgEl.getAttribute('viewBox').split(' ').map(Number); apply(); } };
+  }
+
+  // ---- Init ---------------------------------------------------------------
+  let navWorld = null;
+  init().catch(console.error);
+
+  async function init(){
+    showLoader(true);
+    const data = await loadData();
+    state = migrate(data) || {};
+
+    // primer/lore text
+    primerIntro.textContent = state.primerIntro || '';
+    primerDetails.textContent = state.primerDetails || '';
+    islandLore.textContent = state.islandLore || islandLore.textContent;
+
+    // world map
+    const wSize = state.mapSize || {w:1000,h:600};
+    mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
+    mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
+    fitViewTight(svgWorld, wSize.w, wSize.h, 0.004);
+
+    // island image ONLY (natural size inside a framed card)
+    islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
+    islandImg.alt = "Signika island map";
+
+    // render features
+    renderFeatures();
+
+    // world pan/zoom
+    navWorld = makeNavigator(svgWorld);
+
+    // GM
+    gmBtn.addEventListener('click', ()=> gmModal.classList.add('open'));
+    gmBackdrop.addEventListener('click', ()=> gmModal.classList.remove('open'));
+    gmCancel.addEventListener('click', ()=> gmModal.classList.remove('open'));
+    gmSubmit.addEventListener('click', ()=>{
+      const pass = (gmPass.value||'').trim();
+      if(pass === (state.gmPass||'signika')){
+        gmOpen = true; gmModal.classList.remove('open'); cms.classList.add('open'); gmError.style.display='none';
+        bindCMS();
+      }else{
+        gmError.style.display='block';
+      }
+    });
+
+    // Tooltip close
+    ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
+
+    showLoader(false);
+    window.addEventListener('resize', ()=> fitViewTight(svgWorld, wSize.w, wSize.h, 0.004));
+  }
+
+  async function loadData(){
+    try{
+      const res = await fetch(JSON_PATH, {cache:'no-store'});
+      if(!res.ok) throw new Error('json not found');
+      const data = await res.json();
+      return {
+        mapSrc: data.mapImage || data.mapSrc || DEFAULT_WORLD_MAP,
+        mapSize: data.mapSize || {w:1000,h:600},
+        campaignMapSrc: data.campaignMap || data.campaignMapSrc || DEFAULT_ISLAND_MAP,
+        campaignMapSize: data.campaignMapSize || {w:1024,h:1024},
+        features: data.features || [],
+        primerIntro: data.primerIntro || '',
+        primerDetails: data.primerDetails || '',
+        islandLore: data.islandLore || ''
+      };
+    }catch(e){
+      const loc = loadLocal();
+      if(loc) return loc;
+      return {
+        mapSrc: DEFAULT_WORLD_MAP,
+        mapSize: {w:1000,h:600},
+        campaignMapSrc: DEFAULT_ISLAND_MAP,
+        campaignMapSize: {w:1024,h:1024},
+        features: [], primerIntro:'', primerDetails:'', islandLore:''
+      };
+    }
+  }
+
+  function migrate(s){
+    s = s || {};
+    if(!s.campaignMapSrc && s.campaignMap) s.campaignMapSrc = s.campaignMap;
+    if(typeof s.islandLore !== 'string') s.islandLore = '';
+    return s;
+  }
+
+  function renderFeatures(){
+    gRegions.innerHTML=''; gPoints.innerHTML='';
+    const feats = (state.features||[]);
+    // Regions
+    feats.filter(f=>f.type==='region').forEach(f=>{
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.classList.add('feature','region'); g.dataset.id = f.id||uid();
+      const color = f.color || '#8ad9ff';
+      (f.shapes||[]).forEach(shape=>{
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', roundedPolygonPath(shape, 10));
+        path.setAttribute('fill', color);
+        path.setAttribute('fill-opacity', '0.31');
+        path.setAttribute('stroke','none');
+        path.style.filter = 'url(#fuzzyEdge)';
+        path.addEventListener('click', (e)=> showTooltipFor(f, e));
+        g.appendChild(path);
       });
-      shapeList.appendChild(div);
+      g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
+      g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
+      gRegions.appendChild(g);
+    });
+    // Points
+    feats.filter(f=>f.type==='point').forEach(f=>{
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.classList.add('feature','point'); g.dataset.id = f.id||uid();
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', f.x + 30); label.setAttribute('y', f.y - 30); label.classList.add('label'); label.textContent = f.name || '';
+      c.addEventListener('click', (e)=> showTooltipFor(f, e));
+      label.addEventListener('click', (e)=> showTooltipFor(f, e));
+      g.appendChild(c); g.appendChild(label); gPoints.appendChild(g);
     });
   }
 
-  // Smoke tests
-  (function runTests(){
-    try{
-      console.assert(svg && gRegions && gPoints && mapImage, 'TEST: core SVG elements exist');
-      const f={id:'t', type:'region', name:'T', color:'#fff', shapes:[[ {x:0,y:0},{x:20,y:0},{x:20,y:20},{x:0,y:20} ], [ {x:40,y:40},{x:60,y:40},{x:60,y:60},{x:40,y:60} ]]};
-      deleteShape(f,1); console.assert(f.shapes.length===1, 'TEST: deleteShape removes a shape');
-      // Tooltip image test
-      const fake={name:'Oscana', desc:'Test', img:'images/oscana.jpg'};
-      console.assert(!!(fake.img), 'TEST: feature image supported');
-    }catch(e){ console.warn('Tests failed:', e); }
-  })();
-
-  // ---- Lore side panel sync from tooltip target (optional) ---------------
-  function setLoreFromFeatureId(id){
-    const f = featureById(id); if(!f) return;
-    loreTitle.textContent = f.name || '—';
+  function showTooltipFor(f, evt){
+    if(!f) return;
+    ttTitle.textContent = f.name || '—';
+    ttBody.innerHTML = '<p>' + escapeHTML(f.desc || '') + '</p>';
+    const src = f.img || f.image || f.imageUrl || null;
+    if(src){ ttImg.src = src; ttImg.alt = f.name? (f.name+' image'): 'Feature image'; ttMedia.style.display='block'; }
+    else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
+    tooltip.classList.add('open');
+    positionTooltip(evt);
+    loreTitle.textContent = f.name || 'Details';
     loreBody.textContent = f.desc || '';
   }
 
-  // --- Event to keep side panel aligned when selecting from tooltip clicks
-  tooltip.addEventListener('click', (e)=>{ e.stopPropagation(); });
+  function positionTooltip(evt){
+    const mapWrapRect = mapWrap.getBoundingClientRect();
+    const ttRect = tooltip.getBoundingClientRect();
+    const x = clamp(evt.clientX - mapWrapRect.left + 12, 8, mapWrapRect.width - ttRect.width - 8);
+    const y = clamp(evt.clientY - mapWrapRect.top + 12, 8, mapWrapRect.height - ttRect.height - 8);
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  }
 
+  function bindCMS(){
+    // Fill picker
+    const feats = state.features || [];
+    featurePicker.innerHTML = '';
+    feats.forEach((f,idx)=>{
+      const opt = document.createElement('option');
+      opt.value = f.id || (f.id = uid());
+      opt.textContent = `${f.type.toUpperCase()} – ${f.name || 'Untitled'}`;
+      featurePicker.appendChild(opt);
+    });
+    featurePicker.onchange = ()=> selectFeature(featurePicker.value);
+    if(feats.length) { featurePicker.value = feats[0].id; selectFeature(feats[0].id); }
+
+    // Primer edits
+    primerIntroEdit.value = state.primerIntro || '';
+    primerDetailsEdit.value = state.primerDetails || '';
+    islandLoreEdit.value = state.islandLore || '';
+
+    primerIntroEdit.oninput = ()=>{ state.primerIntro = primerIntroEdit.value; primerIntro.textContent = state.primerIntro; saveLocal(); }
+    primerDetailsEdit.oninput = ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; saveLocal(); }
+    islandLoreEdit.oninput = ()=>{ state.islandLore = islandLoreEdit.value; islandLore.textContent = state.islandLore; saveLocal(); }
+
+    // Export/Import
+    exportBtn.onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'world-data.json'; a.click();
+      setTimeout(()=> URL.revokeObjectURL(url), 3000);
+    };
+    importFile.onchange = async ()=>{
+      const file = importFile.files[0]; if(!file) return;
+      const text = await file.text();
+      try{
+        const data = JSON.parse(text);
+        Object.assign(state, migrate({
+          mapSrc: data.mapImage || data.mapSrc || state.mapSrc,
+          mapSize: data.mapSize || state.mapSize,
+          campaignMapSrc: data.campaignMap || data.campaignMapSrc || state.campaignMapSrc,
+          campaignMapSize: data.campaignMapSize || state.campaignMapSize,
+          features: data.features || state.features,
+          primerIntro: data.primerIntro ?? state.primerIntro,
+          primerDetails: data.primerDetails ?? state.primerDetails,
+          islandLore: data.islandLore ?? state.islandLore
+        }));
+        saveLocal();
+        location.reload();
+      }catch(e){ alert('Invalid JSON'); }
+    };
+  }
+
+  function selectFeature(id){
+    const f = (state.features||[]).find(x=>x.id===id);
+    if(!f) return;
+    featName.value = f.name || '';
+    featDesc.value = f.desc || '';
+    featImagePath.value = f.img || f.image || '';
+    if(f.type === 'region'){ rowColor.style.display='block'; featColor.value = f.color || '#8ad9ff'; }
+    else { rowColor.style.display='none'; }
+    featName.oninput = ()=>{ f.name = featName.value; renderFeatures(); saveLocal(); };
+    featDesc.oninput = ()=>{ f.desc = featDesc.value; renderFeatures(); saveLocal(); };
+    featImagePath.oninput = ()=>{ f.img = featImagePath.value; renderFeatures(); saveLocal(); };
+    featColor.oninput = ()=>{ if(f.type==='region'){ f.color = featColor.value; renderFeatures(); saveLocal(); } };
+  }
+
+  function showLoader(on){ loader.style.display = on? 'flex': 'none'; }
 })();
 </script>
 </body>
