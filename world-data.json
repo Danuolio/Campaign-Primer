@@ -16,6 +16,7 @@
       "id": "n9iu5etxqcimh0h2v6u",
       "type": "region",
       "name": "Oscana",
+      "img": "/Campaign-Primer/map/oscana.png",
       "color": "#ff000d",
       "desc": "A land of crumbling thrones and proud banners. Its knights wage endless wars of honour while the peasants whisper of ancient pacts sealed in blood.",
       "shapes": [
@@ -2894,6 +2895,7 @@
     }
   ]
 }
+
 
 
 
