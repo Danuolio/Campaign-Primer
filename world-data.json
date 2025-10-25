@@ -4,6 +4,11 @@
     "w": 4080,
     "h": 3072
   },
+  "campaignMap": "./map/campaign-map.png",
+  "campaignMapSize": {
+    "w": 1024, 
+    "h": 1024 
+  },
   "primerIntro": "Draelon is a fractured world bound by ancient magic and fading empires. From the frozen northern isles to the burning southern deserts, its people cling to power, faith, and secrets buried beneath their feet.",
   "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
   "features": [
@@ -2897,3 +2902,4 @@
     }
   ]
 }
+
