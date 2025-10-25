@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v49)</title>
+  <title>The World of Draelon – Campaign Primer (v50)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -84,24 +84,26 @@
     .feature.region.hover path.fill{fill-opacity:.35}
     .feature.region.selected path.fill{fill-opacity:.42}
 
+    /* Softer multi-layer neon */
     .feature.region .ol-glow,
     .feature.region .ol-mid,
     .feature.region .ol-core{
       fill:none;
       stroke-linejoin:round; stroke-linecap:round;
       opacity:0; pointer-events:none;
+      transition: opacity .12s linear;
     }
-    .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
-    .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
-    .feature.region .ol-core{ stroke:#fff; stroke-width:3; opacity:0; }
+    .feature.region .ol-glow{ stroke-width:10; filter:url(#neonOuterSoft); }
+    .feature.region .ol-mid { stroke-width:6;  filter:url(#neonInnerSoft); }
+    .feature.region .ol-core{ stroke:#fff; stroke-width:2.25; } /* now participates on hover too */
 
+    /* Hover/Selected visibility (toned-down) */
     .feature.region.hover .ol-glow,
-    .feature.region.hover .ol-mid{ opacity:.85; }
+    .feature.region.hover .ol-mid,
+    .feature.region.hover .ol-core{ opacity:.6; }
     .feature.region.selected .ol-glow,
-    .feature.region.selected .ol-mid{ opacity:1; }
-    .feature.region.selected .ol-core{ opacity:.95; }
-    @keyframes neonPulse{ 0%,100%{filter:url(#neonOuter)} 50%{filter:url(#neonOuterStrong)} }
-    .feature.region.selected .ol-glow{ animation: neonPulse 2.3s ease-in-out infinite; }
+    .feature.region.selected .ol-mid,
+    .feature.region.selected .ol-core{ opacity:.9; }
 
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
@@ -113,6 +115,7 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
+    /* Island section */
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -123,6 +126,7 @@
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
+    /* MOBILE OVERRIDES */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
@@ -157,24 +161,19 @@
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
             </filter>
-            <filter id="neonOuter" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="4" result="blur1"/>
+
+            <!-- Softer neon filters -->
+            <filter id="neonOuterSoft" x="-24%" y="-24%" width="148%" height="148%">
+              <feGaussianBlur stdDeviation="3" result="blur1"/>
               <feMerge>
                 <feMergeNode in="blur1"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
-            <filter id="neonOuterStrong" x="-35%" y="-35%" width="170%" height="170%">
-              <feGaussianBlur stdDeviation="6" result="blur2"/>
+            <filter id="neonInnerSoft" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation="1.2" result="blur2"/>
               <feMerge>
                 <feMergeNode in="blur2"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <filter id="neonInner" x="-12%" y="-12%" width="124%" height="124%">
-              <feGaussianBlur stdDeviation="1.5" result="blur3"/>
-              <feMerge>
-                <feMergeNode in="blur3"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
@@ -211,7 +210,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v49';
+  const STORAGE_KEY = 'signika.world.v50';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -306,7 +305,6 @@
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }, {passive:false});
 
-    // Pointer events
     svgEl.addEventListener('pointerup', (e)=>{
       if(nav.panning){ if(e.cancelable) e.preventDefault(); }
     }, {passive:false, capture:true});
@@ -456,13 +454,14 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
-    // Regions with neon outlines matching color
+    // Regions with softer neon outlines matching color
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       (f.shapes||[]).forEach(shape=>{
         const d = roundedPolygonPath(shape, 10);
 
+        // Fill
         const fill=elNS('path');
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
@@ -473,12 +472,17 @@
         fill.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(fill);
 
+        // Outlines
         const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', color);
         const mid =elNS('path'); mid .setAttribute('d', d); mid .setAttribute('class','ol-mid');  mid .setAttribute('stroke', color);
         const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
         g.appendChild(glow); g.appendChild(mid); g.appendChild(core);
       });
-      g.addEventListener('click', (e)=> showTooltipFor(f,e));
+      g.addEventListener('click', (e)=>{
+        showTooltipFor(f,e);
+        // explicit selection toggle for keyboard/mouse click
+        document.querySelectorAll('#regions .feature.region').forEach(el=>el.classList.toggle('selected', el === g));
+      });
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
       gRegions.appendChild(g);
@@ -512,6 +516,7 @@
     if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
+      // Mobile: panel with image
       loreTitle.textContent = name;
       loreBody.textContent = desc;
       if(src){
@@ -523,6 +528,7 @@
       }
       tooltip.classList.remove('open');
     }else{
+      // Desktop: floating tooltip + panel text mirror (no image)
       ttTitle.textContent = name;
       ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
