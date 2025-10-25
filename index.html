@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v47)</title>
+  <title>The World of Draelon – Campaign Primer (v48)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
       --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
       --wrap:clamp(895px, 90vw, 1400px);
-      --hl: #d4a34f;
-      --hl-soft: #f5e2b3;
     }
     html,body{height:100%}
     html { scroll-behavior: auto; }
@@ -86,19 +84,29 @@
     .feature.region.hover path.fill{fill-opacity:.35}
     .feature.region.selected path.fill{fill-opacity:.42}
 
-    .feature.region path.outline {
+    /* Multi-layer neon outline, driven by per-feature stroke colors via inline style */
+    .feature.region .ol-glow,
+    .feature.region .ol-mid,
+    .feature.region .ol-core{
       fill:none;
-      stroke: var(--hl);
-      stroke-width: 6;
-      stroke-linejoin: round;
-      stroke-linecap: round;
-      opacity: 0;
-      filter: url(#borderGlow);
-      pointer-events: none;
+      stroke-linejoin:round; stroke-linecap:round;
+      opacity:0; pointer-events:none;
     }
-    .feature.region.hover path.outline { opacity: .75; }
-    .feature.region.selected path.outline { opacity: 1; stroke-width: 7; }
+    .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
+    .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
+    .feature.region .ol-core{ stroke:#fff; stroke-width:3; opacity:0; } /* core appears only on selected */
 
+    .feature.region.hover .ol-glow,
+    .feature.region.hover .ol-mid{ opacity:.85; }
+    .feature.region.selected .ol-glow,
+    .feature.region.selected .ol-mid{ opacity:1; }
+    .feature.region.selected .ol-core{ opacity:.95; }
+
+    /* Optional pulse for selected (very subtle so it doesn't scream) */
+    @keyframes neonPulse{ 0%,100%{filter:url(#neonOuter)} 50%{filter:url(#neonOuterStrong)} }
+    .feature.region.selected .ol-glow{ animation: neonPulse 2.3s ease-in-out infinite; }
+
+    /* Tooltip */
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
@@ -109,6 +117,7 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
+    /* Island section */
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -119,6 +128,7 @@
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
+    /* MOBILE OVERRIDES */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
@@ -153,10 +163,26 @@
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
             </filter>
-            <filter id="borderGlow" x="-12%" y="-12%" width="124%" height="124%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="soft"/>
+
+            <!-- Neon filters (use SourceGraphic color to keep per-region tint) -->
+            <filter id="neonOuter" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur1"/>
               <feMerge>
-                <feMergeNode in="soft"/>
+                <feMergeNode in="blur1"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="neonOuterStrong" x="-35%" y="-35%" width="170%" height="170%">
+              <feGaussianBlur stdDeviation="6" result="blur2"/>
+              <feMerge>
+                <feMergeNode in="blur2"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="neonInner" x="-12%" y="-12%" width="124%" height="124%">
+              <feGaussianBlur stdDeviation="1.5" result="blur3"/>
+              <feMerge>
+                <feMergeNode in="blur3"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
@@ -193,7 +219,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v47';
+  const STORAGE_KEY = 'signika.world.v48';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -309,7 +335,7 @@
 
     svgEl.addEventListener('pointermove', (e)=>{
       if(!nav.pointers.has(e.pointerId)) return;
-      nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      nav.pointers.set(e.pointerId, {x:e.clientX, y=e.clientY});
 
       if(nav.pointers.size===2){
         const pts=[...nav.pointers.values()];
@@ -437,11 +463,14 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
+    // Regions with neon outlines matching color
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       (f.shapes||[]).forEach(shape=>{
         const d = roundedPolygonPath(shape, 10);
+
+        // Fill
         const fill=elNS('path');
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
@@ -452,10 +481,11 @@
         fill.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(fill);
 
-        const outline=elNS('path');
-        outline.setAttribute('d', d);
-        outline.setAttribute('class','outline');
-        g.appendChild(outline);
+        // Neon outline layers (all use the region color; core is white)
+        const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', color);
+        const mid =elNS('path'); mid .setAttribute('d', d); mid .setAttribute('class','ol-mid');  mid .setAttribute('stroke', color);
+        const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
+        g.appendChild(glow); g.appendChild(mid); g.appendChild(core);
       });
       g.addEventListener('click', (e)=> showTooltipFor(f,e));
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
@@ -463,6 +493,7 @@
       gRegions.appendChild(g);
     });
 
+    // Points
     feats.filter(f=>f.type==='point').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -490,6 +521,7 @@
     if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
+      // Mobile: panel with image
       loreTitle.textContent = name;
       loreBody.textContent = desc;
       if(src){
@@ -501,6 +533,7 @@
       }
       tooltip.classList.remove('open');
     }else{
+      // Desktop: floating tooltip + panel text mirror (no image)
       ttTitle.textContent = name;
       ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
