@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v30 – Parchment & Island Panel)</title>
+  <title>The World of Draelon – Campaign Primer (v31 – Zoom Bounds & Island Size)</title>
   <style>
     /* ------------------------------------------------------------
        Fantasy / Parchment Theme
@@ -21,44 +21,31 @@
       --shadow:0 18px 40px rgba(0,0,0,.25);
       --radius:16px;
     }
-
-    @font-face{
-      font-family:"IMFellDW";
-      src: local("IM FELL DW Pica"), local("IMFellDW");
-      font-weight:400; font-style:normal;
-      /* Fallback to system serif if not present */
-    }
-
     html,body{height:100%}
     body{
       margin:0;
       color:var(--ink);
       background:
         radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-      font-family: Georgia, "IMFellDW", "Iowan Old Style", "Palatino Linotype", serif;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
       line-height:1.4;
     }
-
-    /* subtle paper grain w/ layered gradients */
     body:before{
-      content:"";
-      position:fixed; inset:0; pointer-events:none;
+      content:""; position:fixed; inset:0; pointer-events:none;
       background:
         radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
         radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
         repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
       mix-blend-mode:multiply; opacity:.6;
     }
-
     .primer, .panel{
-      background:
-        linear-gradient(180deg, var(--paper), var(--paper-2));
+      background: linear-gradient(180deg, var(--paper), var(--paper-2));
       border: 1px solid var(--edge);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       position:relative;
     }
-    .panel::after, .primer::after{
+    .primer::after, .panel::after{
       content:""; position:absolute; inset:0; pointer-events:none;
       border-radius: var(--radius);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
@@ -74,9 +61,10 @@
     .app{display:grid;grid-template-columns:1fr minmax(320px,440px);gap:16px}
     .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;overflow:hidden}
     .map-wrap svg{width:100%;height:100%;display:block;background:#efe6c8;touch-action:none}
+
     .muted{color:var(--ink-soft);font-size:12px}
 
-    /* World map loader and GM button */
+    /* Loader and GM button */
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -122,7 +110,7 @@
     .feature.region.selected path{fill-opacity:.42}
 
     /* Tooltip */
-    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow:var(--shadow);z-index:15;display:none;pointer-events:auto;overflow:hidden}
+    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:15;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
     .tooltip header h3{margin:0;font-size:16px}
@@ -132,34 +120,21 @@
     .tooltip .body{padding:10px 12px;line-height:1.5}
     .tooltip .body p{margin:0}
 
-    /* Island Section (image-only, natural size) */
+    /* Island Section (image-only, capped size) */
     .section{margin:8px 16px 16px 16px}
     .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
     .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
-    .island-grid{
-      display:grid;
-      grid-template-columns: auto 1fr;
-      gap:16px;
-      align-items:start;
-    }
+    .island-grid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
     .island-card{
       margin:0; padding:12px;
       background:linear-gradient(180deg, var(--paper), var(--paper-2));
-      border:1px solid var(--edge);
-      border-radius: var(--radius);
+      border:1px solid var(--edge); border-radius: var(--radius);
       box-shadow: var(--shadow);
       display:inline-block;
+      max-width:min(50vw, 1024px); /* <= Half page at most */
     }
-    .island-card img{
-      display:block;
-      width:auto; height:auto;
-      max-width:100%;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
-    }
-    .island-lore{
-      padding:16px;
-    }
+    .island-card img{display:block; width:100%; height:auto}
+    .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
@@ -167,8 +142,8 @@
       .app{grid-template-columns:1fr}
       .side{grid-row:2;margin:0 16px 16px 16px}
       .map-wrap{margin:0 16px}
-      .island-grid{grid-template-columns: 1fr}
-      .island-card{justify-self:center}
+      .island-grid{grid-template-columns:1fr}
+      .island-card{justify-self:center; max-width:min(90vw, 1024px)}
     }
   </style>
 </head>
@@ -261,8 +236,7 @@
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
           </filter>
         </defs>
-        <!-- Use 'slice' to reduce empty gutters -->
-        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid slice" />
+        <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
         <g id="regions"></g>
         <g id="points"></g>
       </svg>
@@ -280,7 +254,7 @@
     </aside>
   </div>
 
-  <!-- Island Panel (image at natural size alongside island lore) -->
+  <!-- Island Panel (image at natural size alongside island lore, max half page) -->
   <section class="section">
     <header>
       <h2>Signika — Island Primer</h2>
@@ -308,7 +282,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = './map/world-map.png';
   const DEFAULT_ISLAND_MAP = './map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v30';
+  const STORAGE_KEY = 'signika.world.v31';
 
   // ---- State --------------------------------------------------------------
   let state = null;
@@ -392,50 +366,60 @@
     return d;
   }
 
-  // Tight-fit initial view to minimize whitespace around world map
-  function fitViewTight(svgEl, imgW, imgH, padRatio=0.005){
-    const rect = svgEl.getBoundingClientRect();
-    const viewAR = rect.width / rect.height;
-    const imgAR = imgW / imgH;
-    let w = imgW, h = imgH;
-    if(imgAR > viewAR){ h = imgW / viewAR; } else { w = imgH * viewAR; }
-    const padW = imgW * padRatio, padH = imgH * padRatio;
-    const x = (imgW - Math.min(w, imgW-2*padW))/2;
-    const y = (imgH - Math.min(h, imgH-2*padH))/2;
-    const vb = `${clamp(x,0,imgW)} ${clamp(y,0,imgH)} ${clamp(Math.min(w, imgW-2*padW),1,imgW)} ${clamp(Math.min(h, imgH-2*padH),1,imgH)}`;
-    svgEl.setAttribute('viewBox', vb);
-    return vb;
-  }
-
-  // Basic navigator for world map only
-  function makeNavigator(svgEl){
-    const state = {viewBox: svgEl.getAttribute('viewBox').split(' ').map(Number), panning:false, last:{x:0,y:0}};
+  // ---- Bounded Navigator for World ---------------------------------------
+  function makeBoundedNavigator(svgEl, imgW, imgH){
+    // Start at full image
+    svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
+    const state = {viewBox:[0,0,imgW,imgH], minW: imgW, minH: imgH, maxZoomFactor: 0.08, panning:false, last:{x:0,y:0}};
     function apply(){ svgEl.setAttribute('viewBox', state.viewBox.join(' ')); }
+    function clampView(){
+      // clamp size (can't be larger than full image == zoomed out beyond full)
+      let [x,y,w,h] = state.viewBox;
+      w = Math.max(Math.min(w, imgW), imgW*state.maxZoomFactor);
+      h = Math.max(Math.min(h, imgH), imgH*state.maxZoomFactor);
+      // keep inside bounds
+      x = clamp(x, 0, imgW - w);
+      y = clamp(y, 0, imgH - h);
+      state.viewBox = [x,y,w,h];
+    }
     svgEl.addEventListener('wheel', (e)=>{
       e.preventDefault();
-      const [vx,vy,vw,vh] = state.viewBox;
+      let [vx,vy,vw,vh] = state.viewBox;
       const scale = (e.deltaY<0? 0.9: 1.1);
+      // zoom around cursor
       const mx = e.offsetX / svgEl.clientWidth;
       const my = e.offsetY / svgEl.clientHeight;
-      const nw = vw*scale;
-      const nh = vh*scale;
-      const nx = vx + (vw - nw)*mx;
-      const ny = vy + (vh - nh)*my;
-      state.viewBox = [nx,ny,nw,nh]; apply();
+      let nw = vw * scale;
+      let nh = vh * scale;
+      // bounds for zoom
+      nw = clamp(nw, imgW*state.maxZoomFactor, imgW);
+      nh = clamp(nh, imgH*state.maxZoomFactor, imgH);
+      const nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
+      const ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
+      state.viewBox = [nx,ny,nw,nh];
+      apply();
     }, {passive:false});
     svgEl.addEventListener('pointerdown', (e)=>{ state.panning=true; state.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId); });
     svgEl.addEventListener('pointermove', (e)=>{
       if(!state.panning) return;
-      const dx = (e.clientX - state.last.x) * (state.viewBox[2]/svgEl.clientWidth);
-      const dy = (e.clientY - state.last.y) * (state.viewBox[3]/svgEl.clientHeight);
-      state.viewBox[0]-=dx; state.viewBox[1]-=dy; state.last={x:e.clientX,y:e.clientY}; apply();
+      let [vx,vy,vw,vh] = state.viewBox;
+      const dx = (e.clientX - state.last.x) * (vw/svgEl.clientWidth);
+      const dy = (e.clientY - state.last.y) * (vh/svgEl.clientHeight);
+      vx = clamp(vx - dx, 0, Math.max(0, imgW - vw));
+      vy = clamp(vy - dy, 0, Math.max(0, imgH - vh));
+      state.viewBox = [vx,vy,vw,vh]; state.last={x:e.clientX,y:e.clientY}; apply();
     });
     svgEl.addEventListener('pointerup', ()=> state.panning=false);
-    return { reset: (imgW,imgH)=>{ fitViewTight(svgEl, imgW, imgH); state.viewBox = svgEl.getAttribute('viewBox').split(' ').map(Number); apply(); } };
+    // public
+    return {
+      reset: ()=>{ state.viewBox=[0,0,imgW,imgH]; apply(); },
+      resize: ()=>{ /* keep current view but ensure clamps */ clampView(); apply(); }
+    };
   }
 
   // ---- Init ---------------------------------------------------------------
   let navWorld = null;
+
   init().catch(console.error);
 
   async function init(){
@@ -443,26 +427,27 @@
     const data = await loadData();
     state = migrate(data) || {};
 
-    // primer/lore text
+    // text
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
 
-    // world map
-    const wSize = state.mapSize || {w:1000,h:600};
+    // world map: fixed to exact image coords (no infinite zoom out)
+    const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
-    fitViewTight(svgWorld, wSize.w, wSize.h, 0.004);
+    // Important: map image uses preserveAspectRatio='none' and we keep SVG viewBox == image dimensions
+    svgWorld.setAttribute('viewBox', `0 0 ${wSize.w} ${wSize.h}`);
 
-    // island image ONLY (natural size inside a framed card)
+    // island image
     islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
 
-    // render features
+    // render world features
     renderFeatures();
 
-    // world pan/zoom
-    navWorld = makeNavigator(svgWorld);
+    // bounded navigator
+    navWorld = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
 
     // GM
     gmBtn.addEventListener('click', ()=> gmModal.classList.add('open'));
@@ -481,8 +466,10 @@
     // Tooltip close
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
 
+    // On resize, we don't change viewBox scale; still bounded by image
+    window.addEventListener('resize', ()=> navWorld.resize());
+
     showLoader(false);
-    window.addEventListener('resize', ()=> fitViewTight(svgWorld, wSize.w, wSize.h, 0.004));
   }
 
   async function loadData(){
@@ -492,7 +479,7 @@
       const data = await res.json();
       return {
         mapSrc: data.mapImage || data.mapSrc || DEFAULT_WORLD_MAP,
-        mapSize: data.mapSize || {w:1000,h:600},
+        mapSize: data.mapSize || {w:4080,h:3072},
         campaignMapSrc: data.campaignMap || data.campaignMapSrc || DEFAULT_ISLAND_MAP,
         campaignMapSize: data.campaignMapSize || {w:1024,h:1024},
         features: data.features || [],
@@ -505,7 +492,7 @@
       if(loc) return loc;
       return {
         mapSrc: DEFAULT_WORLD_MAP,
-        mapSize: {w:1000,h:600},
+        mapSize: {w:4080,h:3072},
         campaignMapSrc: DEFAULT_ISLAND_MAP,
         campaignMapSize: {w:1024,h:1024},
         features: [], primerIntro:'', primerDetails:'', islandLore:''
@@ -579,7 +566,6 @@
   }
 
   function bindCMS(){
-    // Fill picker
     const feats = state.features || [];
     featurePicker.innerHTML = '';
     feats.forEach((f,idx)=>{
@@ -591,7 +577,6 @@
     featurePicker.onchange = ()=> selectFeature(featurePicker.value);
     if(feats.length) { featurePicker.value = feats[0].id; selectFeature(feats[0].id); }
 
-    // Primer edits
     primerIntroEdit.value = state.primerIntro || '';
     primerDetailsEdit.value = state.primerDetails || '';
     islandLoreEdit.value = state.islandLore || '';
@@ -600,7 +585,6 @@
     primerDetailsEdit.oninput = ()=>{ state.primerDetails = primerDetailsEdit.value; primerDetails.textContent = state.primerDetails; saveLocal(); }
     islandLoreEdit.oninput = ()=>{ state.islandLore = islandLoreEdit.value; islandLore.textContent = state.islandLore; saveLocal(); }
 
-    // Export/Import
     exportBtn.onclick = ()=>{
       const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
