@@ -4,7 +4,7 @@
     "w": 4080,
     "h": 3072
   },
-  "campaignMap": "./map/campaign-map.png",
+  "campaignMap": "/Campaign-Primer/map/campaign-map.png",
   "campaignMapSize": {
     "w": 1024, 
     "h": 1024 
@@ -2902,4 +2902,5 @@
     }
   ]
 }
+
 
