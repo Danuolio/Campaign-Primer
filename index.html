@@ -3,32 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v32)</title>
+  <title>The World of Draelon – Campaign Primer (v33)</title>
   <style>
-    /* ------------------------------------------------------------
-       Fantasy / Parchment Theme
-    ------------------------------------------------------------ */
     :root{
-      --bg:#efe7d2;
-      --paper:#fbf3dd;
-      --paper-2:#f6edd1;
-      --ink:#2c2416;
-      --ink-soft:#5c523f;
-      --accent:#8b5e34;      /* bronze ink */
-      --accent-2:#3a5a40;    /* deep green */
-      --rule:#d8caa6;
-      --edge:#cbb98f;
-      --shadow:0 18px 40px rgba(0,0,0,.25);
-      --radius:16px;
+      --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
+      --accent:#8b5e34; --accent-2:#3a5a40; --rule:#d8caa6; --edge:#cbb98f;
+      --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
     }
     html,body{height:100%}
     body{
-      margin:0;
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
-      line-height:1.4;
+      margin:0; color:var(--ink);
+      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
     }
     body:before{
       content:""; position:fixed; inset:0; pointer-events:none;
@@ -38,40 +24,25 @@
         repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
       mix-blend-mode:multiply; opacity:.6;
     }
-    .primer, .panel{
-      background: linear-gradient(180deg, var(--paper), var(--paper-2));
-      border: 1px solid var(--edge);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      position:relative;
-    }
-    .primer::after, .panel::after{
-      content:""; position:absolute; inset:0; pointer-events:none;
-      border-radius: var(--radius);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
-    }
-
+    .primer, .panel{ background: linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow); position:relative; }
+    .primer::after, .panel::after{ content:""; position:absolute; inset:0; pointer-events:none;
+      border-radius: var(--radius); box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06); }
     .primer{margin:16px; padding:18px 18px 14px}
-    .primer h2{
-      margin:0 0 10px 0; font-size:26px; letter-spacing:.5px;
-      text-transform:uppercase; font-weight:700;
-      border-bottom:2px solid var(--rule); padding-bottom:6px;
-    }
+    .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700;
+      border-bottom:2px solid var(--rule); padding-bottom:6px; }
 
     .app{display:grid;grid-template-columns:1fr minmax(320px,440px);gap:16px}
     .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;overflow:hidden}
     .map-wrap svg{width:100%;height:100%;display:block;background:#efe6c8;touch-action:none}
-
     .muted{color:var(--ink-soft);font-size:12px}
 
-    /* Loader and GM button */
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
     .gm-btn:hover{filter:brightness(1.02)}
 
-    /* GM modal + CMS */
     .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:1000}
     .gm-modal.open{display:flex}
     .gm-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(2px)}
@@ -93,7 +64,6 @@
     .list{border-top:1px dashed var(--rule);padding-top:8px;display:grid;gap:6px}
     .item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#f5ecd0;border:1px solid var(--edge);border-radius:10px}
 
-    /* Sidebar */
     .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;overflow:hidden}
     .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
     .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
@@ -105,11 +75,11 @@
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-    .feature.region path{stroke-width:0;transition:fill-opacity .12s linear}
+    .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
 
-    /* Tooltip (z-index boosted) */
+    /* Tooltip */
     .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
@@ -120,19 +90,14 @@
     .tooltip .body{padding:10px 12px;line-height:1.5}
     .tooltip .body p{margin:0}
 
-    /* Island Section (image-only, capped size) */
+    /* Island Section */
     .section{margin:8px 16px 16px 16px}
     .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
     .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
     .island-grid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
-    .island-card{
-      margin:0; padding:12px;
-      background:linear-gradient(180deg, var(--paper), var(--paper-2));
-      border:1px solid var(--edge); border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      display:inline-block;
-      max-width:min(50vw, 1024px); /* <= Half page at most */
-    }
+    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
+      display:inline-block; max-width:min(50vw, 1024px); }
     .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
@@ -155,10 +120,8 @@
 
   <div class="app">
     <div class="map-wrap panel" id="mapWrap">
-      <!-- Loader -->
       <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
 
-      <!-- GM Mode -->
       <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
       <div class="gm-modal" id="gmModal" aria-hidden="true">
         <div class="gm-modal-backdrop" id="gmBackdrop"></div>
@@ -218,7 +181,6 @@
         </div>
       </div>
 
-      <!-- Tooltip -->
       <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
         <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
         <header>
@@ -228,7 +190,6 @@
         <div class="body" id="ttBody"><p>Description…</p></div>
       </div>
 
-      <!-- World Map (interactive) -->
       <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
         <defs>
           <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
@@ -236,7 +197,6 @@
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
           </filter>
         </defs>
-        <!-- We control viewBox precisely; keep image synced to image size & no extra gutters -->
         <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
         <g id="regions"></g>
         <g id="points"></g>
@@ -255,7 +215,6 @@
     </aside>
   </div>
 
-  <!-- Island Panel (image at natural size alongside island lore, max half page) -->
   <section class="section">
     <header>
       <h2>Signika — Island Primer</h2>
@@ -279,16 +238,13 @@
 
 <script>
 (function(){
-  // ---- Config -------------------------------------------------------------
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v32';
+  const STORAGE_KEY = 'signika.world.v33';
 
-  // ---- State --------------------------------------------------------------
   let state = null;
 
-  // ---- Elements -----------------------------------------------------------
   const svgWorld   = document.getElementById('world');
   const mapImage   = document.getElementById('mapImage');
   const gRegions   = document.getElementById('regions');
@@ -304,7 +260,6 @@
   const loreTitle  = document.getElementById('loreTitle');
   const loreBody   = document.getElementById('loreBody');
 
-  // CMS bits
   const gmBtn = document.getElementById('gmBtn');
   const gmModal = document.getElementById('gmModal');
   const gmBackdrop = document.getElementById('gmBackdrop');
@@ -327,7 +282,6 @@
   const importFile = document.getElementById('importFile');
   const exportBtn = document.getElementById('toolExport');
 
-  // Tooltip
   const tooltip = document.getElementById('tooltip');
   const ttTitle = document.getElementById('ttTitle');
   const ttBody  = document.getElementById('ttBody');
@@ -335,22 +289,16 @@
   const ttImg   = document.getElementById('ttImg');
   const ttClose = document.getElementById('ttClose');
 
-  // ---- Utility ------------------------------------------------------------
   const uid = ()=> Math.random().toString(36).slice(2)+Date.now().toString(36);
   const clamp = (v,min,max)=> Math.max(min, Math.min(max,v));
   const escapeHTML = (s)=> (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  function loadLocal(){
-    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): null; }catch(e){ return null; }
-  }
-  function saveLocal(){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
-  }
+  function loadLocal(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): null; }catch(e){ return null; } }
+  function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
 
   function roundedPolygonPath(points, r){
     if(!points || points.length<2) return '';
-    const n = points.length;
-    let d = '';
+    const n = points.length; let d = '';
     for(let i=0;i<n;i++){
       const p0 = points[(i-1+n)%n], p1 = points[i], p2 = points[(i+1)%n];
       const v1x = p1.x - p0.x, v1y = p1.y - p0.y;
@@ -362,11 +310,9 @@
       if(i===0){ d += `M ${pA.x} ${pA.y} `; } else { d += `L ${pA.x} ${pA.y} `; }
       d += `Q ${p1.x} ${p1.y} ${pB.x} ${pB.y} `;
     }
-    d += 'Z';
-    return d;
+    d += 'Z'; return d;
   }
 
-  // ---- Bounded Navigator for World ---------------------------------------
   function makeBoundedNavigator(svgEl, imgW, imgH){
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
     const nav = {viewBox:[0,0,imgW,imgH], maxZoomFactor: 0.08, panning:false, last:{x:0,y:0}};
@@ -375,16 +321,12 @@
       e.preventDefault();
       let [vx,vy,vw,vh] = nav.viewBox;
       const scale = (e.deltaY<0? 0.9: 1.1);
-      const mx = e.offsetX / svgEl.clientWidth;
-      const my = e.offsetY / svgEl.clientHeight;
-      let nw = vw * scale;
-      let nh = vh * scale;
-      nw = clamp(nw, imgW*nav.maxZoomFactor, imgW);
-      nh = clamp(nh, imgH*nav.maxZoomFactor, imgH);
+      const mx = e.offsetX / svgEl.clientWidth; const my = e.offsetY / svgEl.clientHeight;
+      let nw = clamp(vw * scale, imgW*nav.maxZoomFactor, imgW);
+      let nh = clamp(vh * scale, imgH*nav.maxZoomFactor, imgH);
       const nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
       const ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
-      nav.viewBox = [nx,ny,nw,nh];
-      apply();
+      nav.viewBox = [nx,ny,nw,nh]; apply();
     }, {passive:false});
     svgEl.addEventListener('pointerdown', (e)=>{ nav.panning=true; nav.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId); });
     svgEl.addEventListener('pointermove', (e)=>{
@@ -400,7 +342,6 @@
     return { reset: ()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); } };
   }
 
-  // ---- Init ---------------------------------------------------------------
   let navWorld = null;
 
   init().catch(console.error);
@@ -410,44 +351,31 @@
     const data = await loadData();
     state = migrate(data) || {};
 
-    // text
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
 
-    // world map exact fit
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
     svgWorld.setAttribute('viewBox', `0 0 ${wSize.w} ${wSize.h}`);
 
-    // island image (static)
     islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
 
-    // render features
     renderFeatures();
-
-    // bounded navigator
     navWorld = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
 
-    // GM
-    gmBtn.addEventListener('click', ()=> gmModal.classList.add('open'));
+    document.getElementById('gmBtn').addEventListener('click', ()=> gmModal.classList.add('open'));
     gmBackdrop.addEventListener('click', ()=> gmModal.classList.remove('open'));
     gmCancel.addEventListener('click', ()=> gmModal.classList.remove('open'));
     gmSubmit.addEventListener('click', ()=>{
       const pass = (gmPass.value||'').trim();
-      if(pass === (state.gmPass||'signika')){
-        cms.classList.add('open'); gmModal.classList.remove('open'); gmError.style.display='none';
-        bindCMS();
-      }else{
-        gmError.style.display='block';
-      }
+      if(pass === (state.gmPass||'signika')){ cms.classList.add('open'); gmModal.classList.remove('open'); gmError.style.display='none'; bindCMS(); }
+      else{ gmError.style.display='block'; }
     });
 
-    // Tooltip close
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
-
     showLoader(false);
   }
 
@@ -470,22 +398,11 @@
     }catch(e){
       const loc = loadLocal();
       if(loc) return loc;
-      return {
-        mapSrc: DEFAULT_WORLD_MAP,
-        mapSize: {w:4080,h:3072},
-        campaignMapSrc: DEFAULT_ISLAND_MAP,
-        campaignMapSize: {w:1024,h:1024},
-        features: [], primerIntro:'', primerDetails:'', islandLore:'', gmPass:'signika'
-      };
+      return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMapSrc: DEFAULT_ISLAND_MAP, campaignMapSize:{w:1024,h:1024}, features:[], primerIntro:'', primerDetails:'', islandLore:'', gmPass:'signika' };
     }
   }
 
-  function migrate(s){
-    s = s || {};
-    if(!s.campaignMapSrc && s.campaignMap) s.campaignMapSrc = s.campaignMap;
-    if(typeof s.islandLore !== 'string') s.islandLore = '';
-    return s;
-  }
+  function migrate(s){ s = s || {}; if(!s.campaignMapSrc && s.campaignMap) s.campaignMapSrc = s.campaignMap; if(typeof s.islandLore !== 'string') s.islandLore = ''; return s; }
 
   function renderFeatures(){
     gRegions.innerHTML=''; gPoints.innerHTML='';
@@ -503,10 +420,12 @@
         path.setAttribute('fill-opacity', '0.31');
         path.setAttribute('stroke','none');
         path.style.filter = 'url(#fuzzyEdge)';
+        // attach click directly on PATH (fix)
+        path.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(path);
       });
-      const open = (e)=> showTooltipFor(f, e);
-      g.addEventListener('click', open);
+      // also allow group click (safety)
+      g.addEventListener('click', (e)=> showTooltipFor(f, e));
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
       gRegions.appendChild(g);
@@ -542,9 +461,12 @@
 
   function positionTooltip(evt){
     const mapWrapRect = mapWrap.getBoundingClientRect();
+    // if evt is missing (edge cases), center tooltip
+    const cx = evt && typeof evt.clientX==='number' ? evt.clientX : (mapWrapRect.left + mapWrapRect.width/2);
+    const cy = evt && typeof evt.clientY==='number' ? evt.clientY : (mapWrapRect.top + mapWrapRect.height/2);
     const ttRect = tooltip.getBoundingClientRect();
-    const x = clamp(evt.clientX - mapWrapRect.left + 12, 8, mapWrapRect.width - ttRect.width - 8);
-    const y = clamp(evt.clientY - mapWrapRect.top + 12, 8, mapWrapRect.height - ttRect.height - 8);
+    const x = clamp(cx - mapWrapRect.left + 12, 8, Math.max(8, mapWrapRect.width - ttRect.width - 8));
+    const y = clamp(cy - mapWrapRect.top + 12, 8, Math.max(8, mapWrapRect.height - ttRect.height - 8));
     tooltip.style.left = x + 'px';
     tooltip.style.top  = y + 'px';
   }
@@ -591,8 +513,7 @@
           islandLore: data.islandLore ?? state.islandLore,
           gmPass: data.gmPass ?? state.gmPass
         }));
-        saveLocal();
-        location.reload();
+        saveLocal(); location.reload();
       }catch(e){ alert('Invalid JSON'); }
     };
   }
