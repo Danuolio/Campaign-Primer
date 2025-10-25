@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v46)</title>
+  <title>The World of Draelon – Campaign Primer (v47)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
       --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
       --wrap:clamp(895px, 90vw, 1400px);
+      --hl: #d4a34f;
+      --hl-soft: #f5e2b3;
     }
     html,body{height:100%}
     html { scroll-behavior: auto; }
@@ -80,11 +82,23 @@
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-    .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
-    .feature.region.hover path{fill-opacity:.35}
-    .feature.region.selected path{fill-opacity:.42}
+    .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
+    .feature.region.hover path.fill{fill-opacity:.35}
+    .feature.region.selected path.fill{fill-opacity:.42}
 
-    /* Desktop tooltip */
+    .feature.region path.outline {
+      fill:none;
+      stroke: var(--hl);
+      stroke-width: 6;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      opacity: 0;
+      filter: url(#borderGlow);
+      pointer-events: none;
+    }
+    .feature.region.hover path.outline { opacity: .75; }
+    .feature.region.selected path.outline { opacity: 1; stroke-width: 7; }
+
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
@@ -95,24 +109,20 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
-    /* Base island layout (desktop/tablet) */
     .section{margin:8px 16px 16px 16px}
-    .island-grid{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
+    .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
       border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
-      display:inline-block; max-width:min(50vw, 1024px); }
+      display:block; max-width:100%; }
     .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
-    /* MOBILE OVERRIDES — placed at end to win the cascade */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
       .map-wrap svg{ height:100%; }
-
-      /* Force single column and order explicitly */
       .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; }
       .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
       .island-lore{ order: 2 !important; margin-top: 12px !important; }
@@ -139,9 +149,16 @@
         </div>
         <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
           <defs>
-            <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%">
+            <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
+            </filter>
+            <filter id="borderGlow" x="-12%" y="-12%" width="124%" height="124%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="soft"/>
+              <feMerge>
+                <feMergeNode in="soft"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
           </defs>
           <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
@@ -176,7 +193,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v46';
+  const STORAGE_KEY = 'signika.world.v47';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -244,8 +261,8 @@
 
     const nav={
       viewBox:[vx,vy,vw,vh],
-      minW: imgW*0.08, minH: imgH*0.08, // deep zoom
-      maxW: vw, maxH: vh,               // max zoom-out == cover
+      minW: imgW*0.08, minH: imgH*0.08,
+      maxW: vw, maxH: vh,
       panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0},
       pointers:new Map(), initialPinchDist:0, initialViewBox:null
     };
@@ -260,7 +277,7 @@
     svgEl.addEventListener('wheel', (e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
       const full = atFull();
-      if(full && e.deltaY > 0){ return; } // let page scroll when scrolling down at full
+      if(full && e.deltaY > 0){ return; }
       e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
@@ -271,7 +288,6 @@
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }, {passive:false});
 
-    // Cancel synthetic click after panning on touch
     svgEl.addEventListener('pointerup', (e)=>{
       if(nav.panning){ if(e.cancelable) e.preventDefault(); }
     }, {passive:false, capture:true});
@@ -296,7 +312,6 @@
       nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
 
       if(nav.pointers.size===2){
-        // Pinch zoom
         const pts=[...nav.pointers.values()];
         const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         if(nav.initialPinchDist>0){
@@ -313,7 +328,6 @@
         return;
       }
 
-      // Single-finger pan with strict clamp
       if(nav.dragCandidate){
         const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -342,7 +356,6 @@
     svgEl.addEventListener('pointercancel', endPointer);
     svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
 
-    // Keep cover behavior on resize, try to preserve center
     window.addEventListener('resize', ()=>{
       const rect = svgEl.getBoundingClientRect();
       const centerX = nav.viewBox[0] + nav.viewBox[2]/2;
@@ -392,6 +405,7 @@
       const isMobile = window.matchMedia('(max-width: 760px)').matches;
       if(!isFeature){
         if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
+        document.querySelectorAll('.feature.region.selected').forEach(el=>el.classList.remove('selected'));
       }
     });
 
@@ -423,19 +437,25 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
-    // Regions
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       (f.shapes||[]).forEach(shape=>{
-        const p=elNS('path');
-        p.setAttribute('d', roundedPolygonPath(shape, 10));
-        p.setAttribute('fill', color);
-        p.setAttribute('fill-opacity', '0.31');
-        p.setAttribute('stroke','none');
-        p.style.filter='url(#fuzzyEdge)';
-        p.addEventListener('click', (e)=> showTooltipFor(f, e));
-        g.appendChild(p);
+        const d = roundedPolygonPath(shape, 10);
+        const fill=elNS('path');
+        fill.setAttribute('d', d);
+        fill.setAttribute('class','fill');
+        fill.setAttribute('fill', color);
+        fill.setAttribute('fill-opacity', '0.31');
+        fill.setAttribute('stroke','none');
+        fill.style.filter='url(#fuzzyEdge)';
+        fill.addEventListener('click', (e)=> showTooltipFor(f, e));
+        g.appendChild(fill);
+
+        const outline=elNS('path');
+        outline.setAttribute('d', d);
+        outline.setAttribute('class','outline');
+        g.appendChild(outline);
       });
       g.addEventListener('click', (e)=> showTooltipFor(f,e));
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
@@ -443,7 +463,6 @@
       gRegions.appendChild(g);
     });
 
-    // Points
     feats.filter(f=>f.type==='point').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -454,19 +473,25 @@
     });
   }
 
+  function setSelectedRegionById(id){
+    document.querySelectorAll('#regions .feature.region').forEach(el=>{
+      if(el.dataset.id === id){ el.classList.add('selected'); }
+      else{ el.classList.remove('selected'); }
+    });
+  }
+
   function showTooltipFor(f, evt){
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const name = f.name || '—';
-    theDesc = f.desc || '';
+    const desc = f.desc || '';
     const src = f.img || f.image || f.imageUrl || null;
 
-    try { if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); } catch {}
+    if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
-      // Mobile: render into Campaign Info WITH image, and do NOT scroll
       loreTitle.textContent = name;
-      loreBody.textContent = theDesc;
+      loreBody.textContent = desc;
       if(src){
         loreImg.src = src; loreImg.alt = name + ' image';
         loreMedia.style.display='block';
@@ -476,16 +501,15 @@
       }
       tooltip.classList.remove('open');
     }else{
-      // Desktop: floating tooltip only; panel mirrors TEXT ONLY (no image)
       ttTitle.textContent = name;
-      ttBody.innerHTML = '<p>' + (theDesc? escapeHTML(theDesc) : '—') + '</p>';
+      ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
       else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
       tooltip.classList.add('open');
       positionTooltip(evt);
 
       loreTitle.textContent = name;
-      loreBody.textContent = theDesc;
+      loreBody.textContent = desc;
       loreImg.removeAttribute('src');
       loreMedia.style.display='none';
     }
