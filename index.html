@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v36)</title>
+  <title>The World of Draelon – Campaign Primer (v37)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -15,7 +15,14 @@
       margin:0; color:var(--ink);
       background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
       font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
+      -webkit-tap-highlight-color: transparent;
     }
+    /* 1) Prevent accidental text selection while panning */
+    *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+    input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{
+      user-select: text; -webkit-user-select: text;
+    }
+
     body:before{
       content:""; position:fixed; inset:0; pointer-events:none;
       background:
@@ -45,39 +52,27 @@
     }
 
     /* Single-column layout: world map row, then side panel row */
-    .app{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:0;
-    }
+    .app{ display:grid; grid-template-columns: 1fr; gap:0; }
 
-    /* World map wrap centered, capped width */
     .map-row{display:flex; justify-content:center}
     .map-wrap{
       position:relative;
-      width:100%;
-      max-width:var(--wrap);
-      min-height:58vh;
-      max-height:74vh;
-      margin:16px; /* keeps panel spacing */
-      overflow:hidden;
+      width:100%; max-width:var(--wrap);
+      min-height:58vh; max-height:74vh;
+      margin:16px; overflow:hidden;
     }
     .map-wrap svg{
-      width:100%;
-      height:100%;
-      display:block;
+      width:100%; height:100%; display:block;
       background:#efe6c8;
-      touch-action:none;
+      touch-action:none;         /* toggled dynamically on mobile */
       cursor:grab;
     }
 
-    /* Side panel below world map, same width for rhythm */
+    /* Side panel below world map */
     .side-row{display:flex; justify-content:center}
     .side{
-      width:100%;
-      max-width:var(--wrap);
+      width:100%; max-width:var(--wrap);
       display:flex;flex-direction:column;
-      min-height:unset; max-height:none;
       margin:0 16px 16px 16px; overflow:hidden;
     }
     .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
@@ -93,7 +88,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
 
-    /* Feature styling */
+    /* Features */
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
@@ -112,33 +107,23 @@
     .tooltip .body{padding:10px 12px;line-height:1.5}
     .tooltip .body p{margin:0}
 
-    /* Island Section (campaign map area) */
+    /* Campaign map area */
     .section{margin:8px 16px 16px 16px}
-    .island-grid{
-      display:grid;
-      grid-template-columns:auto 1fr;
-      gap:16px;
-      align-items:start;
-      /* no global centering here; keep natural flow */
-      max-width: 1280px;
-      margin: 0 16px;
-    }
-    .island-card{
-      margin:0; padding:12px;
-      background:linear-gradient(180deg, var(--paper), var(--paper-2));
-      border:1px solid var(--edge); border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      display:inline-block;
-      max-width:min(50vw, 1024px);
-    }
+    .island-grid{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
+    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
+      display:inline-block; max-width:min(50vw, 1024px); }
     .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
-    @media (max-width: 900px){
-      .island-grid{grid-template-columns:1fr}
-      .island-card{max-width:min(90vw, 1024px)}
+    /* 2) Mobile: set a calculated height to maintain 4:3 without bars */
+    @media (max-width: 600px){
+      .map-wrap{ height: min(70vh, calc(100vw * 0.75)); min-height:auto; max-height:none; }
+      .map-wrap svg{ height:100%; }
+      .island-grid{ grid-template-columns:1fr }
+      .island-card{ max-width:min(90vw, 1024px) }
     }
   </style>
 </head>
@@ -205,7 +190,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v36';
+  const STORAGE_KEY = 'signika.world.v37';
 
   let state=null;
 
@@ -250,69 +235,109 @@
 
   function makeBoundedNavigator(svgEl, imgW, imgH){
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
-    const nav={viewBox:[0,0,imgW,imgH], maxZoomFactor:0.08,
-               panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0}};
+    const nav={
+      viewBox:[0,0,imgW,imgH], minW: imgW*0.08, minH: imgH*0.08,
+      panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0},
+      pointers:new Map(), initialPinchDist:0, initialViewBox:null
+    };
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
+    const atFull=()=> (Math.abs(nav.viewBox[2]-imgW)<0.5 && Math.abs(nav.viewBox[3]-imgH)<0.5);
+
+    function setTouchMode(){
+      // Allow page scroll on mobile when fully zoomed out (vertical scrolling)
+      if(atFull() && nav.pointers.size <= 1){
+        svgEl.style.touchAction = 'pan-y';
+      }else{
+        svgEl.style.touchAction = 'none';
+      }
+    }
 
     svgEl.addEventListener('wheel', (e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
-      const atFull = (vw >= imgW - 0.5 && vh >= imgH - 0.5);
-      // Allow page scroll when fully zoomed out and scrolling down
-      if(atFull && e.deltaY > 0){ return; } // no preventDefault -> page scrolls
+      const full = atFull();
+      if(full && e.deltaY > 0){ return; } // allow page scroll down
       e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
-      let nw=clamp(vw*scale, imgW*nav.maxZoomFactor, imgW);
-      let nh=clamp(vh*scale, imgH*nav.maxZoomFactor, imgH);
+      let nw=clamp(vw*scale, nav.minW, imgW);
+      let nh=clamp(vh*scale, nav.minH, imgH);
       const nx=clamp(vx+(vw-nw)*mx, 0, imgW-nw);
       const ny=clamp(vy+(vh-nh)*my, 0, imgH-nh);
-      nav.viewBox=[nx,ny,nw,nh]; apply();
+      nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }, {passive:false});
 
-    // Helper to suppress click after a drag, once
-    function suppressNextClick(){
-      const blocker = (ev)=>{ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener('click', blocker, true); };
-      window.addEventListener('click', blocker, true);
-    }
+    // Click-vs-drag threshold & suppression
+    function suppressNextClick(){ const blocker=(ev)=>{ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener('click', blocker, true); }; window.addEventListener('click', blocker, true); }
 
     svgEl.addEventListener('pointerdown', (e)=>{
-      // We allow starting on features; decide later if it becomes a drag
+      nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
       nav.dragCandidate = true; nav.dragged = false;
       nav.start = {x:e.clientX, y:e.clientY};
       nav.last  = {x:e.clientX, y:e.clientY};
+
+      if(nav.pointers.size===2){
+        // Begin pinch; record initial distance and viewBox
+        const pts=[...nav.pointers.values()];
+        nav.initialPinchDist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+        nav.initialViewBox = nav.viewBox.slice();
+      }
       svgEl.style.cursor='grabbing';
+      setTouchMode();
     });
 
     svgEl.addEventListener('pointermove', (e)=>{
-      if(!nav.dragCandidate && !nav.panning) return;
-      const dx0 = e.clientX - nav.start.x;
-      const dy0 = e.clientY - nav.start.y;
-      const dist2 = dx0*dx0 + dy0*dy0;
-      const threshold2 = 16; // ~4px movement threshold
-      if(nav.dragCandidate && dist2 > threshold2){
-        // Activate panning
-        nav.panning = true; nav.dragCandidate = false; nav.dragged = true;
-        try{ svgEl.setPointerCapture(e.pointerId); }catch{}
-        e.preventDefault(); // avoid not-allowed cursor and selection
+      if(!nav.pointers.has(e.pointerId)) return;
+      nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+      if(nav.pointers.size===2){
+        // Pinch zoom (2 fingers)
+        const pts=[...nav.pointers.values()];
+        const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+        if(nav.initialPinchDist>0){
+          const scale = nav.initialPinchDist / dist; // pinch out (dist larger) => scale < 1 => zoom in
+          const [vx,vy,vw,vh] = nav.initialViewBox;
+          let nw = clamp(vw * scale, nav.minW, imgW);
+          let nh = clamp(vh * scale, nav.minH, imgH);
+          // Zoom toward the midpoint
+          const mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
+          const my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
+          let nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
+          let ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
+          nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
+        }
+        return; // don't treat as pan
+      }
+
+      // Single-finger: decide drag vs click
+      if(nav.dragCandidate){
+        const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
+        if(dx0*dx0 + dy0*dy0 > 16){
+          nav.panning=true; nav.dragCandidate=false; nav.dragged=true;
+          try{ svgEl.setPointerCapture(e.pointerId); }catch{}
+        }
       }
       if(!nav.panning) return;
       let [vx,vy,vw,vh]=nav.viewBox;
       const dx=(e.clientX-nav.last.x)*(vw/svgEl.clientWidth);
       const dy=(e.clientY-nav.last.y)*(vh/svgEl.clientHeight);
-      vx=clamp(vx-dx,0,Math.max(0,imgW-vw));
-      vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
+      vx=clamp(vx-dx,0,Math.max(0,imgW-vw)); vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
 
-    function endPan(e){
+    function endPointer(e){
       if(nav.panning){ suppressNextClick(); }
-      nav.panning=false; nav.dragCandidate=false; nav.dragged=false; svgEl.style.cursor='grab';
+      nav.pointers.delete(e.pointerId);
+      nav.panning=false; nav.dragCandidate=false; nav.dragged=false;
+      nav.initialPinchDist=0; nav.initialViewBox=null;
+      svgEl.style.cursor='grab';
       try{ svgEl.releasePointerCapture(e.pointerId); }catch{}
+      setTouchMode();
     }
-    svgEl.addEventListener('pointerup', endPan);
-    svgEl.addEventListener('pointercancel', endPan);
+    svgEl.addEventListener('pointerup', endPointer);
+    svgEl.addEventListener('pointercancel', endPointer);
+    svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
 
-    return { reset:()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); } };
+    return { reset:()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); setTouchMode(); } };
   }
 
   init().catch(console.error);
