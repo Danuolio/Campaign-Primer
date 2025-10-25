@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v42)</title>
+  <title>The World of Draelon – Campaign Primer (v43)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -68,6 +68,9 @@
     .side .content{padding:16px;overflow:visible}
     .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
     .lore-body{line-height:1.6;white-space:pre-wrap}
+    .lore-media{margin:0 0 12px 0; display:none}
+    .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
+
     .muted{color:var(--ink-soft);font-size:12px}
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
@@ -79,6 +82,8 @@
     .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
+
+    /* Desktop tooltip (unchanged) */
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
@@ -88,17 +93,16 @@
     .tooltip .media img{width:100%;height:auto;display:block}
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
+
+    /* On mobile, do NOT show tooltip over map */
     @media (max-width: 760px){
-      .tooltip{
-        left:50% !important; transform:translateX(-50%) !important;
-        right:auto; top:auto !important; bottom:8px !important;
-        width:88vw; max-width:88vw; max-height:58vh;
-        border-radius:16px; overflow:auto;
-      }
-      .tooltip header{ position:sticky; top:0; }
-      .tooltip .media img{ max-height:32vh; object-fit:cover; }
-      .tooltip .body{ max-height: calc(58vh - 48px - 1px); overflow:auto; }
+      .tooltip{ display:none !important; }
+      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
+      .map-wrap svg{ height:100%; }
+      .island-grid{ grid-template-columns:1fr }
+      .island-card{ max-width:min(90vw, 1024px) }
     }
+
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -108,12 +112,6 @@
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
-    @media (max-width: 760px){
-      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
-      .map-wrap svg{ height:100%; }
-      .island-grid{ grid-template-columns:1fr }
-      .island-card{ max-width:min(90vw, 1024px) }
-    }
   </style>
 </head>
 <body>
@@ -151,6 +149,7 @@
       <aside class="side panel" id="sidePanel">
         <header><h1>Campaign Info</h1><span class="muted">Click the map to explore</span></header>
         <div class="content">
+          <div class="lore-media" id="loreMedia"><img id="loreImg" alt=""></div>
           <h3 class="lore-title" id="loreTitle">Welcome</h3>
           <div class="lore-body" id="loreBody">Use the map to learn about regions like <b>Oscana</b>, <b>Athium</b>, <b>Eturia</b>, and the island of <b>Signika</b>.</div>
         </div>
@@ -172,7 +171,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v42';
+  const STORAGE_KEY = 'signika.world.v43';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -185,6 +184,8 @@
   const primerDetails = document.getElementById('primerDetails');
   const loreTitle = document.getElementById('loreTitle');
   const loreBody  = document.getElementById('loreBody');
+  const loreMedia = document.getElementById('loreMedia');
+  const loreImg   = document.getElementById('loreImg');
   const loader = document.getElementById('loader');
   const tooltip = document.getElementById('tooltip');
   const ttTitle = document.getElementById('ttTitle');
@@ -228,7 +229,6 @@
   }
 
   function makeBoundedNavigator(svgEl, imgW, imgH){
-    // Compute "cover" crop based on rendered SVG size
     function initialView(){
       const rect = svgEl.getBoundingClientRect();
       const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
@@ -310,7 +310,7 @@
         return;
       }
 
-      // Single-finger pan with strong clamp
+      // Single-finger pan with strict clamp
       if(nav.dragCandidate){
         const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -322,7 +322,6 @@
       let [vx,vy,vw,vh]=nav.viewBox;
       const dx=(e.clientX-nav.last.x)*(vw/svgEl.clientWidth);
       const dy=(e.clientY-nav.last.y)*(vh/svgEl.clientHeight);
-      // Strict clamp so edges never cross wrapper
       vx=clamp(vx-dx, 0, imgW - vw);
       vy=clamp(vy-dy, 0, imgH - vh);
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
@@ -340,7 +339,7 @@
     svgEl.addEventListener('pointercancel', endPointer);
     svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
 
-    // On resize, recompute "cover" and keep current center if possible
+    // Keep cover behavior on resize, try to preserve center
     window.addEventListener('resize', ()=>{
       const rect = svgEl.getBoundingClientRect();
       const centerX = nav.viewBox[0] + nav.viewBox[2]/2;
@@ -386,8 +385,11 @@
 
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
     svgWorld.addEventListener('click', (e)=>{
-      if(tooltip.classList.contains('open') && !e.target.closest('.feature')){
-        tooltip.classList.remove('open');
+      const isFeature = !!e.target.closest('.feature');
+      const isMobile = window.matchMedia('(max-width: 760px)').matches;
+      if(!isFeature){
+        // close overlay tooltip on desktop
+        if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
       }
     });
 
@@ -452,20 +454,43 @@
 
   function showTooltipFor(f, evt){
     if(!f) return;
-    ttTitle.textContent = f.name || '—';
-    ttBody.innerHTML = '<p>' + (f.desc? escapeHTML(f.desc) : '—') + '</p>';
+    const isMobile = window.matchMedia('(max-width: 760px)').matches;
+    const name = f.name || '—';
+    const desc = f.desc || '';
     const src = f.img || f.image || f.imageUrl || null;
-    if(src){ ttImg.src = src; ttImg.alt = f.name? (f.name+' image'): 'Feature image'; ttMedia.style.display='block'; }
-    else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
-    tooltip.classList.add('open');
-    positionTooltip(evt);
-    loreTitle.textContent = f.name || 'Details';
-    loreBody.textContent = f.desc || '';
+
+    if(isMobile){
+      // Render in side panel instead of overlay
+      loreTitle.textContent = name;
+      loreBody.textContent = desc;
+      if(src){
+        loreImg.src = src; loreImg.alt = name + ' image';
+        loreMedia.style.display='block';
+      } else {
+        loreImg.removeAttribute('src');
+        loreMedia.style.display='none';
+      }
+      // ensure overlay tooltip is closed
+      tooltip.classList.remove('open');
+      // Smooth scroll to the side panel so content is visible
+      document.getElementById('sidePanel').scrollIntoView({behavior:'smooth', block:'start'});
+    }else{
+      // Desktop: keep overlay tooltip behavior
+      ttTitle.textContent = name;
+      ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
+      if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
+      else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
+      tooltip.classList.add('open');
+      positionTooltip(evt);
+      // Also mirror into side panel text
+      loreTitle.textContent = name;
+      loreBody.textContent = desc;
+      if(src){ loreImg.src = src; loreImg.alt = name + ' image'; loreMedia.style.display='block'; }
+      else { loreImg.removeAttribute('src'); loreMedia.style.display='none'; }
+    }
   }
 
   function positionTooltip(evt){
-    const mobile = window.matchMedia('(max-width: 760px)').matches;
-    if(mobile){ return; }
     const wrapRect = mapWrap.getBoundingClientRect();
     const ttRect = tooltip.getBoundingClientRect();
     const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
