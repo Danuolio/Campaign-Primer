@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v45)</title>
+  <title>The World of Draelon – Campaign Primer (v46)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -84,7 +84,7 @@
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
 
-    /* Desktop tooltip (unchanged) */
+    /* Desktop tooltip */
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
@@ -95,16 +95,7 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
-    /* Mobile tweaks: hide floating tooltip; stack island lore under campaign map */
-    @media (max-width: 760px){
-      .tooltip{ display:none !important; }
-      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
-      .map-wrap svg{ height:100%; }
-      .island-grid{ grid-template-columns:1fr; grid-auto-flow:row; }
-      .island-card{ max-width:min(90vw, 1024px); order:1; }
-      .island-lore{ order:2; margin-top:12px; }
-    }
-
+    /* Base island layout (desktop/tablet) */
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -114,6 +105,18 @@
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
+
+    /* MOBILE OVERRIDES — placed at end to win the cascade */
+    @media (max-width: 760px){
+      .tooltip{ display:none !important; }
+      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
+      .map-wrap svg{ height:100%; }
+
+      /* Force single column and order explicitly */
+      .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; }
+      .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
+      .island-lore{ order: 2 !important; margin-top: 12px !important; }
+    }
   </style>
 </head>
 <body>
@@ -136,7 +139,7 @@
         </div>
         <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
           <defs>
-            <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
+            <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
             </filter>
@@ -173,7 +176,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v45';
+  const STORAGE_KEY = 'signika.world.v46';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -455,7 +458,7 @@
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const name = f.name || '—';
-    const desc = f.desc || '';
+    theDesc = f.desc || '';
     const src = f.img || f.image || f.imageUrl || null;
 
     try { if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); } catch {}
@@ -463,7 +466,7 @@
     if(isMobile){
       // Mobile: render into Campaign Info WITH image, and do NOT scroll
       loreTitle.textContent = name;
-      loreBody.textContent = desc;
+      loreBody.textContent = theDesc;
       if(src){
         loreImg.src = src; loreImg.alt = name + ' image';
         loreMedia.style.display='block';
@@ -475,14 +478,14 @@
     }else{
       // Desktop: floating tooltip only; panel mirrors TEXT ONLY (no image)
       ttTitle.textContent = name;
-      ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
+      ttBody.innerHTML = '<p>' + (theDesc? escapeHTML(theDesc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
       else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
       tooltip.classList.add('open');
       positionTooltip(evt);
 
       loreTitle.textContent = name;
-      loreBody.textContent = desc;
+      loreBody.textContent = theDesc;
       loreImg.removeAttribute('src');
       loreMedia.style.display='none';
     }
