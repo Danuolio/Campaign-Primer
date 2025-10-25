@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v39)</title>
+  <title>The World of Draelon – Campaign Primer (v40)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
       --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
-      --wrap:895px;
+      --wrap:clamp(895px, 90vw, 1400px);
     }
     html,body{height:100%}
     body{
@@ -17,12 +17,10 @@
       font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
       -webkit-tap-highlight-color: transparent;
     }
-    /* Prevent accidental text selection while panning, but keep it in editable areas */
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
     input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{
       user-select: text; -webkit-user-select: text;
     }
-
     body:before{
       content:""; position:fixed; inset:0; pointer-events:none;
       background:
@@ -43,32 +41,26 @@
       border-radius: var(--radius);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
     }
-
     .primer{margin:16px; padding:18px 18px 14px}
     .primer h2{
       margin:0 0 10px 0; font-size:26px; letter-spacing:.5px;
       text-transform:uppercase; font-weight:700;
       border-bottom:2px solid var(--rule); padding-bottom:6px;
     }
-
-    /* Single-column layout: world map row, then side panel row */
     .app{ display:grid; grid-template-columns: 1fr; gap:0; }
-
     .map-row{display:flex; justify-content:center}
     .map-wrap{
       position:relative;
       width:100%; max-width:var(--wrap);
-      min-height:58vh; max-height:74vh;
+      min-height:60vh; max-height:82vh;
       margin:16px; overflow:hidden;
     }
+    @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
     .map-wrap svg{
       width:100%; height:100%; display:block;
       background:#efe6c8;
-      touch-action:none;         /* toggled dynamically on mobile */
-      cursor:grab;
+      touch-action:none; cursor:grab;
     }
-
-    /* Side panel below world map */
     .side-row{display:flex; justify-content:center}
     .side{
       width:100%; max-width:var(--wrap);
@@ -80,34 +72,37 @@
     .side .content{padding:16px;overflow:visible}
     .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
     .lore-body{line-height:1.6;white-space:pre-wrap}
-
     .muted{color:var(--ink-soft);font-size:12px}
-
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
-
-    /* Features */
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
     .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
-
-    /* Tooltip */
-    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
+    .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
-    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
     .tooltip header h3{margin:0;font-size:16px}
     .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
-    .tooltip .media{width:100%;max-height:180px;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
+    .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
     .tooltip .media img{width:100%;height:auto;display:block}
-    .tooltip .body{padding:10px 12px;line-height:1.5}
+    .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
-
-    /* Campaign map area */
+    @media (max-width: 760px){
+      .tooltip{
+        left:50% !important; transform:translateX(-50%) !important;
+        right:auto; top:auto !important; bottom:8px !important;
+        width:88vw; max-width:88vw; max-height:58vh;
+        border-radius:16px; overflow:auto;
+      }
+      .tooltip header{ position:sticky; top:0; }
+      .tooltip .media img{ max-height:32vh; object-fit:cover; }
+      .tooltip .body{ max-height: calc(58vh - 48px - 1px); overflow:auto; }
+    }
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -117,8 +112,6 @@
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
-
-    /* 1) Apply mobile height tweak at a slightly wider breakpoint, with slightly shorter height */
     @media (max-width: 760px){
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
       .map-wrap svg{ height:100%; }
@@ -132,13 +125,11 @@
     <h2>The World of Draelon</h2>
     <div id="primerIntro">This is your editable campaign introduction. Enable GM mode to edit this text. Players can scroll the map, tap regions, and read tooltips.</div>
   </div>
-
   <div class="app">
     <div class="map-row">
       <div class="map-wrap panel" id="mapWrap">
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
-
         <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
           <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
           <header>
@@ -147,7 +138,6 @@
           </header>
           <div class="body" id="ttBody"><p>Description…</p></div>
         </div>
-
         <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
           <defs>
             <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%" height="108%">
@@ -161,7 +151,6 @@
         </svg>
       </div>
     </div>
-
     <div class="side-row">
       <aside class="side panel" id="sidePanel">
         <header><h1>Campaign Info</h1><span class="muted">Click the map to explore</span></header>
@@ -172,28 +161,23 @@
       </aside>
     </div>
   </div>
-
   <section class="section">
     <div class="island-grid">
       <figure class="island-card"><img id="islandImg" src="" alt="Signika island map"/></figure>
       <div class="island-lore panel"><h3>Island Lore</h3><div id="islandLore" class="body">Add your Signika lore here — history, factions, features, and travel notes.</div></div>
     </div>
   </section>
-
   <div class="primer panel" id="primerBottom">
     <h2>Primer – Details</h2>
     <div id="primerDetails">Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.</div>
   </div>
-
 <script>
 (function(){
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v39';
-
+  const STORAGE_KEY = 'signika.world.v40';
   let state=null;
-
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
   const mapImage = document.getElementById('mapImage');
@@ -212,11 +196,9 @@
   const ttMedia = document.getElementById('ttMedia');
   const ttImg   = document.getElementById('ttImg');
   const ttClose = document.getElementById('ttClose');
-
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
   function roundedPolygonPath(points, r){
     if(!points || points.length<2) return '';
     const n=points.length; let d='';
@@ -232,7 +214,6 @@
     }
     return d+'Z';
   }
-
   function makeBoundedNavigator(svgEl, imgW, imgH){
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
     const nav={
@@ -242,20 +223,14 @@
     };
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
     const atFull=()=> (Math.abs(nav.viewBox[2]-imgW)<0.5 && Math.abs(nav.viewBox[3]-imgH)<0.5);
-
     function setTouchMode(){
-      // Allow page scroll on mobile when fully zoomed out (vertical scrolling)
-      if(atFull() && nav.pointers.size <= 1){
-        svgEl.style.touchAction = 'pan-y';
-      }else{
-        svgEl.style.touchAction = 'none';
-      }
+      if(atFull() && nav.pointers.size <= 1){ svgEl.style.touchAction = 'pan-y'; }
+      else{ svgEl.style.touchAction = 'none'; }
     }
-
     svgEl.addEventListener('wheel', (e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
       const full = atFull();
-      if(full && e.deltaY > 0){ return; } // allow page scroll down
+      if(full && e.deltaY > 0){ return; }
       e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
@@ -265,24 +240,15 @@
       const ny=clamp(vy+(vh-nh)*my, 0, imgH-nh);
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }, {passive:false});
-
-    // Prevent the synthetic click generated by touch after a pan,
-    // without blocking the user's next real tap.
     svgEl.addEventListener('pointerup', (e)=>{
-      if(nav.panning){
-        // calling preventDefault here cancels the follow-up click on mobile
-        if (e.cancelable) e.preventDefault();
-      }
+      if(nav.panning){ if(e.cancelable) e.preventDefault(); }
     }, {passive:false, capture:true});
-
     svgEl.addEventListener('pointerdown', (e)=>{
       nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
       nav.dragCandidate = true; nav.dragged = false;
       nav.start = {x:e.clientX, y:e.clientY};
       nav.last  = {x:e.clientX, y:e.clientY};
-
       if(nav.pointers.size===2){
-        // Begin pinch; record initial distance and viewBox
         const pts=[...nav.pointers.values()];
         nav.initialPinchDist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         nav.initialViewBox = nav.viewBox.slice();
@@ -290,31 +256,25 @@
       svgEl.style.cursor='grabbing';
       setTouchMode();
     });
-
     svgEl.addEventListener('pointermove', (e)=>{
       if(!nav.pointers.has(e.pointerId)) return;
       nav.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-
       if(nav.pointers.size===2){
-        // Pinch zoom (2 fingers)
         const pts=[...nav.pointers.values()];
         const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         if(nav.initialPinchDist>0){
-          const scale = nav.initialPinchDist / dist; // pinch out (dist larger) => scale < 1 => zoom in
+          const scale = nav.initialPinchDist / dist;
           const [vx,vy,vw,vh] = nav.initialViewBox;
           let nw = clamp(vw * scale, nav.minW, imgW);
           let nh = clamp(vh * scale, nav.minH, imgH);
-          // Zoom toward the midpoint
           const mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
           const my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
           let nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
           let ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
           nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
         }
-        return; // don't treat as pan
+        return;
       }
-
-      // Single-finger: decide drag vs click
       if(nav.dragCandidate){
         const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -329,7 +289,6 @@
       vx=clamp(vx-dx,0,Math.max(0,imgW-vw)); vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
-
     function endPointer(e){
       nav.pointers.delete(e.pointerId);
       nav.panning=false; nav.dragCandidate=false; nav.dragged=false;
@@ -341,34 +300,31 @@
     svgEl.addEventListener('pointerup', endPointer);
     svgEl.addEventListener('pointercancel', endPointer);
     svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
-
     return { reset:()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); setTouchMode(); } };
   }
-
   init().catch(console.error);
-
   async function init(){
     const data = await loadData();
     state = data || {};
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
-
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
     svgWorld.setAttribute('viewBox', `0 0 ${wSize.w} ${wSize.h}`);
-
     islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
-
     renderFeatures();
     makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
-
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
+    svgWorld.addEventListener('click', (e)=>{
+      if(tooltip.classList.contains('open') && !e.target.closest('.feature')){
+        tooltip.classList.remove('open');
+      }
+    });
     loader.style.display='none';
   }
-
   async function loadData(){
     try{
       const res = await fetch(JSON_PATH, {cache:'no-store'});
@@ -389,12 +345,9 @@
                campaignMapSize:{w:1024,h:1024}, features:[], primerIntro:'', primerDetails:'', islandLore:'' };
     }
   }
-
   function renderFeatures(){
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
-
-    // Regions
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
@@ -413,8 +366,6 @@
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
       gRegions.appendChild(g);
     });
-
-    // Points
     feats.filter(f=>f.type==='point').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -424,7 +375,6 @@
       g.appendChild(c); g.appendChild(t); gPoints.appendChild(g);
     });
   }
-
   function showTooltipFor(f, evt){
     if(!f) return;
     ttTitle.textContent = f.name || '—';
@@ -432,12 +382,14 @@
     const src = f.img || f.image || f.imageUrl || null;
     if(src){ ttImg.src = src; ttImg.alt = f.name? (f.name+' image'): 'Feature image'; ttMedia.style.display='block'; }
     else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
-    tooltip.classList.add('open'); positionTooltip(evt);
+    tooltip.classList.add('open');
+    positionTooltip(evt);
     loreTitle.textContent = f.name || 'Details';
     loreBody.textContent = f.desc || '';
   }
-
   function positionTooltip(evt){
+    const mobile = window.matchMedia('(max-width: 760px)').matches;
+    if(mobile){ return; }
     const wrapRect = mapWrap.getBoundingClientRect();
     const ttRect = tooltip.getBoundingClientRect();
     const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
@@ -449,7 +401,6 @@
     x = Math.max(8, Math.min(maxX, x)); y = Math.max(8, Math.min(maxY, y));
     tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
   }
-
 })();
 </script>
 </body>
