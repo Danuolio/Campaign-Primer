@@ -1,83 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The World of Draelon – Campaign Primer (v34)</title>
-<style>
-  :root{ --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
-         --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px; }
-  html,body{height:100%}
-  body{ margin:0; color:var(--ink);
-        background:radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-        font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4; }
-  body:before{ content:""; position:fixed; inset:0; pointer-events:none;
-        background:radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
-                   radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
-                   repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
-        mix-blend-mode:multiply; opacity:.6; }
-  .primer,.panel{ background:linear-gradient(180deg, var(--paper), var(--paper-2)); border:1px solid var(--edge);
-        border-radius:var(--radius); box-shadow:var(--shadow); position:relative; }
-  .primer::after,.panel::after{ content:""; position:absolute; inset:0; pointer-events:none; border-radius:var(--radius);
-        box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06); }
-  .primer{margin:16px; padding:18px 18px 14px}
-  .primer h2{ margin:0 0 10px; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
-  .app{display:grid;grid-template-columns:1fr minmax(320px,440px);gap:16px}
-  .map-wrap{position:relative;min-height:58vh;max-height:74vh;margin:16px;overflow:hidden}
-  .map-wrap svg{width:100%;height:100%;display:block;background:#efe6c8;touch-action:none}
-  .muted{color:var(--ink-soft);font-size:12px}
-  .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
-  .cms{position:absolute;top:56px;right:12px;width:min(620px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:900;overflow:hidden}
-  .cms.open{display:flex;flex-direction:column}
-  .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
-  .cms .cms-body{padding:12px;overflow:auto;display:grid;gap:10px}
-  .row{display:grid;gap:6px}
-  .row label{font-size:12px;color:var(--ink-soft)}
-  .row input[type="text"],.row textarea,.row select,.row input[type="color"]{width:100%;box-sizing:border-box;background:#fff6d8;color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:10px 12px}
-  .row textarea{min-height:100px;resize:vertical}
-  .side{display:flex;flex-direction:column;min-height:58vh;max-height:74vh;margin:16px 16px 16px 0;overflow:hidden}
-  .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
-  .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
-  .side .content{padding:16px;overflow:auto}
-  .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-  .lore-body{line-height:1.6;white-space:pre-wrap}
-  .feature{cursor:pointer}
-  .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
-  .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-  .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
-  .feature.region.hover path{fill-opacity:.35}
-  .feature.region.selected path{fill-opacity:.42}
-  .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
-  .tooltip.open{display:block}
-  .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
-  .tooltip header h3{margin:0;font-size:16px}
-  .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
-  .tooltip .media{width:100%;max-height:180px;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
-  .tooltip .media img{width:100%;height:auto;display:block}
-  .tooltip .body{padding:10px 12px;line-height:1.5}
-  .tooltip .body p{margin:0}
-  .section{margin:8px 16px 16px 16px}
-  .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
-  .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
-  .island-grid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
-  .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
-    border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
-    display:inline-block; max-width:min(50vw, 1024px); }
-  .island-card img{display:block; width:100%; height:auto}
-  .island-lore{padding:16px}
-  .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
-  .island-lore .body{white-space:pre-wrap; line-height:1.6}
-  @media (max-width: 900px){
-    .app{grid-template-columns:1fr}
-    .side{grid-row:2;margin:0 16px 16px 16px}
-    .map-wrap{margin:0 16px}
-    .island-grid{grid-template-columns:1fr}
-    .island-card{justify-self:center; max-width:min(90vw, 1024px)}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The World of Draelon – Campaign Primer (v35)</title>
+  <style>
+    :root{
+      --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
+      --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
+    }
+    body:before{
+      content:""; position:fixed; inset:0; pointer-events:none;
+      background:
+        radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
+        radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
+      mix-blend-mode:multiply; opacity:.6;
+    }
+    .primer,.panel{
+      background: linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid var(--edge);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    .primer::after,.panel::after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
+    }
+
+    .primer{margin:16px; padding:18px 18px 14px}
+    .primer h2{
+      margin:0 0 10px 0; font-size:26px; letter-spacing:.5px;
+      text-transform:uppercase; font-weight:700;
+      border-bottom:2px solid var(--rule); padding-bottom:6px;
+    }
+
+    /* Layout: two columns; left column width capped for the map */
+    .app{
+      display:grid;
+      grid-template-columns: minmax(0, 895px) minmax(320px, 440px);
+      gap:16px;
+      align-items:start;
+      justify-content:center; /* center whole grid */
+      padding:0 16px;
+    }
+
+    .map-wrap{
+      position:relative;
+      width:100%;
+      max-width:895px;  /* requested cap */
+      min-height:58vh;
+      max-height:74vh;
+      margin:16px auto; /* center; plays nice on wide screens */
+      overflow:hidden;
+    }
+    .map-wrap svg{
+      width:100%;
+      height:100%;
+      display:block;
+      background:#efe6c8;
+      touch-action:none;
+      cursor:grab;           /* visible grab cursor to avoid red cancel */
+    }
+    .map-wrap.svg--dragging{
+      cursor:grabbing;
+    }
+
+    .muted{color:var(--ink-soft);font-size:12px}
+
+    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
+
+    /* Sidebar */
+    .side{
+      display:flex;flex-direction:column;
+      min-height:58vh;max-height:74vh;
+      margin:16px 16px 16px 0;overflow:hidden
+    }
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+    .side .content{padding:16px;overflow:auto}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+    .lore-body{line-height:1.6;white-space:pre-wrap}
+
+    /* Feature styling */
+    .feature{cursor:pointer}
+    .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
+    .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
+    .feature.region path{stroke-width:0;transition:fill-opacity .12s linear; pointer-events:auto}
+    .feature.region.hover path{fill-opacity:.35}
+    .feature.region.selected path{fill-opacity:.42}
+
+    /* Tooltip */
+    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
+    .tooltip.open{display:block}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
+    .tooltip header h3{margin:0;font-size:16px}
+    .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
+    .tooltip .media{width:100%;max-height:180px;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
+    .tooltip .media img{width:100%;height:auto;display:block}
+    .tooltip .body{padding:10px 12px;line-height:1.5}
+    .tooltip .body p{margin:0}
+
+    /* Island Section */
+    .section{margin:8px 16px 16px 16px}
+    .section header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
+    .section h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.6px}
+    .island-grid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;max-width:1280px;margin:0 auto}
+    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
+      display:inline-block; max-width:min(50vw, 1024px); }
+    .island-card img{display:block; width:100%; height:auto}
+    .island-lore{padding:16px}
+    .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
+    .island-lore .body{white-space:pre-wrap; line-height:1.6}
+
+    @media (max-width: 1100px){
+      .app{grid-template-columns: 1fr}
+      .side{grid-row:2;margin:0 16px 16px 16px}
+      .map-wrap{margin:0 auto 16px auto}
+    }
+    @media (max-width: 900px){
+      .island-grid{grid-template-columns:1fr}
+      .island-card{justify-self:center; max-width:min(90vw, 1024px)}
+    }
+  </style>
 </head>
 <body>
   <div class="primer" id="primerTop">
@@ -139,16 +196,15 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v34';
+  const STORAGE_KEY = 'signika.world.v35';
 
   let state=null;
 
+  const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
   const mapImage = document.getElementById('mapImage');
   const gRegions = document.getElementById('regions');
   const gPoints  = document.getElementById('points');
-  const mapWrap  = document.getElementById('mapWrap');
-
   const islandImg = document.getElementById('islandImg');
   const islandLore = document.getElementById('islandLore');
   const primerIntro = document.getElementById('primerIntro');
@@ -187,9 +243,15 @@
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
     const nav={viewBox:[0,0,imgW,imgH], maxZoomFactor:0.08, panning:false, last:{x:0,y:0}};
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
+
     svgEl.addEventListener('wheel', (e)=>{
-      e.preventDefault();
       let [vx,vy,vw,vh]=nav.viewBox;
+      const atFull = (vw >= imgW - 0.5 && vh >= imgH - 0.5);
+      // Allow page scroll when fully zoomed out and scrolling down
+      if(atFull && e.deltaY > 0){
+        return; // don't preventDefault -> page scrolls
+      }
+      e.preventDefault();
       const scale=(e.deltaY<0?0.9:1.1);
       const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
       let nw=clamp(vw*scale, imgW*nav.maxZoomFactor, imgW);
@@ -198,10 +260,14 @@
       const ny=clamp(vy+(vh-nh)*my, 0, imgH-nh);
       nav.viewBox=[nx,ny,nw,nh]; apply();
     }, {passive:false});
+
     svgEl.addEventListener('pointerdown', (e)=>{
-      // NEW: don't start panning if clicking a feature (so clicks bubble to paths/groups)
+      // Only pan when clicking the background (not features), and show grabbing cursor
       if(e.target && e.target.closest && e.target.closest('.feature')) return;
-      nav.panning=true; nav.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId);
+      e.preventDefault(); // avoid "not-allowed" cursor glitch
+      nav.panning=true; nav.last={x:e.clientX,y:e.clientY};
+      svgEl.setPointerCapture(e.pointerId);
+      svgEl.style.cursor='grabbing';
     });
     svgEl.addEventListener('pointermove', (e)=>{
       if(!nav.panning) return;
@@ -212,7 +278,9 @@
       vy=clamp(vy-dy,0,Math.max(0,imgH-vh));
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
-    svgEl.addEventListener('pointerup', ()=> nav.panning=false);
+    const endPan=()=>{ nav.panning=false; svgEl.style.cursor='grab'; };
+    svgEl.addEventListener('pointerup', endPan);
+    svgEl.addEventListener('pointercancel', endPan);
     return { reset:()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); } };
   }
 
@@ -276,7 +344,6 @@
         p.setAttribute('fill-opacity', '0.31');
         p.setAttribute('stroke','none');
         p.style.filter='url(#fuzzyEdge)';
-        // listen on the PATH and the GROUP
         p.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(p);
       });
@@ -300,7 +367,7 @@
   function showTooltipFor(f, evt){
     if(!f) return;
     ttTitle.textContent = f.name || '—';
-    ttBody.innerHTML = '<p>' + escapeHTML(f.desc || '') + '</p>';
+    ttBody.innerHTML = '<p>' + (f.desc? escapeHTML(f.desc) : '—') + '</p>';
     const src = f.img || f.image || f.imageUrl || null;
     if(src){ ttImg.src = src; ttImg.alt = f.name? (f.name+' image'): 'Feature image'; ttMedia.style.display='block'; }
     else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
