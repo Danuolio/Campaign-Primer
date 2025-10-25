@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v31 – Zoom Bounds & Island Size)</title>
+  <title>The World of Draelon – Campaign Primer (v32)</title>
   <style>
     /* ------------------------------------------------------------
        Fantasy / Parchment Theme
@@ -72,7 +72,7 @@
     .gm-btn:hover{filter:brightness(1.02)}
 
     /* GM modal + CMS */
-    .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20}
+    .gm-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:1000}
     .gm-modal.open{display:flex}
     .gm-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(2px)}
     .gm-modal-card{position:relative;width:min(92%,380px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);padding:16px;z-index:1}
@@ -81,7 +81,7 @@
     .btn{background:#fff6d8;color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:8px 12px;cursor:pointer}
     .btn.primary{background:#c9a66b;color:#1e1406;font-weight:800;border:0}
 
-    .cms{position:absolute;top:56px;right:12px;width:min(620px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:9;overflow:hidden}
+    .cms{position:absolute;top:56px;right:12px;width:min(620px,calc(100% - 24px));max-height:calc(100% - 68px);background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:900;overflow:hidden}
     .cms.open{display:flex;flex-direction:column}
     .cms header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
     .cms header h2{font-size:16px;margin:0}
@@ -109,8 +109,8 @@
     .feature.region.hover path{fill-opacity:.35}
     .feature.region.selected path{fill-opacity:.42}
 
-    /* Tooltip */
-    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:15;display:none;pointer-events:auto;overflow:hidden}
+    /* Tooltip (z-index boosted) */
+    .tooltip{position:absolute;min-width:260px;max-width:380px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule)}
     .tooltip header h3{margin:0;font-size:16px}
@@ -213,7 +213,7 @@
           </div>
           <div class="row" id="rowImagePath">
             <label for="featImagePath">Region Image URL/Path (optional)</label>
-            <input id="featImagePath" type="text" placeholder="map/oscana.jpg" />
+            <input id="featImagePath" type="text" placeholder="/Campaign-Primer/map/oscana.jpg" />
           </div>
         </div>
       </div>
@@ -236,6 +236,7 @@
             <feComposite in="SourceGraphic" in2="blur" operator="in" />
           </filter>
         </defs>
+        <!-- We control viewBox precisely; keep image synced to image size & no extra gutters -->
         <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
         <g id="regions"></g>
         <g id="points"></g>
@@ -280,13 +281,12 @@
 (function(){
   // ---- Config -------------------------------------------------------------
   const JSON_PATH = './world-data.json';
-  const DEFAULT_WORLD_MAP = './map/world-map.png';
-  const DEFAULT_ISLAND_MAP = './map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v31';
+  const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
+  const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
+  const STORAGE_KEY = 'signika.world.v32';
 
   // ---- State --------------------------------------------------------------
   let state = null;
-  let gmOpen = false;
 
   // ---- Elements -----------------------------------------------------------
   const svgWorld   = document.getElementById('world');
@@ -368,53 +368,36 @@
 
   // ---- Bounded Navigator for World ---------------------------------------
   function makeBoundedNavigator(svgEl, imgW, imgH){
-    // Start at full image
     svgEl.setAttribute('viewBox', `0 0 ${imgW} ${imgH}`);
-    const state = {viewBox:[0,0,imgW,imgH], minW: imgW, minH: imgH, maxZoomFactor: 0.08, panning:false, last:{x:0,y:0}};
-    function apply(){ svgEl.setAttribute('viewBox', state.viewBox.join(' ')); }
-    function clampView(){
-      // clamp size (can't be larger than full image == zoomed out beyond full)
-      let [x,y,w,h] = state.viewBox;
-      w = Math.max(Math.min(w, imgW), imgW*state.maxZoomFactor);
-      h = Math.max(Math.min(h, imgH), imgH*state.maxZoomFactor);
-      // keep inside bounds
-      x = clamp(x, 0, imgW - w);
-      y = clamp(y, 0, imgH - h);
-      state.viewBox = [x,y,w,h];
-    }
+    const nav = {viewBox:[0,0,imgW,imgH], maxZoomFactor: 0.08, panning:false, last:{x:0,y:0}};
+    function apply(){ svgEl.setAttribute('viewBox', nav.viewBox.join(' ')); }
     svgEl.addEventListener('wheel', (e)=>{
       e.preventDefault();
-      let [vx,vy,vw,vh] = state.viewBox;
+      let [vx,vy,vw,vh] = nav.viewBox;
       const scale = (e.deltaY<0? 0.9: 1.1);
-      // zoom around cursor
       const mx = e.offsetX / svgEl.clientWidth;
       const my = e.offsetY / svgEl.clientHeight;
       let nw = vw * scale;
       let nh = vh * scale;
-      // bounds for zoom
-      nw = clamp(nw, imgW*state.maxZoomFactor, imgW);
-      nh = clamp(nh, imgH*state.maxZoomFactor, imgH);
+      nw = clamp(nw, imgW*nav.maxZoomFactor, imgW);
+      nh = clamp(nh, imgH*nav.maxZoomFactor, imgH);
       const nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
       const ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
-      state.viewBox = [nx,ny,nw,nh];
+      nav.viewBox = [nx,ny,nw,nh];
       apply();
     }, {passive:false});
-    svgEl.addEventListener('pointerdown', (e)=>{ state.panning=true; state.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId); });
+    svgEl.addEventListener('pointerdown', (e)=>{ nav.panning=true; nav.last={x:e.clientX,y:e.clientY}; svgEl.setPointerCapture(e.pointerId); });
     svgEl.addEventListener('pointermove', (e)=>{
-      if(!state.panning) return;
-      let [vx,vy,vw,vh] = state.viewBox;
-      const dx = (e.clientX - state.last.x) * (vw/svgEl.clientWidth);
-      const dy = (e.clientY - state.last.y) * (vh/svgEl.clientHeight);
+      if(!nav.panning) return;
+      let [vx,vy,vw,vh] = nav.viewBox;
+      const dx = (e.clientX - nav.last.x) * (vw/svgEl.clientWidth);
+      const dy = (e.clientY - nav.last.y) * (vh/svgEl.clientHeight);
       vx = clamp(vx - dx, 0, Math.max(0, imgW - vw));
       vy = clamp(vy - dy, 0, Math.max(0, imgH - vh));
-      state.viewBox = [vx,vy,vw,vh]; state.last={x:e.clientX,y:e.clientY}; apply();
+      nav.viewBox = [vx,vy,vw,vh]; nav.last={x:e.clientX,y:e.clientY}; apply();
     });
-    svgEl.addEventListener('pointerup', ()=> state.panning=false);
-    // public
-    return {
-      reset: ()=>{ state.viewBox=[0,0,imgW,imgH]; apply(); },
-      resize: ()=>{ /* keep current view but ensure clamps */ clampView(); apply(); }
-    };
+    svgEl.addEventListener('pointerup', ()=> nav.panning=false);
+    return { reset: ()=>{ nav.viewBox=[0,0,imgW,imgH]; apply(); } };
   }
 
   // ---- Init ---------------------------------------------------------------
@@ -432,18 +415,17 @@
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
 
-    // world map: fixed to exact image coords (no infinite zoom out)
+    // world map exact fit
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
-    // Important: map image uses preserveAspectRatio='none' and we keep SVG viewBox == image dimensions
     svgWorld.setAttribute('viewBox', `0 0 ${wSize.w} ${wSize.h}`);
 
-    // island image
+    // island image (static)
     islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
 
-    // render world features
+    // render features
     renderFeatures();
 
     // bounded navigator
@@ -456,7 +438,7 @@
     gmSubmit.addEventListener('click', ()=>{
       const pass = (gmPass.value||'').trim();
       if(pass === (state.gmPass||'signika')){
-        gmOpen = true; gmModal.classList.remove('open'); cms.classList.add('open'); gmError.style.display='none';
+        cms.classList.add('open'); gmModal.classList.remove('open'); gmError.style.display='none';
         bindCMS();
       }else{
         gmError.style.display='block';
@@ -465,9 +447,6 @@
 
     // Tooltip close
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
-
-    // On resize, we don't change viewBox scale; still bounded by image
-    window.addEventListener('resize', ()=> navWorld.resize());
 
     showLoader(false);
   }
@@ -485,7 +464,8 @@
         features: data.features || [],
         primerIntro: data.primerIntro || '',
         primerDetails: data.primerDetails || '',
-        islandLore: data.islandLore || ''
+        islandLore: data.islandLore || '',
+        gmPass: data.gmPass || 'signika'
       };
     }catch(e){
       const loc = loadLocal();
@@ -495,7 +475,7 @@
         mapSize: {w:4080,h:3072},
         campaignMapSrc: DEFAULT_ISLAND_MAP,
         campaignMapSize: {w:1024,h:1024},
-        features: [], primerIntro:'', primerDetails:'', islandLore:''
+        features: [], primerIntro:'', primerDetails:'', islandLore:'', gmPass:'signika'
       };
     }
   }
@@ -510,10 +490,11 @@
   function renderFeatures(){
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
+
     // Regions
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-      g.classList.add('feature','region'); g.dataset.id = f.id||uid();
+      g.classList.add('feature','region'); g.dataset.id = f.id || (f.id = uid());
       const color = f.color || '#8ad9ff';
       (f.shapes||[]).forEach(shape=>{
         const path = document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -522,23 +503,26 @@
         path.setAttribute('fill-opacity', '0.31');
         path.setAttribute('stroke','none');
         path.style.filter = 'url(#fuzzyEdge)';
-        path.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(path);
       });
+      const open = (e)=> showTooltipFor(f, e);
+      g.addEventListener('click', open);
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
       gRegions.appendChild(g);
     });
+
     // Points
     feats.filter(f=>f.type==='point').forEach(f=>{
       const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-      g.classList.add('feature','point'); g.dataset.id = f.id||uid();
+      g.classList.add('feature','point'); g.dataset.id = f.id || (f.id = uid());
       const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
       c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
       const label = document.createElementNS('http://www.w3.org/2000/svg','text');
       label.setAttribute('x', f.x + 30); label.setAttribute('y', f.y - 30); label.classList.add('label'); label.textContent = f.name || '';
-      c.addEventListener('click', (e)=> showTooltipFor(f, e));
-      label.addEventListener('click', (e)=> showTooltipFor(f, e));
+      const open = (e)=> showTooltipFor(f, e);
+      c.addEventListener('click', open);
+      label.addEventListener('click', open);
       g.appendChild(c); g.appendChild(label); gPoints.appendChild(g);
     });
   }
@@ -568,7 +552,7 @@
   function bindCMS(){
     const feats = state.features || [];
     featurePicker.innerHTML = '';
-    feats.forEach((f,idx)=>{
+    feats.forEach((f)=>{
       const opt = document.createElement('option');
       opt.value = f.id || (f.id = uid());
       opt.textContent = `${f.type.toUpperCase()} – ${f.name || 'Untitled'}`;
@@ -604,7 +588,8 @@
           features: data.features || state.features,
           primerIntro: data.primerIntro ?? state.primerIntro,
           primerDetails: data.primerDetails ?? state.primerDetails,
-          islandLore: data.islandLore ?? state.islandLore
+          islandLore: data.islandLore ?? state.islandLore,
+          gmPass: data.gmPass ?? state.gmPass
         }));
         saveLocal();
         location.reload();
