@@ -1906,14 +1906,6 @@
       ]
     },
     {
-      "id": "akazj70lcemh0h2v6u",
-      "type": "point",
-      "name": "Signika",
-      "desc": "An island adrift in the northern sea—where monsters glow with magic and factions vie to claim its secrets before the storm claims them all.",
-      "x": 1497.8550326046186,
-      "y": 730.6223333710882
-    },
-    {
       "id": "gce2x426lhmh0pjxxr",
       "type": "region",
       "name": "Letrylor",
@@ -2902,5 +2894,6 @@
     }
   ]
 }
+
 
 
