@@ -1,137 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v52)</title>
-  <style>
-    :root{
-      --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
-      --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
-      --wrap:clamp(895px, 90vw, 1400px);
-    }
-    html,body{height:100%}
-    html { scroll-behavior: auto; }
-    body{
-      margin:0; color:var(--ink);
-      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
-      -webkit-tap-highlight-color: transparent;
-    }
-    *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
-    input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{
-      user-select: text; -webkit-user-select: text;
-    }
-    body:before{
-      content:""; position:fixed; inset:0; pointer-events:none;
-      background:
-        radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
-        radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
-        repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
-      mix-blend-mode:multiply; opacity:.6;
-    }
-    .primer,.panel{
-      background: linear-gradient(180deg, var(--paper), var(--paper-2));
-      border: 1px solid var(--edge);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      position:relative;
-    }
-    .primer::after,.panel::after{
-      content:""; position:absolute; inset:0; pointer-events:none;
-      border-radius: var(--radius);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
-    }
-    .primer{margin:16px; padding:18px 18px 14px}
-    .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
-    .app{ display:grid; grid-template-columns: 1fr; gap:0; }
-    .map-row{display:flex; justify-content:center}
-    .map-wrap{
-      position:relative;
-      width:100%; max-width:var(--wrap);
-      min-height:60vh; max-height:82vh;
-      margin:16px; overflow:hidden;
-    }
-    @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
-    .map-wrap svg{
-      width:100%; height:100%; display:block;
-      background:#efe6c8;
-      touch-action:none; cursor:grab;
-    }
-    .side-row{display:flex; justify-content:center}
-    .side{
-      width:100%; max-width:var(--wrap);
-      display:flex;flex-direction:column;
-      margin:0 16px 16px 16px; overflow:hidden;
-    }
-    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
-    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
-    .side .content{padding:16px;overflow:visible}
-    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-    .lore-body{line-height:1.6;white-space:pre-wrap}
-    .lore-media{margin:0 0 12px 0; display:none}
-    .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
-
-    .muted{color:var(--ink-soft);font-size:12px}
-    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
-    .feature{cursor:pointer}
-    .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
-    .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-    .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
-    .feature.region.hover path.fill{fill-opacity:.35}
-    .feature.region.selected path.fill{fill-opacity:.42}
-
-    .feature.region .ol-glow,
-    .feature.region .ol-mid,
-    .feature.region .ol-core{
-      fill:none;
-      stroke-linejoin:round; stroke-linecap:round;
-      opacity:0; pointer-events:none;
-      transition: opacity .12s linear;
-    }
-    .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
-    .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
-    .feature.region .ol-core{ stroke:#f6e7c8; stroke-width:2.5; }
-
-    .feature.region.hover .ol-glow,
-    .feature.region.hover .ol-mid,
-    .feature.region.hover .ol-core{ opacity:.5; }
-    .feature.region.selected .ol-glow,
-    .feature.region.selected .ol-mid,
-    .feature.region.selected .ol-core{ opacity:.7; }
-
-    .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
-    .tooltip.open{display:block}
-    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
-    .tooltip header h3{margin:0;font-size:16px}
-    .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
-    .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
-    .tooltip .media img{width:100%;height:auto;display:block}
-    .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
-    .tooltip .body p{margin:0}
-
-    .section{margin:8px 16px 16px 16px}
-    .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
-    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
-      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
-      display:block; max-width:100%; }
-    .island-card img{display:block; width:100%; height:auto}
-    .island-lore{padding:16px}
-    .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
-    .island-lore .body{white-space:pre-wrap; line-height:1.6}
-
-    @media (max-width: 760px){
-      .tooltip{ display:none !important; }
-      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
-      .map-wrap svg{ height:100%; }
-      .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; }
-      .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
-      .island-lore{ order: 2 !important; margin-top: 12px !important; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The World of Draelon – Campaign Primer (v53)</title>
+<style>
+  :root{ --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
+         --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
+         --wrap:clamp(895px, 90vw, 1400px); }
+  html,body{height:100%}
+  body{ margin:0; color:var(--ink);
+        background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+        font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif; line-height:1.4; -webkit-tap-highlight-color: transparent; }
+  *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+  input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{ user-select: text; -webkit-user-select: text; }
+  body:before{ content:''; position:fixed; inset:0; pointer-events:none;
+               background: radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
+                           radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
+                           repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
+               mix-blend-mode:multiply; opacity:.6; }
+  .primer,.panel{ background: linear-gradient(180deg, var(--paper), var(--paper-2)); border:1px solid var(--edge); border-radius:var(--radius); box-shadow:var(--shadow); position:relative; }
+  .primer::after,.panel::after{ content:''; position:absolute; inset:0; pointer-events:none; border-radius:var(--radius);
+                                box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06); }
+  .primer{margin:16px; padding:18px 18px 14px}
+  .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
+  .app{ display:grid; grid-template-columns: 1fr; gap:0; }
+  .map-row{display:flex; justify-content:center}
+  .map-wrap{ position:relative; width:100%; max-width:var(--wrap); min-height:60vh; max-height:82vh; margin:16px; overflow:hidden; }
+  @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
+  .map-wrap svg{ width:100%; height:100%; display:block; background:#efe6c8; touch-action:none; cursor:grab; }
+  .side-row{display:flex; justify-content:center}
+  .side{ width:100%; max-width:var(--wrap); display:flex; flex-direction:column; margin:0 16px 16px 16px; overflow:hidden; }
+  .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+  .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+  .side .content{padding:16px;overflow:visible}
+  .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+  .lore-body{line-height:1.6;white-space:pre-wrap}
+  .lore-media{margin:0 0 12px 0; display:none}
+  .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
+  .muted{color:var(--ink-soft);font-size:12px}
+  .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
+  .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
+  .feature{cursor:pointer}
+  .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
+  .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
+  .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
+  .feature.region.hover path.fill{fill-opacity:.35}
+  .feature.region.selected path.fill{fill-opacity:.42}
+  .feature.region .ol-glow,.feature.region .ol-mid,.feature.region .ol-core{ fill:none; stroke-linejoin:round; stroke-linecap:round; opacity:0; pointer-events:none; transition: opacity .12s linear; }
+  .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
+  .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
+  .feature.region .ol-core{ stroke:#f6e7c8; stroke-width:2.5; }
+  .feature.region.hover .ol-glow,.feature.region.hover .ol-mid,.feature.region.hover .ol-core{ opacity:.5; }
+  .feature.region.selected .ol-glow,.feature.region.selected .ol-mid,.feature.region.selected .ol-core{ opacity:.7; }
+  .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
+  .tooltip.open{display:block}
+  .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
+  .tooltip header h3{margin:0;font-size:16px}
+  .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
+  .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
+  .tooltip .media img{width:100%;height:auto;display:block}
+  .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
+  .tooltip .body p{margin:0}
+  .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
+  .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; width:100%; }
+  .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2)); border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow); display:block; max-width:100%; }
+  .island-card img{display:block; width:100%; height:auto}
+  .island-lore{padding:16px}
+  .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
+  .island-lore .body{white-space:pre-wrap; line-height:1.6}
+  body.gm-on [contenteditable="true"]{ outline: 2px dashed rgba(139,94,52,.45); background: linear-gradient(180deg, rgba(255,255,240,.35), rgba(255,255,220,.25)); border-radius: 8px; padding: 6px; transition: background .2s ease; }
+  body.gm-on [contenteditable="true"]:focus{ background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45)); }
+  @media (max-width: 760px){
+    .tooltip{ display:none !important; }
+    .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
+    .map-wrap svg{ height:100%; }
+    .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: 720px; }
+    .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
+    .island-lore{ order: 2 !important; margin-top: 12px !important; }
+  }
+</style>
 </head>
 <body>
   <div class="primer" id="primerTop">
@@ -204,7 +155,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v52';
+  const STORAGE_KEY = 'signika.world.v53';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -226,6 +177,7 @@
   const ttMedia = document.getElementById('ttMedia');
   const ttImg   = document.getElementById('ttImg');
   const ttClose = document.getElementById('ttClose');
+  const gmBtn   = document.getElementById('gmBtn');
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
@@ -400,8 +352,9 @@
   init().catch(console.error);
 
   async function init(){
-    const data = await loadData();
-    state = data || {};
+    const loaded = await loadData();
+    const saved = loadLocal();
+    state = Object.assign({}, loaded, saved);
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
@@ -416,6 +369,7 @@
 
     renderFeatures();
     makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
+    bindGM();
 
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
     svgWorld.addEventListener('click', (e)=>{
@@ -449,6 +403,46 @@
       return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMapSrc: DEFAULT_ISLAND_MAP,
                campaignMapSize:{w:1024,h:1024}, features:[], primerIntro:'', primerDetails:'', islandLore:'' };
     }
+  }
+
+  function loadLocal(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function saveLocal(){
+    const payload={
+      primerIntro: primerIntro.textContent.trim(),
+      primerDetails: primerDetails.textContent.trim(),
+      islandLore: islandLore.textContent.trim()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  function bindGM(){
+    const editables=[primerIntro, primerDetails, islandLore];
+    let gmOn=false, saveTimer=0;
+
+    function setEditable(on){
+      editables.forEach(el=> el.setAttribute('contenteditable', on ? 'true' : 'false'));
+      document.body.classList.toggle('gm-on', on);
+      gmBtn.classList.toggle('on', on);
+      gmBtn.textContent = on ? 'GM: ON' : 'GM';
+    }
+    setEditable(false);
+
+    const scheduleSave=()=>{
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(saveLocal, 400);
+    };
+    editables.forEach(el=>{
+      el.addEventListener('input', scheduleSave);
+      el.addEventListener('blur', saveLocal);
+    });
+
+    gmBtn.addEventListener('click', ()=>{
+      gmOn=!gmOn; setEditable(gmOn);
+      if(gmOn){ scheduleSave(); }
+    });
   }
 
   function renderFeatures(){
