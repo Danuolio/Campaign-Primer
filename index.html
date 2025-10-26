@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v54)</title>
+  <title>The World of Draelon – Campaign Primer (v55)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -59,7 +59,7 @@
     .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
     .side .content{padding:16px;overflow:visible}
     .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-    .lore-body{line-height:1.6;white-space:pre-wrap}
+    .lore-body{line-height:1.6;}
     .lore-media{margin:0 0 12px 0; display:none}
     .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
 
@@ -77,7 +77,6 @@
     .feature.region.hover path.fill{fill-opacity:.35}
     .feature.region.selected path.fill{fill-opacity:.42}
 
-    /* Region outlines: softened parchment glow */
     .feature.region .ol-glow,
     .feature.region .ol-mid,
     .feature.region .ol-core{
@@ -94,7 +93,6 @@
     .feature.region.selected .ol-mid,
     .feature.region.selected .ol-core{ opacity:.7; }
 
-    /* Tooltip */
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
     .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
@@ -105,7 +103,6 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
-    /* Island section centered */
     .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
     .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; width:100%; }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -114,9 +111,8 @@
     .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
-    .island-lore .body{white-space:pre-wrap; line-height:1.6}
+    .island-lore .body{line-height:1.6}
 
-    /* GM editor toolbar */
     .gm-bar{
       position:absolute; left:12px; top:12px; z-index:45;
       background:linear-gradient(180deg, #fff7dd, #f2e5b7);
@@ -135,14 +131,12 @@
     }
     .gm-bar .sep{ width:1px; height:20px; background:var(--edge); margin:0 4px; }
 
-    /* Editor overlay handles */
     .gm-overlay .shape-path{ fill:rgba(255,255,240,.25); stroke:#8b5e34; stroke-width:2; }
     .gm-overlay .handle{ fill:#fff; stroke:#8b5e34; stroke-width:2; cursor:grab; }
     .gm-overlay .handle.drag{ cursor:grabbing; }
-    .gm-overlay .edge{ stroke:rgba(139,94,52,.5); stroke-width:8; stroke-linecap:round; opacity:.0001; cursor:copy; } /* click edges to insert */
+    .gm-overlay .edge{ stroke:rgba(139,94,52,.5); stroke-width:8; stroke-linecap:round; opacity:.0001; cursor:copy; }
     .gm-overlay .handle.del{ fill:#8b3434; stroke:#fff; }
 
-    /* Editable look */
     body.gm-on [contenteditable="true"]{
       outline: 2px dashed rgba(139,94,52,.45);
       background: linear-gradient(180deg, rgba(255,255,240,.35), rgba(255,255,220,.25));
@@ -150,7 +144,6 @@
     }
     body.gm-on [contenteditable="true"]:focus{ background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45)); }
 
-    /* MOBILE */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
@@ -172,7 +165,6 @@
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
 
-        <!-- GM Editor Bar -->
         <div class="gm-bar" id="gmBar">
           <div class="row">
             <select id="regionSelect"></select>
@@ -196,7 +188,7 @@
             <h3 id="ttTitle">Title</h3>
             <button class="close" id="ttClose" aria-label="Close">×</button>
           </header>
-          <div class="body" id="ttBody"><p>Description…</p></div>
+          <div class="body" id="ttBody"></div>
         </div>
 
         <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
@@ -217,7 +209,6 @@
           <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
           <g id="regions"></g>
           <g id="points"></g>
-          <!-- GM overlay rendered at top so it sits above regions -->
           <g id="gmOverlay" class="gm-overlay"></g>
         </svg>
       </div>
@@ -245,10 +236,10 @@
   </div>
 <script>
 (function(){
-  const JSON_PATH = '/Campaign-Primer/world-data.json';
+  const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v54';
+  const LS_KEY = 'signika.world.v55';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -287,8 +278,8 @@
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function renderMultiline(el, text){ el.innerHTML = escapeHTML(text || '').replace(/\n/g, '<br>'); }
 
-  // color utils
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
   function rgbToHex({r,g,b}){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(r)+h(g)+h(b); }
@@ -296,7 +287,6 @@
     const lerp=(x,y)=>Math.round(x+(y-x)*t);
     return rgbToHex({r:lerp(A.r,B.r), g:lerp(A.g,B.g), b:lerp(A.b,B.b)}); }
 
-  // svg coords helper
   function clientToSvg(x,y){
     const pt = svgWorld.createSVGPoint();
     pt.x = x; pt.y = y;
@@ -356,10 +346,7 @@
       if(atFull() && nav.pointers.size <= 1){ svgEl.style.touchAction = 'pan-y'; }
       else{ svgEl.style.touchAction = 'none'; }
     }
-
-    function guardEnabled(handler){
-      return function(e){ if(!nav.enabled) return; return handler(e); };
-    }
+    function guardEnabled(handler){ return function(e){ if(!nav.enabled) return; return handler(e); }; }
 
     svgEl.addEventListener('wheel', guardEnabled((e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
@@ -464,7 +451,6 @@
     };
   }
 
-  // App init
   let navigatorApi=null;
   init().catch(console.error);
 
@@ -473,9 +459,9 @@
     const saved = loadLocal();
     state = Object.assign({}, loaded, saved);
 
-    primerIntro.textContent = state.primerIntro || '';
-    primerDetails.textContent = state.primerDetails || '';
-    islandLore.textContent = state.islandLore || islandLore.textContent;
+    renderMultiline(primerIntro, state.primerIntro || '');
+    renderMultiline(primerDetails, state.primerDetails || '');
+    renderMultiline(islandLore, state.islandLore || islandLore.textContent || '');
 
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
@@ -527,7 +513,6 @@
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
   }
 
-  // --- Rendering world features (read-only layers) ---
   function renderFeatures(){
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
@@ -577,7 +562,6 @@
     });
   }
 
-  // Tooltip behavior
   function bindTooltipDismiss(){
     ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
     svgWorld.addEventListener('click', (e)=>{
@@ -600,18 +584,19 @@
 
     if(isMobile){
       loreTitle.textContent = name;
-      loreBody.textContent = desc;
+      renderMultiline(loreBody, desc);
       if(src){ loreImg.src=src; loreImg.alt=name+' image'; loreMedia.style.display='block'; }
       else { loreImg.removeAttribute('src'); loreMedia.style.display='none'; }
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
-      ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
+      ttBody.innerHTML = desc ? escapeHTML(desc).replace(/\n/g,'<br>') : '—';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
       else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
       tooltip.classList.add('open');
       positionTooltip(evt);
-      loreTitle.textContent = name; loreBody.textContent = desc;
+      loreTitle.textContent = name;
+      renderMultiline(loreBody, desc);
       loreImg.removeAttribute('src'); loreMedia.style.display='none';
     }
   }
@@ -628,18 +613,17 @@
     tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
   }
 
-  // ---------------- GM MODE ----------------
   function bindGM(){
-    // Text editables
     const editables=[primerIntro, primerDetails, islandLore];
     let gmOn=false, saveTimer=0;
+    const editor={ selectedId:null, mode:'idle', curShape:null, busy(){ return this.mode!=='idle'; } };
+
     function setEditable(on){
       editables.forEach(el=> el.setAttribute('contenteditable', on ? 'true' : 'false'));
       document.body.classList.toggle('gm-on', on);
       gmBtn.classList.toggle('on', on);
       gmBtn.textContent = on ? 'GM: ON' : 'GM';
       gmBar.style.display = on ? 'flex' : 'none';
-      // enable/disable pan-zoom depending on editor sub-mode
       navigatorApi && navigatorApi.enable(on ? !editor.busy() : true);
       drawOverlay();
     }
@@ -647,13 +631,15 @@
     editables.forEach(el=>{ el.addEventListener('input', scheduleSave); el.addEventListener('blur', saveLocal); });
     gmBtn.addEventListener('click', ()=>{ gmOn=!gmOn; setEditable(gmOn); if(gmOn){ scheduleSave(); } });
 
-    // ---- Region editor ----
-    const editor={
-      selectedId:null,
-      mode:'idle', // 'idle' | 'adding' | 'addVertex' | 'delVertex'
-      curShape:null, // {points:[], regionRef, shapeIndex}
-      busy(){ return this.mode!=='idle'; }
-    };
+    const regionSelect = document.getElementById('regionSelect');
+    const regionName   = document.getElementById('regionName');
+    const regionColor  = document.getElementById('regionColor');
+    const addShapeBtn  = document.getElementById('addShapeBtn');
+    const finishShapeBtn= document.getElementById('finishShapeBtn');
+    const addVertexModeBtn= document.getElementById('addVertexModeBtn');
+    const delVertexModeBtn= document.getElementById('delVertexModeBtn');
+    const newRegionBtn = document.getElementById('newRegionBtn');
+    const saveJsonBtn  = document.getElementById('saveJsonBtn');
 
     function refreshRegionSelect(){
       const regions = (state.features||[]).filter(f=>f.type==='region');
@@ -710,15 +696,14 @@
     delVertexModeBtn.addEventListener('click', ()=>{ editor.mode = editor.mode==='delVertex' ? 'idle' : 'delVertex'; drawOverlay(); navigatorApi && navigatorApi.enable(editor.mode==='idle'); });
 
     saveJsonBtn.addEventListener('click', ()=>{
-      // assemble export JSON from state
       const exportData={
         mapImage: state.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: state.mapSize || {w:4080,h:3072},
         campaignMap: state.campaignMapSrc || DEFAULT_ISLAND_MAP,
         campaignMapSize: state.campaignMapSize || {w:1024,h:1024},
-        primerIntro: primerIntro.textContent.trim(),
-        primerDetails: primerDetails.textContent.trim(),
-        islandLore: islandLore.textContent.trim(),
+        primerIntro: primerIntro.innerText.trim(),
+        primerDetails: primerDetails.innerText.trim(),
+        islandLore: islandLore.innerText.trim(),
         features: state.features || []
       };
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
@@ -729,21 +714,16 @@
       URL.revokeObjectURL(a.href);
     });
 
-    // Overlay rendering + interactions
     function drawOverlay(){
       gmOverlay.innerHTML='';
       if(!document.body.classList.contains('gm-on')) return;
+      const r = getSelectedRegion(); if(!r) return;
 
-      const r = getSelectedRegion();
-      if(!r) return;
-
-      // draw all shapes of selected region
       (r.shapes||[]).forEach((shape, si)=>{
         const path=elNS('path'); path.setAttribute('class','shape-path');
         path.setAttribute('d', roundedPolygonPath(shape, 0));
         gmOverlay.appendChild(path);
 
-        // edges for add-vertex mode
         for(let i=0;i<shape.length;i++){
           const a=shape[i], b=shape[(i+1)%shape.length];
           const edge=elNS('line');
@@ -760,7 +740,6 @@
           gmOverlay.appendChild(edge);
         }
 
-        // vertex handles
         shape.forEach((pt, idx)=>{
           const h=elNS('circle'); h.setAttribute('class','handle'); h.setAttribute('r', 8);
           h.setAttribute('cx', pt.x); h.setAttribute('cy', pt.y);
@@ -779,24 +758,20 @@
             pt.x=p.x; pt.y=p.y;
             h.setAttribute('cx', pt.x); h.setAttribute('cy', pt.y);
             path.setAttribute('d', roundedPolygonPath(shape, 0));
-            renderFeatures(); // live update
+            renderFeatures();
           });
           h.addEventListener('pointerup', ()=>{ if(!dragging) return; dragging=false; h.classList.remove('drag'); saveLocal(); });
           gmOverlay.appendChild(h);
         });
       });
 
-      // adding-mode: draw provisional last segment + click to add points
       if(editor.mode==='adding' && editor.curShape){
         const pts = editor.curShape.points;
         const tempPath=elNS('path'); tempPath.setAttribute('class','shape-path');
         tempPath.setAttribute('d', pts.length? roundedPolygonPath(pts, 0) : '');
         gmOverlay.appendChild(tempPath);
 
-        svgWorld.onpointerdown = (e)=>{
-          const p = clientToSvg(e.clientX, e.clientY);
-          pts.push(p); drawOverlay();
-        };
+        svgWorld.onpointerdown = (e)=>{ const p = clientToSvg(e.clientX, e.clientY); pts.push(p); drawOverlay(); };
         svgWorld.ondblclick = (e)=>{ finishShapeBtn.click(); };
       }else{
         svgWorld.onpointerdown = null; svgWorld.ondblclick=null;
@@ -810,4 +785,3 @@
 })();</script>
 </body>
 </html>
-
