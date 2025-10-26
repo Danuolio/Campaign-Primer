@@ -11,7 +11,7 @@
     "h": 1024 
   },
   "primerDetails": "As eyes across the world turn to Signika, competition for monsters slain and truths unconvered grows fiercer each day.",
-  "primerIntro": "Help"
+  "primerIntro": "Help",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -2896,6 +2896,7 @@
     }
   ]
 }
+
 
 
 
