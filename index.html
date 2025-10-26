@@ -1,88 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The World of Draelon – Campaign Primer (v53)</title>
-<style>
-  :root{ --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
-         --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
-         --wrap:clamp(895px, 90vw, 1400px); }
-  html,body{height:100%}
-  body{ margin:0; color:var(--ink);
-        background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-        font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif; line-height:1.4; -webkit-tap-highlight-color: transparent; }
-  *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
-  input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{ user-select: text; -webkit-user-select: text; }
-  body:before{ content:''; position:fixed; inset:0; pointer-events:none;
-               background: radial-gradient(800px 400px at 40% -10%, rgba(139,94,52,.07), transparent 60%),
-                           radial-gradient(600px 600px at 90% 0%, rgba(58,90,64,.08), transparent 70%),
-                           repeating-linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,.03) 1px, transparent 2px, transparent 4px);
-               mix-blend-mode:multiply; opacity:.6; }
-  .primer,.panel{ background: linear-gradient(180deg, var(--paper), var(--paper-2)); border:1px solid var(--edge); border-radius:var(--radius); box-shadow:var(--shadow); position:relative; }
-  .primer::after,.panel::after{ content:''; position:absolute; inset:0; pointer-events:none; border-radius:var(--radius);
-                                box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06); }
-  .primer{margin:16px; padding:18px 18px 14px}
-  .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
-  .app{ display:grid; grid-template-columns: 1fr; gap:0; }
-  .map-row{display:flex; justify-content:center}
-  .map-wrap{ position:relative; width:100%; max-width:var(--wrap); min-height:60vh; max-height:82vh; margin:16px; overflow:hidden; }
-  @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
-  .map-wrap svg{ width:100%; height:100%; display:block; background:#efe6c8; touch-action:none; cursor:grab; }
-  .side-row{display:flex; justify-content:center}
-  .side{ width:100%; max-width:var(--wrap); display:flex; flex-direction:column; margin:0 16px 16px 16px; overflow:hidden; }
-  .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
-  .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
-  .side .content{padding:16px;overflow:visible}
-  .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-  .lore-body{line-height:1.6;white-space:pre-wrap}
-  .lore-media{margin:0 0 12px 0; display:none}
-  .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
-  .muted{color:var(--ink-soft);font-size:12px}
-  .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
-  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .gm-btn{position:absolute;top:12px;right:12px;z-index:10;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
-  .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
-  .feature{cursor:pointer}
-  .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
-  .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-  .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
-  .feature.region.hover path.fill{fill-opacity:.35}
-  .feature.region.selected path.fill{fill-opacity:.42}
-  .feature.region .ol-glow,.feature.region .ol-mid,.feature.region .ol-core{ fill:none; stroke-linejoin:round; stroke-linecap:round; opacity:0; pointer-events:none; transition: opacity .12s linear; }
-  .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
-  .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
-  .feature.region .ol-core{ stroke:#f6e7c8; stroke-width:2.5; }
-  .feature.region.hover .ol-glow,.feature.region.hover .ol-mid,.feature.region.hover .ol-core{ opacity:.5; }
-  .feature.region.selected .ol-glow,.feature.region.selected .ol-mid,.feature.region.selected .ol-core{ opacity:.7; }
-  .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
-  .tooltip.open{display:block}
-  .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
-  .tooltip header h3{margin:0;font-size:16px}
-  .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
-  .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
-  .tooltip .media img{width:100%;height:auto;display:block}
-  .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
-  .tooltip .body p{margin:0}
-  .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
-  .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; width:100%; }
-  .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2)); border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow); display:block; max-width:100%; }
-  .island-card img{display:block; width:100%; height:auto}
-  .island-lore{padding:16px}
-  .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
-  .island-lore .body{white-space:pre-wrap; line-height:1.6}
-  body.gm-on [contenteditable="true"]{ outline: 2px dashed rgba(139,94,52,.45); background: linear-gradient(180deg, rgba(255,255,240,.35), rgba(255,255,220,.25)); border-radius: 8px; padding: 6px; transition: background .2s ease; }
-  body.gm-on [contenteditable="true"]:focus{ background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45)); }
-  @media (max-width: 760px){
-    .tooltip{ display:none !important; }
-    .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
-    .map-wrap svg{ height:100%; }
-    .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: 720px; }
-    .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
-    .island-lore{ order: 2 !important; margin-top: 12px !important; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The World of Draelon – Campaign Primer (v54)</title>
+  <style>
+    :root{
+      --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
+      --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
+      --wrap:clamp(895px, 90vw, 1400px);
+      --gold:#e7d9b7; --ivory:#f6e7c8;
+      --btn:#ead8aa; --btn2:#dfc98a;
+    }
+    html,body{height:100%}
+    body{ margin:0; color:var(--ink);
+      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
+      -webkit-tap-highlight-color: transparent;
+    }
+    *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+    input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{
+      user-select: text; -webkit-user-select: text;
+    }
+    .primer,.panel{
+      background: linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid var(--edge);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    .primer::after,.panel::after{
+      content:""; position:absolute; inset:0; pointer-events:none; border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
+    }
+    .primer{margin:16px; padding:18px 18px 14px}
+    .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
+    .app{ display:grid; grid-template-columns: 1fr; gap:0; }
+    .map-row{display:flex; justify-content:center}
+    .map-wrap{
+      position:relative;
+      width:100%; max-width:var(--wrap);
+      min-height:60vh; max-height:82vh;
+      margin:16px; overflow:hidden;
+    }
+    @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
+    .map-wrap svg{
+      width:100%; height:100%; display:block;
+      background:#efe6c8;
+      touch-action:none; cursor:grab;
+    }
+    .side-row{display:flex; justify-content:center}
+    .side{
+      width:100%; max-width:var(--wrap);
+      display:flex;flex-direction:column;
+      margin:0 16px 16px 16px; overflow:hidden;
+    }
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+    .side .content{padding:16px;overflow:visible}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+    .lore-body{line-height:1.6;white-space:pre-wrap}
+    .lore-media{margin:0 0 12px 0; display:none}
+    .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
+
+    .muted{color:var(--ink-soft);font-size:12px}
+    .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
+    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .gm-btn{position:absolute;top:12px;right:12px;z-index:40;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
+    .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
+
+    .feature{cursor:pointer}
+    .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
+    .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
+    .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
+    .feature.region.hover path.fill{fill-opacity:.35}
+    .feature.region.selected path.fill{fill-opacity:.42}
+
+    /* Region outlines: softened parchment glow */
+    .feature.region .ol-glow,
+    .feature.region .ol-mid,
+    .feature.region .ol-core{
+      fill:none; stroke-linejoin:round; stroke-linecap:round;
+      opacity:0; pointer-events:none; transition: opacity .12s linear;
+    }
+    .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
+    .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
+    .feature.region .ol-core{ stroke:var(--ivory); stroke-width:2.5; }
+    .feature.region.hover .ol-glow,
+    .feature.region.hover .ol-mid,
+    .feature.region.hover .ol-core{ opacity:.5; }
+    .feature.region.selected .ol-glow,
+    .feature.region.selected .ol-mid,
+    .feature.region.selected .ol-core{ opacity:.7; }
+
+    /* Tooltip */
+    .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
+    .tooltip.open{display:block}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
+    .tooltip header h3{margin:0;font-size:16px}
+    .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
+    .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
+    .tooltip .media img{width:100%;height:auto;display:block}
+    .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
+    .tooltip .body p{margin:0}
+
+    /* Island section centered */
+    .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
+    .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; width:100%; }
+    .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
+      border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
+      display:block; max-width:100%; }
+    .island-card img{display:block; width:100%; height:auto}
+    .island-lore{padding:16px}
+    .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
+    .island-lore .body{white-space:pre-wrap; line-height:1.6}
+
+    /* GM editor toolbar */
+    .gm-bar{
+      position:absolute; left:12px; top:12px; z-index:45;
+      background:linear-gradient(180deg, #fff7dd, #f2e5b7);
+      border:1px solid var(--edge); border-radius:12px; padding:8px; display:none; gap:6px; align-items:center;
+      box-shadow: var(--shadow);
+    }
+    body.gm-on .gm-bar{ display:flex; }
+    .gm-bar .row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+    .gm-bar label{ font-size:12px; color:var(--ink-soft) }
+    .gm-bar input[type="text"], .gm-bar input[type="color"], .gm-bar select{
+      font-size:12px; padding:4px 6px; border:1px solid var(--edge); border-radius:6px; background:#fffaf0;
+    }
+    .gm-bar button{
+      font-size:12px; padding:6px 10px; border:1px solid var(--edge); border-radius:999px; cursor:pointer;
+      background:linear-gradient(180deg, var(--btn), var(--btn2));
+    }
+    .gm-bar .sep{ width:1px; height:20px; background:var(--edge); margin:0 4px; }
+
+    /* Editor overlay handles */
+    .gm-overlay .shape-path{ fill:rgba(255,255,240,.25); stroke:#8b5e34; stroke-width:2; }
+    .gm-overlay .handle{ fill:#fff; stroke:#8b5e34; stroke-width:2; cursor:grab; }
+    .gm-overlay .handle.drag{ cursor:grabbing; }
+    .gm-overlay .edge{ stroke:rgba(139,94,52,.5); stroke-width:8; stroke-linecap:round; opacity:.0001; cursor:copy; } /* click edges to insert */
+    .gm-overlay .handle.del{ fill:#8b3434; stroke:#fff; }
+
+    /* Editable look */
+    body.gm-on [contenteditable="true"]{
+      outline: 2px dashed rgba(139,94,52,.45);
+      background: linear-gradient(180deg, rgba(255,255,240,.35), rgba(255,255,220,.25));
+      border-radius: 8px; padding: 6px; transition: background .2s ease;
+    }
+    body.gm-on [contenteditable="true"]:focus{ background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45)); }
+
+    /* MOBILE */
+    @media (max-width: 760px){
+      .tooltip{ display:none !important; }
+      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
+      .map-wrap svg{ height:100%; }
+      .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: 720px; }
+      .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
+      .island-lore{ order: 2 !important; margin-top: 12px !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="primer" id="primerTop">
@@ -94,6 +171,25 @@
       <div class="map-wrap panel" id="mapWrap">
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
+
+        <!-- GM Editor Bar -->
+        <div class="gm-bar" id="gmBar">
+          <div class="row">
+            <select id="regionSelect"></select>
+            <button id="newRegionBtn" title="Create new region">+ Region</button>
+            <span class="sep"></span>
+            <label>Name</label><input id="regionName" type="text" size="12" />
+            <label>Color</label><input id="regionColor" type="color" value="#8ad9ff" />
+            <span class="sep"></span>
+            <button id="addShapeBtn" title="Start a new polygon for this region">+ Shape</button>
+            <button id="finishShapeBtn" title="Finish current shape">Finish</button>
+            <button id="addVertexModeBtn" title="Click an edge to insert a vertex">Add Vertex</button>
+            <button id="delVertexModeBtn" title="Click a vertex to delete it">Del Vertex</button>
+            <span class="sep"></span>
+            <button id="saveJsonBtn" title="Download world-data.json">Save JSON</button>
+          </div>
+        </div>
+
         <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
           <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
           <header>
@@ -102,6 +198,7 @@
           </header>
           <div class="body" id="ttBody"><p>Description…</p></div>
         </div>
+
         <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
           <defs>
             <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%">
@@ -110,22 +207,18 @@
             </filter>
             <filter id="neonOuter" x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="4" result="blur1"/>
-              <feMerge>
-                <feMergeNode in="blur1"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
+              <feMerge><feMergeNode in="blur1"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
             <filter id="neonInner" x="-12%" y="-12%" width="124%" height="124%">
               <feGaussianBlur stdDeviation="1.5" result="blur3"/>
-              <feMerge>
-                <feMergeNode in="blur3"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
+              <feMerge><feMergeNode in="blur3"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
           <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
           <g id="regions"></g>
           <g id="points"></g>
+          <!-- GM overlay rendered at top so it sits above regions -->
+          <g id="gmOverlay" class="gm-overlay"></g>
         </svg>
       </div>
     </div>
@@ -155,13 +248,15 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v53';
+  const LS_KEY = 'signika.world.v54';
   let state=null;
+
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
   const mapImage = document.getElementById('mapImage');
   const gRegions = document.getElementById('regions');
   const gPoints  = document.getElementById('points');
+  const gmOverlay= document.getElementById('gmOverlay');
   const islandImg = document.getElementById('islandImg');
   const islandLore = document.getElementById('islandLore');
   const primerIntro = document.getElementById('primerIntro');
@@ -178,17 +273,37 @@
   const ttImg   = document.getElementById('ttImg');
   const ttClose = document.getElementById('ttClose');
   const gmBtn   = document.getElementById('gmBtn');
+  const gmBar   = document.getElementById('gmBar');
+  const regionSelect = document.getElementById('regionSelect');
+  const regionName   = document.getElementById('regionName');
+  const regionColor  = document.getElementById('regionColor');
+  const addShapeBtn  = document.getElementById('addShapeBtn');
+  const finishShapeBtn= document.getElementById('finishShapeBtn');
+  const addVertexModeBtn= document.getElementById('addVertexModeBtn');
+  const delVertexModeBtn= document.getElementById('delVertexModeBtn');
+  const newRegionBtn = document.getElementById('newRegionBtn');
+  const saveJsonBtn  = document.getElementById('saveJsonBtn');
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
+  // color utils
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
   function rgbToHex({r,g,b}){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(r)+h(g)+h(b); }
   function blendHex(a,b,t){ const A=hexToRgb(a), B=hexToRgb(b);
     const lerp=(x,y)=>Math.round(x+(y-x)*t);
     return rgbToHex({r:lerp(A.r,B.r), g:lerp(A.g,B.g), b:lerp(A.b,B.b)}); }
+
+  // svg coords helper
+  function clientToSvg(x,y){
+    const pt = svgWorld.createSVGPoint();
+    pt.x = x; pt.y = y;
+    const m = svgWorld.getScreenCTM().inverse();
+    const sp = pt.matrixTransform(m);
+    return {x: sp.x, y: sp.y};
+  }
 
   function roundedPolygonPath(points, r){
     if(!points || points.length<2) return '';
@@ -210,11 +325,7 @@
     const aspect = svgW / svgH;
     let vw = Math.min(imgW, imgH * aspect);
     let vh = vw / aspect;
-    if (vh > imgH) {
-      vh = imgH;
-      vw = vh * aspect;
-      if (vw > imgW) { vw = imgW; vh = vw / aspect; }
-    }
+    if (vh > imgH) { vh = imgH; vw = vh * aspect; if (vw > imgW) { vw = imgW; vh = vw / aspect; } }
     return {vw, vh};
   }
 
@@ -234,17 +345,23 @@
       minW: imgW*0.08, minH: imgH*0.08,
       maxW: vw, maxH: vh,
       panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0},
-      pointers:new Map(), initialPinchDist:0, initialViewBox:null
+      pointers:new Map(), initialPinchDist:0, initialViewBox:null,
+      enabled:true
     };
     const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
     const atFull=()=> (Math.abs(nav.viewBox[2]-nav.maxW)<0.5 && Math.abs(nav.viewBox[3]-nav.maxH)<0.5);
 
     function setTouchMode(){
+      if(!nav.enabled){ svgEl.style.touchAction='none'; return; }
       if(atFull() && nav.pointers.size <= 1){ svgEl.style.touchAction = 'pan-y'; }
       else{ svgEl.style.touchAction = 'none'; }
     }
 
-    svgEl.addEventListener('wheel', (e)=>{
+    function guardEnabled(handler){
+      return function(e){ if(!nav.enabled) return; return handler(e); };
+    }
+
+    svgEl.addEventListener('wheel', guardEnabled((e)=>{
       let [vx,vy,vw,vh]=nav.viewBox;
       const full = atFull();
       if(full && e.deltaY > 0){ return; }
@@ -256,31 +373,28 @@
       const nx=clamp(vx+(vw-nw)*mx, 0, imgW-nw);
       const ny=clamp(vy+(vh-nh)*my, 0, imgH-nh);
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
-    }, {passive:false});
+    }), {passive:false});
 
-    svgEl.addEventListener('pointerup', (e)=>{
+    svgEl.addEventListener('pointerup', guardEnabled((e)=>{
       if(nav.panning){ if(e.cancelable) e.preventDefault(); }
-    }, {passive:false, capture:true});
+    }), {passive:false, capture:true});
 
-    svgEl.addEventListener('pointerdown', (e)=>{
+    svgEl.addEventListener('pointerdown', guardEnabled((e)=>{
       nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
       nav.dragCandidate = true; nav.dragged = false;
       nav.start = {x: e.clientX, y: e.clientY};
       nav.last  = {x: e.clientX, y: e.clientY};
-
       if(nav.pointers.size===2){
         const pts=[...nav.pointers.values()];
         nav.initialPinchDist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         nav.initialViewBox = nav.viewBox.slice();
       }
-      svgEl.style.cursor='grabbing';
-      setTouchMode();
-    });
+      svgEl.style.cursor='grabbing'; setTouchMode();
+    }));
 
-    svgEl.addEventListener('pointermove', (e)=>{
+    svgEl.addEventListener('pointermove', guardEnabled((e)=>{
       if(!nav.pointers.has(e.pointerId)) return;
       nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
-
       if(nav.pointers.size===2){
         const pts=[...nav.pointers.values()];
         const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
@@ -297,7 +411,6 @@
         }
         return;
       }
-
       if(nav.dragCandidate){
         const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -312,18 +425,17 @@
       vx=clamp(vx-dx, 0, imgW - vw);
       vy=clamp(vy-dy, 0, imgH - vh);
       nav.viewBox=[vx,vy,vw,vh]; nav.last={x: e.clientX, y: e.clientY}; apply();
-    });
+    }));
 
     function endPointer(e){
       nav.pointers.delete(e.pointerId);
       nav.panning=false; nav.dragCandidate=false; nav.dragged=false;
       nav.initialPinchDist=0; nav.initialViewBox=null;
-      svgEl.style.cursor='grab';
+      svgEl.style.cursor='grab'; setTouchMode();
       try{ svgEl.releasePointerCapture(e.pointerId); }catch{}
-      setTouchMode();
     }
-    svgEl.addEventListener('pointerup', endPointer);
-    svgEl.addEventListener('pointercancel', endPointer);
+    svgEl.addEventListener('pointerup', guardEnabled(endPointer));
+    svgEl.addEventListener('pointercancel', guardEnabled(endPointer));
     svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
 
     window.addEventListener('resize', ()=>{
@@ -339,22 +451,28 @@
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     });
 
-    return { reset:()=>{
-      const rect = svgEl.getBoundingClientRect();
-      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
-      const vx = (imgW - vw) / 2;
-      const vy = (imgH - vh) / 2;
-      nav.maxW = vw; nav.maxH = vh;
-      nav.viewBox=[vx,vy,vw,vh]; apply(); setTouchMode();
-    } };
+    return {
+      enable(on){ nav.enabled = on; setTouchMode(); },
+      reset:()=>{
+        const rect = svgEl.getBoundingClientRect();
+        const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+        const vx = (imgW - vw) / 2;
+        const vy = (imgH - vh) / 2;
+        nav.maxW = vw; nav.maxH = vh;
+        nav.viewBox=[vx,vy,vw,vh]; apply(); setTouchMode();
+      }
+    };
   }
 
+  // App init
+  let navigatorApi=null;
   init().catch(console.error);
 
   async function init(){
     const loaded = await loadData();
     const saved = loadLocal();
     state = Object.assign({}, loaded, saved);
+
     primerIntro.textContent = state.primerIntro || '';
     primerDetails.textContent = state.primerDetails || '';
     islandLore.textContent = state.islandLore || islandLore.textContent;
@@ -368,18 +486,9 @@
     islandImg.alt = "Signika island map";
 
     renderFeatures();
-    makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
+    navigatorApi = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
     bindGM();
-
-    ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
-    svgWorld.addEventListener('click', (e)=>{
-      const isFeature = !!e.target.closest('.feature');
-      const isMobile = window.matchMedia('(max-width: 760px)').matches;
-      if(!isFeature){
-        if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
-        document.querySelectorAll('.feature.region.selected').forEach(el=>el.classList.remove('selected'));
-      }
-    });
+    bindTooltipDismiss();
 
     loader.style.display='none';
   }
@@ -405,46 +514,20 @@
     }
   }
 
-  function loadLocal(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-    catch(e){ return {}; }
-  }
+  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }catch(e){ return {}; } }
   function saveLocal(){
     const payload={
+      mapSrc: state.mapSrc, mapSize: state.mapSize,
+      campaignMapSrc: state.campaignMapSrc, campaignMapSize: state.campaignMapSize,
+      features: state.features,
       primerIntro: primerIntro.textContent.trim(),
       primerDetails: primerDetails.textContent.trim(),
       islandLore: islandLore.textContent.trim()
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(LS_KEY, JSON.stringify(payload));
   }
 
-  function bindGM(){
-    const editables=[primerIntro, primerDetails, islandLore];
-    let gmOn=false, saveTimer=0;
-
-    function setEditable(on){
-      editables.forEach(el=> el.setAttribute('contenteditable', on ? 'true' : 'false'));
-      document.body.classList.toggle('gm-on', on);
-      gmBtn.classList.toggle('on', on);
-      gmBtn.textContent = on ? 'GM: ON' : 'GM';
-    }
-    setEditable(false);
-
-    const scheduleSave=()=>{
-      clearTimeout(saveTimer);
-      saveTimer=setTimeout(saveLocal, 400);
-    };
-    editables.forEach(el=>{
-      el.addEventListener('input', scheduleSave);
-      el.addEventListener('blur', saveLocal);
-    });
-
-    gmBtn.addEventListener('click', ()=>{
-      gmOn=!gmOn; setEditable(gmOn);
-      if(gmOn){ scheduleSave(); }
-    });
-  }
-
+  // --- Rendering world features (read-only layers) ---
   function renderFeatures(){
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
@@ -456,7 +539,6 @@
 
       (f.shapes||[]).forEach(shape=>{
         const d = roundedPolygonPath(shape, 10);
-
         const fill=elNS('path');
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
@@ -472,9 +554,9 @@
         const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
         g.appendChild(glow); g.appendChild(mid); g.appendChild(core);
       });
-      g.addEventListener('click', (e)=> showTooltipFor(f,e));
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
+      g.addEventListener('click', (e)=> showTooltipFor(f,e));
       gRegions.appendChild(g);
     });
 
@@ -495,25 +577,32 @@
     });
   }
 
+  // Tooltip behavior
+  function bindTooltipDismiss(){
+    ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
+    svgWorld.addEventListener('click', (e)=>{
+      const isFeature = !!e.target.closest('.feature');
+      const isMobile = window.matchMedia('(max-width: 760px)').matches;
+      if(!isFeature){
+        if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
+        document.querySelectorAll('.feature.region.selected').forEach(el=>el.classList.remove('selected'));
+      }
+    });
+  }
+
   function showTooltipFor(f, evt){
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const name = f.name || '—';
     const desc = f.desc || '';
     const src = f.img || f.image || f.imageUrl || null;
-
     if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
       loreTitle.textContent = name;
       loreBody.textContent = desc;
-      if(src){
-        loreImg.src = src; loreImg.alt = name + ' image';
-        loreMedia.style.display='block';
-      } else {
-        loreImg.removeAttribute('src');
-        loreMedia.style.display='none';
-      }
+      if(src){ loreImg.src=src; loreImg.alt=name+' image'; loreMedia.style.display='block'; }
+      else { loreImg.removeAttribute('src'); loreMedia.style.display='none'; }
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
@@ -522,14 +611,10 @@
       else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
       tooltip.classList.add('open');
       positionTooltip(evt);
-
-      loreTitle.textContent = name;
-      loreBody.textContent = desc;
-      loreImg.removeAttribute('src');
-      loreMedia.style.display='none';
+      loreTitle.textContent = name; loreBody.textContent = desc;
+      loreImg.removeAttribute('src'); loreMedia.style.display='none';
     }
   }
-
   function positionTooltip(evt){
     const wrapRect = mapWrap.getBoundingClientRect();
     const ttRect = tooltip.getBoundingClientRect();
@@ -543,7 +628,185 @@
     tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
   }
 
-})();
-</script>
+  // ---------------- GM MODE ----------------
+  function bindGM(){
+    // Text editables
+    const editables=[primerIntro, primerDetails, islandLore];
+    let gmOn=false, saveTimer=0;
+    function setEditable(on){
+      editables.forEach(el=> el.setAttribute('contenteditable', on ? 'true' : 'false'));
+      document.body.classList.toggle('gm-on', on);
+      gmBtn.classList.toggle('on', on);
+      gmBtn.textContent = on ? 'GM: ON' : 'GM';
+      gmBar.style.display = on ? 'flex' : 'none';
+      // enable/disable pan-zoom depending on editor sub-mode
+      navigatorApi && navigatorApi.enable(on ? !editor.busy() : true);
+      drawOverlay();
+    }
+    const scheduleSave=()=>{ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal, 400); };
+    editables.forEach(el=>{ el.addEventListener('input', scheduleSave); el.addEventListener('blur', saveLocal); });
+    gmBtn.addEventListener('click', ()=>{ gmOn=!gmOn; setEditable(gmOn); if(gmOn){ scheduleSave(); } });
+
+    // ---- Region editor ----
+    const editor={
+      selectedId:null,
+      mode:'idle', // 'idle' | 'adding' | 'addVertex' | 'delVertex'
+      curShape:null, // {points:[], regionRef, shapeIndex}
+      busy(){ return this.mode!=='idle'; }
+    };
+
+    function refreshRegionSelect(){
+      const regions = (state.features||[]).filter(f=>f.type==='region');
+      regionSelect.innerHTML='';
+      regions.forEach(r=>{
+        const opt=document.createElement('option');
+        opt.value=r.id; opt.textContent=r.name || r.id;
+        regionSelect.appendChild(opt);
+      });
+      if(!editor.selectedId && regions[0]) editor.selectedId = regions[0].id;
+      regionSelect.value = editor.selectedId || '';
+      updateRegionFields();
+    }
+    function updateRegionFields(){
+      const r = getSelectedRegion();
+      regionName.value = r ? (r.name||'') : '';
+      regionColor.value = r ? (r.color||'#8ad9ff') : '#8ad9ff';
+      drawOverlay();
+    }
+    function getSelectedRegion(){
+      return (state.features||[]).find(f=>f.type==='region' && f.id===editor.selectedId) || null;
+    }
+
+    regionSelect.addEventListener('change', ()=>{ editor.selectedId=regionSelect.value; updateRegionFields(); });
+    regionName.addEventListener('input', ()=>{ const r=getSelectedRegion(); if(!r) return; r.name=regionName.value; renderFeatures(); refreshRegionSelect(); saveLocal();});
+    regionColor.addEventListener('input', ()=>{ const r=getSelectedRegion(); if(!r) return; r.color=regionColor.value; renderFeatures(); drawOverlay(); saveLocal(); });
+
+    newRegionBtn.addEventListener('click', ()=>{
+      const id = 'region-'+Date.now().toString(36);
+      const r = { id, type:'region', name:'New Region', color:'#8ad9ff', desc:'', shapes:[] };
+      state.features = state.features || [];
+      state.features.push(r);
+      editor.selectedId = id;
+      renderFeatures(); refreshRegionSelect(); saveLocal();
+    });
+
+    addShapeBtn.addEventListener('click', ()=>{
+      const r=getSelectedRegion(); if(!r){ alert('Create or select a region first.'); return; }
+      editor.mode='adding';
+      editor.curShape={ points:[], regionRef:r, shapeIndex:r.shapes.length };
+      r.shapes.push(editor.curShape.points);
+      navigatorApi && navigatorApi.enable(false);
+      drawOverlay();
+    });
+
+    finishShapeBtn.addEventListener('click', ()=>{
+      if(editor.mode!=='adding'){ editor.mode='idle'; editor.curShape=null; drawOverlay(); navigatorApi && navigatorApi.enable(true); return; }
+      const pts = editor.curShape.points;
+      if(!pts || pts.length<3){ alert('Need at least 3 points.'); return; }
+      editor.mode='idle'; editor.curShape=null; renderFeatures(); drawOverlay(); saveLocal(); navigatorApi && navigatorApi.enable(true);
+    });
+
+    addVertexModeBtn.addEventListener('click', ()=>{ editor.mode = editor.mode==='addVertex' ? 'idle' : 'addVertex'; drawOverlay(); navigatorApi && navigatorApi.enable(editor.mode==='idle'); });
+    delVertexModeBtn.addEventListener('click', ()=>{ editor.mode = editor.mode==='delVertex' ? 'idle' : 'delVertex'; drawOverlay(); navigatorApi && navigatorApi.enable(editor.mode==='idle'); });
+
+    saveJsonBtn.addEventListener('click', ()=>{
+      // assemble export JSON from state
+      const exportData={
+        mapImage: state.mapSrc || DEFAULT_WORLD_MAP,
+        mapSize: state.mapSize || {w:4080,h:3072},
+        campaignMap: state.campaignMapSrc || DEFAULT_ISLAND_MAP,
+        campaignMapSize: state.campaignMapSize || {w:1024,h:1024},
+        primerIntro: primerIntro.textContent.trim(),
+        primerDetails: primerDetails.textContent.trim(),
+        islandLore: islandLore.textContent.trim(),
+        features: state.features || []
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'world-data.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Overlay rendering + interactions
+    function drawOverlay(){
+      gmOverlay.innerHTML='';
+      if(!document.body.classList.contains('gm-on')) return;
+
+      const r = getSelectedRegion();
+      if(!r) return;
+
+      // draw all shapes of selected region
+      (r.shapes||[]).forEach((shape, si)=>{
+        const path=elNS('path'); path.setAttribute('class','shape-path');
+        path.setAttribute('d', roundedPolygonPath(shape, 0));
+        gmOverlay.appendChild(path);
+
+        // edges for add-vertex mode
+        for(let i=0;i<shape.length;i++){
+          const a=shape[i], b=shape[(i+1)%shape.length];
+          const edge=elNS('line');
+          edge.setAttribute('class','edge');
+          edge.setAttribute('x1', a.x); edge.setAttribute('y1', a.y);
+          edge.setAttribute('x2', b.x); edge.setAttribute('y2', b.y);
+          edge.addEventListener('click', (e)=>{
+            if(editor.mode!=='addVertex') return;
+            e.stopPropagation();
+            const p = clientToSvg(e.clientX, e.clientY);
+            shape.splice(i+1, 0, p);
+            drawOverlay(); renderFeatures(); saveLocal();
+          });
+          gmOverlay.appendChild(edge);
+        }
+
+        // vertex handles
+        shape.forEach((pt, idx)=>{
+          const h=elNS('circle'); h.setAttribute('class','handle'); h.setAttribute('r', 8);
+          h.setAttribute('cx', pt.x); h.setAttribute('cy', pt.y);
+          if(editor.mode==='delVertex'){ h.classList.add('del'); }
+          let dragging=false, id=null;
+          h.addEventListener('pointerdown', (e)=>{
+            if(editor.mode==='delVertex'){
+              e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); saveLocal(); }
+              return;
+            }
+            e.preventDefault(); dragging=true; id=e.pointerId; h.classList.add('drag'); h.setPointerCapture(id);
+          });
+          h.addEventListener('pointermove', (e)=>{
+            if(!dragging) return;
+            const p = clientToSvg(e.clientX, e.clientY);
+            pt.x=p.x; pt.y=p.y;
+            h.setAttribute('cx', pt.x); h.setAttribute('cy', pt.y);
+            path.setAttribute('d', roundedPolygonPath(shape, 0));
+            renderFeatures(); // live update
+          });
+          h.addEventListener('pointerup', ()=>{ if(!dragging) return; dragging=false; h.classList.remove('drag'); saveLocal(); });
+          gmOverlay.appendChild(h);
+        });
+      });
+
+      // adding-mode: draw provisional last segment + click to add points
+      if(editor.mode==='adding' && editor.curShape){
+        const pts = editor.curShape.points;
+        const tempPath=elNS('path'); tempPath.setAttribute('class','shape-path');
+        tempPath.setAttribute('d', pts.length? roundedPolygonPath(pts, 0) : '');
+        gmOverlay.appendChild(tempPath);
+
+        svgWorld.onpointerdown = (e)=>{
+          const p = clientToSvg(e.clientX, e.clientY);
+          pts.push(p); drawOverlay();
+        };
+        svgWorld.ondblclick = (e)=>{ finishShapeBtn.click(); };
+      }else{
+        svgWorld.onpointerdown = null; svgWorld.ondblclick=null;
+      }
+    }
+
+    refreshRegionSelect();
+    drawOverlay();
+  }
+
+})();</script>
 </body>
 </html>
