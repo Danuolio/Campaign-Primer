@@ -10,8 +10,8 @@
     "w": 1024, 
     "h": 1024 
   },
-  "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples stand, their miracles still flicker through the faithful, but none have crossed the Divine Gate since the Silence. Priests argue over whether they were banished, retreated, or fell asleep. The Athumi claim one remains—their Lady of Brass—but none outside their empire have seen her light. Life went on. Empires hardened, cities rose, and magic became a craft rather than a covenant. In Oscana, knights sell honour by the contract. Athium turns faith into machinery and ambition into doctrine. Eturia trades knowledge like gold, and in Letrylor’s jungles, the dead still answer if you speak the right words. Trade routes cross the skies and seas, stitched together by old alliances that are beginning to fray. Across Draelon, the same unease spreads. Monsters are being born changed—stronger, smarter, sometimes almost human. Prophets choke on their own visions. The Guilds, mercenary and holy alike, are mobilising. The island of Signika is the newest obsession: a scrap of rock that has begun to attract beasts no scholar can explain. Every faction wants a foothold. Every adventurer wants their claim.",
   "primerDetails": "As eyes across the world turn to Signika, competition for monsters slain and truths unconvered grows fiercer each day.",
+  "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples stand, their miracles still flicker through the faithful, but none have crossed the Divine Gate since the Silence. Priests argue over whether they were banished, retreated, or fell asleep. The Athumi claim one remains—their Lady of Brass—but none outside their empire have seen her light. Life went on. Empires hardened, cities rose, and magic became a craft rather than a covenant. In Oscana, knights sell honour by the contract. Athium turns faith into machinery and ambition into doctrine. Eturia trades knowledge like gold, and in Letrylor’s jungles, the dead still answer if you speak the right words. Trade routes cross the skies and seas, stitched together by old alliances that are beginning to fray. Across Draelon, the same unease spreads. Monsters are being born changed—stronger, smarter, sometimes almost human. Prophets choke on their own visions. The Guilds, mercenary and holy alike, are mobilising. The island of Signika is the newest obsession: a scrap of rock that has begun to attract beasts no scholar can explain. Every faction wants a foothold. Every adventurer wants their claim.",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -2896,6 +2896,7 @@
     }
   ]
 }
+
 
 
 
