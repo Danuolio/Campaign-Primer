@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v51)</title>
+  <title>The World of Draelon – Campaign Primer (v52)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -84,7 +84,6 @@
     .feature.region.hover path.fill{fill-opacity:.35}
     .feature.region.selected path.fill{fill-opacity:.42}
 
-    /* Restored beefy multi-layer neon with softened color tone */
     .feature.region .ol-glow,
     .feature.region .ol-mid,
     .feature.region .ol-core{
@@ -95,14 +94,14 @@
     }
     .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
     .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
-    .feature.region .ol-core{ stroke:#fff; stroke-width:2.5; }
+    .feature.region .ol-core{ stroke:#f6e7c8; stroke-width:2.5; }
 
     .feature.region.hover .ol-glow,
     .feature.region.hover .ol-mid,
-    .feature.region.hover .ol-core{ opacity:.65; }
+    .feature.region.hover .ol-core{ opacity:.5; }
     .feature.region.selected .ol-glow,
     .feature.region.selected .ol-mid,
-    .feature.region.selected .ol-core{ opacity:.92; }
+    .feature.region.selected .ol-core{ opacity:.7; }
 
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
@@ -114,7 +113,6 @@
     .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
     .tooltip .body p{margin:0}
 
-    /* Island section */
     .section{margin:8px 16px 16px 16px}
     .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; margin:0 16px }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -125,7 +123,6 @@
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{white-space:pre-wrap; line-height:1.6}
 
-    /* MOBILE OVERRIDES */
     @media (max-width: 760px){
       .tooltip{ display:none !important; }
       .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
@@ -160,7 +157,6 @@
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
             </filter>
-            <!-- Stronger blurs for smooth neon -->
             <filter id="neonOuter" x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="4" result="blur1"/>
               <feMerge>
@@ -208,7 +204,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v51';
+  const STORAGE_KEY = 'signika.world.v52';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -235,7 +231,6 @@
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  // Color helpers
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
   function rgbToHex({r,g,b}){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(r)+h(g)+h(b); }
@@ -460,16 +455,14 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
-    // Regions with softened-toned neon outlines matching (blended) color
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
-      const neon = blendHex(color, '#e7d9b7', 0.45); // 45% toward warm parchment gold
+      const neon = blendHex(color, '#e7d9b7', 0.80);
 
       (f.shapes||[]).forEach(shape=>{
         const d = roundedPolygonPath(shape, 10);
 
-        // Fill: pure original color
         const fill=elNS('path');
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
@@ -480,7 +473,6 @@
         fill.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(fill);
 
-        // Outlines: blended neon tone + white core
         const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', neon);
         const mid =elNS('path'); mid .setAttribute('d', d); mid .setAttribute('class','ol-mid');  mid .setAttribute('stroke', neon);
         const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
@@ -492,7 +484,6 @@
       gRegions.appendChild(g);
     });
 
-    // Points
     feats.filter(f=>f.type==='point').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
@@ -520,7 +511,6 @@
     if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
-      // Mobile: panel with image
       loreTitle.textContent = name;
       loreBody.textContent = desc;
       if(src){
@@ -532,7 +522,6 @@
       }
       tooltip.classList.remove('open');
     }else{
-      // Desktop: floating tooltip + panel text mirror (no image)
       ttTitle.textContent = name;
       ttBody.innerHTML = '<p>' + (desc? escapeHTML(desc) : '—') + '</p>';
       if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
