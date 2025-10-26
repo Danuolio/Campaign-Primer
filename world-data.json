@@ -676,9 +676,7 @@
       "type": "region",
       "name": "Athium",
       "color": "#001eff",
-      "desc": "Athium is a theocracy built on faith, order, and conquest. It is ruled in the name of the Lady of Brass—the only god said to remain on this side of the Divine Gate. Her priests claim she still walks among them, though few outside Athium believe it. Her image crowns every banner, and her doctrine shapes every law. The empire’s strength lies in its discipline. Cities are planned to the street, armies drilled to the breath. Authority flows downward without question, and service to the state is considered sacred. Those who doubt the Lady’s rule are corrected, not debated. 
-
-      Athium’s borders are in constant motion. To the north, its forces fight the Scarlands in long, bitter campaigns across burned plains and shattered forts. Wyvern squads patrol the skies, giving the empire command of the air and the ability to strike far from its heartland.",
+      "desc": "Athium is a theocracy built on faith, order, and conquest. It is ruled in the name of the Lady of Brass—the only god said to remain on this side of the Divine Gate. Her priests claim she still walks among them, though few outside Athium believe it. Her image crowns every banner, and her doctrine shapes every law. The empire’s strength lies in its discipline. Cities are planned to the street, armies drilled to the breath. Authority flows downward without question, and service to the state is considered sacred. Those who doubt the Lady’s rule are corrected, not debated. Athium’s borders are in constant motion. To the north, its forces fight the Scarlands in long, bitter campaigns across burned plains and shattered forts. Wyvern squads patrol the skies, giving the empire command of the air and the ability to strike far from its heartland.",
       "shapes": [
         [
           {
@@ -2898,6 +2896,7 @@
     }
   ]
 }
+
 
 
 
