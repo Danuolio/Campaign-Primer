@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v50)</title>
+  <title>The World of Draelon – Campaign Primer (v51)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -84,7 +84,7 @@
     .feature.region.hover path.fill{fill-opacity:.35}
     .feature.region.selected path.fill{fill-opacity:.42}
 
-    /* Softer multi-layer neon */
+    /* Restored beefy multi-layer neon with softened color tone */
     .feature.region .ol-glow,
     .feature.region .ol-mid,
     .feature.region .ol-core{
@@ -93,17 +93,16 @@
       opacity:0; pointer-events:none;
       transition: opacity .12s linear;
     }
-    .feature.region .ol-glow{ stroke-width:10; filter:url(#neonOuterSoft); }
-    .feature.region .ol-mid { stroke-width:6;  filter:url(#neonInnerSoft); }
-    .feature.region .ol-core{ stroke:#fff; stroke-width:2.25; } /* now participates on hover too */
+    .feature.region .ol-glow{ stroke-width:14; filter:url(#neonOuter); }
+    .feature.region .ol-mid { stroke-width:8;  filter:url(#neonInner); }
+    .feature.region .ol-core{ stroke:#fff; stroke-width:2.5; }
 
-    /* Hover/Selected visibility (toned-down) */
     .feature.region.hover .ol-glow,
     .feature.region.hover .ol-mid,
-    .feature.region.hover .ol-core{ opacity:.6; }
+    .feature.region.hover .ol-core{ opacity:.65; }
     .feature.region.selected .ol-glow,
     .feature.region.selected .ol-mid,
-    .feature.region.selected .ol-core{ opacity:.9; }
+    .feature.region.selected .ol-core{ opacity:.92; }
 
     .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
     .tooltip.open{display:block}
@@ -161,19 +160,18 @@
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="in" />
             </filter>
-
-            <!-- Softer neon filters -->
-            <filter id="neonOuterSoft" x="-24%" y="-24%" width="148%" height="148%">
-              <feGaussianBlur stdDeviation="3" result="blur1"/>
+            <!-- Stronger blurs for smooth neon -->
+            <filter id="neonOuter" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur1"/>
               <feMerge>
                 <feMergeNode in="blur1"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
-            <filter id="neonInnerSoft" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation="1.2" result="blur2"/>
+            <filter id="neonInner" x="-12%" y="-12%" width="124%" height="124%">
+              <feGaussianBlur stdDeviation="1.5" result="blur3"/>
               <feMerge>
-                <feMergeNode in="blur2"/>
+                <feMergeNode in="blur3"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
@@ -210,7 +208,7 @@
   const JSON_PATH = './world-data.json';
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const STORAGE_KEY = 'signika.world.v50';
+  const STORAGE_KEY = 'signika.world.v51';
   let state=null;
   const mapWrap  = document.getElementById('mapWrap');
   const svgWorld = document.getElementById('world');
@@ -236,6 +234,14 @@
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  // Color helpers
+  function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
+    const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
+  function rgbToHex({r,g,b}){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(r)+h(g)+h(b); }
+  function blendHex(a,b,t){ const A=hexToRgb(a), B=hexToRgb(b);
+    const lerp=(x,y)=>Math.round(x+(y-x)*t);
+    return rgbToHex({r:lerp(A.r,B.r), g:lerp(A.g,B.g), b:lerp(A.b,B.b)}); }
 
   function roundedPolygonPath(points, r){
     if(!points || points.length<2) return '';
@@ -454,14 +460,16 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
-    // Regions with softer neon outlines matching color
+    // Regions with softened-toned neon outlines matching (blended) color
     feats.filter(f=>f.type==='region').forEach(f=>{
       const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
+      const neon = blendHex(color, '#e7d9b7', 0.45); // 45% toward warm parchment gold
+
       (f.shapes||[]).forEach(shape=>{
         const d = roundedPolygonPath(shape, 10);
 
-        // Fill
+        // Fill: pure original color
         const fill=elNS('path');
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
@@ -472,17 +480,13 @@
         fill.addEventListener('click', (e)=> showTooltipFor(f, e));
         g.appendChild(fill);
 
-        // Outlines
-        const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', color);
-        const mid =elNS('path'); mid .setAttribute('d', d); mid .setAttribute('class','ol-mid');  mid .setAttribute('stroke', color);
+        // Outlines: blended neon tone + white core
+        const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', neon);
+        const mid =elNS('path'); mid .setAttribute('d', d); mid .setAttribute('class','ol-mid');  mid .setAttribute('stroke', neon);
         const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
         g.appendChild(glow); g.appendChild(mid); g.appendChild(core);
       });
-      g.addEventListener('click', (e)=>{
-        showTooltipFor(f,e);
-        // explicit selection toggle for keyboard/mouse click
-        document.querySelectorAll('#regions .feature.region').forEach(el=>el.classList.toggle('selected', el === g));
-      });
+      g.addEventListener('click', (e)=> showTooltipFor(f,e));
       g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
       g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
       gRegions.appendChild(g);
