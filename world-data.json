@@ -1,5 +1,4 @@
 {
-  "islandLore": "Your long chunk of island lore text here"
   "mapImage": "/Campaign-Primer/map/world-map.png",
   "mapSize": {
     "w": 4080,
@@ -7,11 +6,12 @@
   },
   "campaignMap": "/Campaign-Primer/map/campaign-map.png",
   "campaignMapSize": {
-    "w": 1024, 
-    "h": 1024 
+    "w": 1024,
+    "h": 1024
   },
-  "primerDetails": "As eyes across the world turn to Signika, competition for monsters slain and truths unconvered grows fiercer each day.",
-  "primerIntro": "Help",
+  "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples stand, their miracles still flicker through the faithful, but none have crossed the Divine Gate since the Silence. Priests argue over whether they were banished, retreated, or fell asleep. The Athumi claim one remains—their Lady of Brass—but none outside their empire have seen her light.\nLife went on. Empires hardened, cities rose, and magic became a craft rather than a covenant. In Oscana, knights sell honour by the contract. Athium turns faith into machinery and ambition into doctrine. Eturia trades knowledge like gold, and in Letrylor’s jungles, the dead still answer if you speak the right words. Trade routes cross the skies and seas, stitched together by old alliances that are beginning to fray.\nAcross Draelon, the same unease spreads. Monsters are being born changed—stronger, smarter, sometimes almost human. Prophets choke on their own visions. The Guilds, mercenary and holy alike, are mobilising. The island of Signika is the newest obsession: a scrap of rock that has begun to attract beasts no scholar can explain. Every faction wants a foothold. Every adventurer wants their claim.",
+  "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
+  "islandLore": "Add your Signika lore here — history, factions, features, and travel notes.",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -19,7 +19,7 @@
       "name": "Oscana",
       "img": "/Campaign-Primer/map/oscana.jpeg",
       "color": "#ff000d",
-      "desc": "Oscana is a feudal land divided among dozens of small kingdoms. Each holds its own laws, armies, and grudges, united only by the need to survive. The land is built from dark stone and cold iron. Smoke from foundries mixes with the mist that rolls down from the Mountains of Naebolg’s Belt. Beyond those peaks lie the northern wildlands—harsh, frozen, and mostly unclaimed. The threat from that frontier has shaped Oscana’s people. They are disciplined, superstitious, and wary of strangers. Mechanists and smiths work beside knights and priests. Industry and invention have taken root, but tradition still rules the courts.",
+      "desc": "A land of crumbling thrones and proud banners. Its knights wage endless wars of honour while the peasants whisper of ancient pacts sealed in blood.",
       "shapes": [
         [
           {
@@ -151,8 +151,8 @@
             "y": 736.813786948619
           },
           {
-            "x": 1395.0352841904828,
-            "y": 756.9436422611536
+            "x": 1395.671875,
+            "y": 753.3077392578125
           },
           {
             "x": 1385.941321341346,
@@ -179,6 +179,10 @@
             "y": 883.9703274502887
           },
           {
+            "x": 1489.9893798828125,
+            "y": 906.9859008789062
+          },
+          {
             "x": 1503.3534246964678,
             "y": 928.6556752505593
           },
@@ -189,6 +193,10 @@
           {
             "x": 1571.883002213613,
             "y": 915.0278287403861
+          },
+          {
+            "x": 1595.298583984375,
+            "y": 894.8013305664062
           },
           {
             "x": 1619.867473759179,
@@ -227,8 +235,8 @@
             "y": 1057.3531835209392
           },
           {
-            "x": 1591.406162319155,
-            "y": 1077.5855000089775
+            "x": 1598.4962158203125,
+            "y": 1092.49560546875
           },
           {
             "x": 1622.1333606587186,
@@ -247,16 +255,16 @@
             "y": 1176.0019687653557
           },
           {
-            "x": 1511.8587427067077,
-            "y": 1191.9172355699461
+            "x": 1506.275146484375,
+            "y": 1191.0072021484375
           },
           {
             "x": 1475.8178596565374,
             "y": 1163.9452010866864
           },
           {
-            "x": 1424.1571891545407,
-            "y": 1171.9009974631103
+            "x": 1429.4964599609375,
+            "y": 1169.298828125
           },
           {
             "x": 1393.5066255252868,
@@ -279,8 +287,8 @@
             "y": 1119.2637884605751
           },
           {
-            "x": 1236.1193662222504,
-            "y": 1129.66134810912
+            "x": 1244.035888671875,
+            "y": 1129.3671875
           },
           {
             "x": 1215.5268268237699,
@@ -668,6 +676,26 @@
             "x": 1782.2729510752827,
             "y": 965.0595752869255
           }
+        ],
+        [
+          {
+            "x": 1552.5911865234375,
+            "y": 766.9185791015625
+          },
+          {
+            "x": 1530.234619140625,
+            "y": 723.7472534179688
+          },
+          {
+            "x": 1569.55126953125,
+            "y": 737.623779296875
+          }
+        ],
+        [
+          {
+            "x": 1587.2823486328125,
+            "y": 768.4603881835938
+          }
         ]
       ]
     },
@@ -676,7 +704,7 @@
       "type": "region",
       "name": "Athium",
       "color": "#001eff",
-      "desc": "Athium is a theocracy built on faith, order, and conquest. It is ruled in the name of the Lady of Brass—the only god said to remain on this side of the Divine Gate. Her priests claim she still walks among them, though few outside Athium believe it. Her image crowns every banner, and her doctrine shapes every law. The empire’s strength lies in its discipline. Cities are planned to the street, armies drilled to the breath. Authority flows downward without question, and service to the state is considered sacred. Those who doubt the Lady’s rule are corrected, not debated. Athium’s borders are in constant motion. To the north, its forces fight the Scarlands in long, bitter campaigns across burned plains and shattered forts. Wyvern squads patrol the skies, giving the empire command of the air and the ability to strike far from its heartland.",
+      "desc": "An empire forged by discipline and fire. Cities of marble and brass rise where forests once stood, feeding the ambitions of its war councils.",
       "shapes": [
         [
           {
@@ -2893,16 +2921,14 @@
           }
         ]
       ]
+    },
+    {
+      "id": "region-mh725tc2",
+      "type": "region",
+      "name": "New Region",
+      "color": "#8ad9ff",
+      "desc": "",
+      "shapes": []
     }
   ]
 }
-
-
-
-
-
-
-
-
-
-
