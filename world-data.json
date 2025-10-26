@@ -9,7 +9,7 @@
     "w": 1024,
     "h": 1024
   },
-  "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples stand, their miracles still flicker through the faithful, but none have crossed the Divine Gate since the Silence. Priests argue over whether they were banished, retreated, or fell asleep. The Athumi claim one remains—their Lady of Brass—but none outside their empire have seen her light.\n\nLife went on. Empires hardened, cities rose, and magic became a craft rather than a covenant. In Oscana, knights sell honour by the contract. Athium turns faith into machinery and ambition into doctrine. Eturia trades knowledge like gold, and in Letrylor’s jungles, the dead still answer if you speak the right words. Trade routes cross the skies and seas, stitched together by old alliances that are beginning to fray.\n\nAcross Draelon, the same unease spreads. Monsters are being born changed—stronger, smarter, sometimes almost human. Prophets choke on their own visions. The Guilds, mercenary and holy alike, are mobilising. The island of Signika is the newest obsession: a scrap of rock that has begun to attract beasts no scholar can explain. Every faction wants a foothold. Every adventurer wants their claim.",
+  "primerIntro": "hey",
   "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
   "islandLore": "Add your Signika lore here — history, factions, features, and travel notes.",
   "features": [
@@ -2932,5 +2932,6 @@
     }
   ]
 }
+
 
 
