@@ -9,7 +9,7 @@
     "w": 1024,
     "h": 1024
   },
-  "primerIntro": "hey",
+  "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples still stand, their names still carry weight, but none have crossed the Divine Gate since the Silence. The Athumi claim their Lady of Brass remains—the last of them to walk the mortal world—but even that faith feels brittle after centuries of war and decay.\n\nNations have filled the silence with their own order: Oscana’s feudal lords forge alliances and betrayals in equal measure, Athium’s empire spreads its doctrine through steel and flame, and Eturia hoards magic like coin. Trade and conflict bind them all, yet something stirs beneath the surface—monsters changing in form and mind, storms that howl with voices, and an island called Signika drawing them in like a wound in the world.",
   "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
   "islandLore": "Add your Signika lore here — history, factions, features, and travel notes.",
   "features": [
@@ -17,7 +17,7 @@
       "id": "n9iu5etxqcimh0h2v6u",
       "type": "region",
       "name": "Oscana",
-      "img": "/Campaign-Primer/map/oscana.jpeg",
+      "img": "/Campaign-Primer/map/Oscana.png",
       "color": "#ff000d",
       "desc": "A land of crumbling thrones and proud banners. Its knights wage endless wars of honour while the peasants whisper of ancient pacts sealed in blood.",
       "shapes": [
@@ -703,6 +703,7 @@
       "id": "xlcya72nhxemh0h2v6u",
       "type": "region",
       "name": "Athium",
+      "img": "/Campaign-Primer/map/Athium.png",
       "color": "#001eff",
       "desc": "An empire forged by discipline and fire. Cities of marble and brass rise where forests once stood, feeding the ambitions of its war councils.",
       "shapes": [
@@ -1326,6 +1327,7 @@
       "id": "igb6sr79mydmh0h2v6u",
       "type": "region",
       "name": "Eturia",
+      "img": "/Campaign-Primer/map/Eturia.png",
       "color": "#25db00",
       "desc": "A realm of towers and tomes. Knowledge is power here, and power is bought with perilous bargains whispered in candlelight.",
       "shapes": [
@@ -2932,6 +2934,7 @@
     }
   ]
 }
+
 
 
 
