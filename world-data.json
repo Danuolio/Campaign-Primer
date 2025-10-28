@@ -2799,6 +2799,7 @@
       "id": "7dij6p951rmh0q76sy",
       "type": "region",
       "name": "Frissia",
+      "img":"/Campaign-Primer/map/Frissia.png",
       "color": "#8ad9ff",
       "desc": "Once the seat of a world-spanning empire, modern Frissia is a shadow of its former grandeur. Now ruled by two tribes—the Fokari and the Areth—whose mutual hatred has only deepened with time, the island is a land of old scars and stubborn pride. Desperate to prove themselves the rightful heirs to a realm the rest of the world has chosen to forget, they fight over a legacy few still remember.\n\nThe people of the island know better. The secrets buried here may yet shape history once more.",
       "shapes": [
@@ -2936,6 +2937,7 @@
     }
   ]
 }
+
 
 
 
