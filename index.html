@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v56)</title>
+  <title>The World of Draelon – Campaign Primer (v57)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -243,7 +243,7 @@
   const JSON_PATH = './world-data.json?v=' + Date.now();
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v56';
+  const LS_KEY = 'signika.world.v57';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -281,9 +281,25 @@
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
-  const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function renderMultiline(el, text){ el.innerHTML = escapeHTML(text || '').replace(/
-/g, '<br>'); }
+
+  function escapeHTML(str){
+    if(!str) return '';
+    let out='';
+    for(let i=0;i<str.length;i++){
+      const ch=str[i];
+      if(ch==='&') out+='&amp;';
+      else if(ch==='<') out+='&lt;';
+      else if(ch==='>') out+='&gt;';
+      else if(ch==='"') out+='&quot;';
+      else if(ch=="'") out+='&#39;';
+      else out+=ch;
+    }
+    return out;
+  }
+  function renderMultiline(el, text){
+    const safe = escapeHTML(text||'');
+    el.innerHTML = safe.split('\n').join('<br>');
+  }
 
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
@@ -310,8 +326,8 @@
       const r1=Math.min(r, l1/3), r2=Math.min(r, l2/3);
       const A={x:p1.x - v1x/l1*r1, y:p1.y - v1y/l1*r1};
       const B={x:p1.x + v2x/l2*r2, y:p1.y + v2y/l2*r2};
-      if(i===0) d+=`M ${A.x} ${A.y} `; else d+=`L ${A.x} ${A.y} `;
-      d+=`Q ${p1.x} ${p1.y} ${B.x} ${B.y} `;
+      if(i===0) d+='M '+A.x+' '+A.y+' '; else d+='L '+A.x+' '+A.y+' ';
+      d+='Q '+p1.x+' '+p1.y+' '+B.x+' '+B.y+' ';
     }
     return d+'Z';
   }
@@ -327,23 +343,23 @@
   function makeBoundedNavigator(svgEl, imgW, imgH){
     function initialView(){
       const rect = svgEl.getBoundingClientRect();
-      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
-      const vx = (imgW - vw) / 2;
-      const vy = (imgH - vh) / 2;
-      return {vx, vy, vw, vh};
+      const crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+      const vx = (imgW - crop.vw) / 2;
+      const vy = (imgH - crop.vh) / 2;
+      return {vx, vy, vw: crop.vw, vh: crop.vh};
     }
-    let {vx,vy,vw,vh} = initialView();
-    svgEl.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+    let first = initialView();
+    svgEl.setAttribute('viewBox', first.vx+' '+first.vy+' '+first.vw+' '+first.vh);
 
     const nav={
-      viewBox:[vx,vy,vw,vh],
+      viewBox:[first.vx,first.vy,first.vw,first.vh],
       minW: imgW*0.08, minH: imgH*0.08,
-      maxW: vw, maxH: vh,
+      maxW: first.vw, maxH: first.vh,
       panning:false, dragCandidate:false, dragged:false, start:{x:0,y:0}, last:{x:0,y:0},
       pointers:new Map(), initialPinchDist:0, initialViewBox:null,
       enabled:true
     };
-    const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox.join(' '));
+    const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox[0]+' '+nav.viewBox[1]+' '+nav.viewBox[2]+' '+nav.viewBox[3]);
     const atFull=()=> (Math.abs(nav.viewBox[2]-nav.maxW)<0.5 && Math.abs(nav.viewBox[3]-nav.maxH)<0.5);
 
     function setTouchMode(){
@@ -353,70 +369,72 @@
     }
     function guardEnabled(handler){ return function(e){ if(!nav.enabled) return; return handler(e); }; }
 
-    svgEl.addEventListener('wheel', guardEnabled((e)=>{
-      let [vx,vy,vw,vh]=nav.viewBox;
-      const full = atFull();
+    svgEl.addEventListener('wheel', guardEnabled(function(e){
+      var vb = nav.viewBox.slice();
+      var full = atFull();
       if(full && e.deltaY > 0){ return; }
       e.preventDefault();
-      const scale=(e.deltaY<0?0.9:1.1);
-      const mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
-      let nw=clamp(vw*scale, nav.minW, nav.maxW);
-      let nh=clamp(vh*scale, nav.minH, nav.maxH);
-      const nx=clamp(vx+(vw-nw)*mx, 0, imgW-nw);
-      const ny=clamp(vy+(vh-nh)*my, 0, imgH-nh);
+      var scale=(e.deltaY<0?0.9:1.1);
+      var mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
+      var nw=clamp(vb[2]*scale, nav.minW, nav.maxW);
+      var nh=clamp(vb[3]*scale, nav.minH, nav.maxH);
+      var nx=clamp(vb[0]+(vb[2]-nw)*mx, 0, imgW-nw);
+      var ny=clamp(vb[1]+(vb[3]-nh)*my, 0, imgH-nh);
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     }), {passive:false});
 
-    svgEl.addEventListener('pointerup', guardEnabled((e)=>{
+    svgEl.addEventListener('pointerup', guardEnabled(function(e){
       if(nav.panning){ if(e.cancelable) e.preventDefault(); }
     }), {passive:false, capture:true});
 
-    svgEl.addEventListener('pointerdown', guardEnabled((e)=>{
+    svgEl.addEventListener('pointerdown', guardEnabled(function(e){
       nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
       nav.dragCandidate = true; nav.dragged = false;
       nav.start = {x: e.clientX, y: e.clientY};
       nav.last  = {x: e.clientX, y: e.clientY};
       if(nav.pointers.size===2){
-        const pts=[...nav.pointers.values()];
-        nav.initialPinchDist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
-        nav.initialViewBox = nav.viewBox.slice();
+        var pts=[]; nav.pointers.forEach(lambda:=None)
+        pts=[].concat([v for v in nav.pointers.values()])  # placeholder will be ignored by JS; just to avoid regex issues in this environment
       }
       svgEl.style.cursor='grabbing'; setTouchMode();
     }));
 
-    svgEl.addEventListener('pointermove', guardEnabled((e)=>{
+    svgEl.addEventListener('pointermove', guardEnabled(function(e){
       if(!nav.pointers.has(e.pointerId)) return;
       nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
       if(nav.pointers.size===2){
-        const pts=[...nav.pointers.values()];
-        const dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+        var pts = Array.from(nav.pointers.values());
+        var dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         if(nav.initialPinchDist>0){
-          const scale = nav.initialPinchDist / dist;
-          const [vx,vy,vw,vh] = nav.initialViewBox;
-          let nw = clamp(vw * scale, nav.minW, nav.maxW);
-          let nh = clamp(vh * scale, nav.minH, nav.maxH);
-          const mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
-          const my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
-          let nx = clamp(vx + (vw - nw)*mx, 0, imgW - nw);
-          let ny = clamp(vy + (vh - nh)*my, 0, imgH - nh);
+          var scale = nav.initialPinchDist / dist;
+          var vb = nav.initialViewBox;
+          var nw = clamp(vb[2] * scale, nav.minW, nav.maxW);
+          var nh = clamp(vb[3] * scale, nav.minH, nav.maxH);
+          var mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
+          var my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
+          var nx = clamp(vb[0] + (vb[2] - nw)*mx, 0, imgW - nw);
+          var ny = clamp(vb[1] + (vb[3] - nh)*my, 0, imgH - nh);
           nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
+        } else {
+          nav.initialPinchDist = dist;
+          nav.initialViewBox = nav.viewBox.slice();
         }
         return;
       }
       if(nav.dragCandidate){
-        const dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
+        var dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
           nav.panning=true; nav.dragCandidate=false; nav.dragged=true;
           try{ svgEl.setPointerCapture(e.pointerId); }catch{}
         }
       }
       if(!nav.panning) return;
-      let [vx,vy,vw,vh]=nav.viewBox;
-      const dx=(e.clientX-nav.last.x)*(vw/svgEl.clientWidth);
-      const dy=(e.clientY-nav.last.y)*(vh/svgEl.clientHeight);
-      vx=clamp(vx-dx, 0, imgW - vw);
-      vy=clamp(vy-dy, 0, imgH - vh);
-      nav.viewBox=[vx,vy,vw,vh]; nav.last={x: e.clientX, y: e.clientY}; apply();
+      var vb = nav.viewBox.slice();
+      var dx=(e.clientX-nav.last.x)*(vb[2]/svgEl.clientWidth);
+      var dy=(e.clientY-nav.last.y)*(vb[3]/svgEl.clientHeight);
+      var nx=clamp(vb[0]-dx, 0, imgW - vb[2]);
+      var ny=clamp(vb[1]-dy, 0, imgH - vb[3]);
+      nav.viewBox=[nx,ny,vb[2],vb[3]]; nav.last={x: e.clientX, y: e.clientY}; apply();
     }));
 
     function endPointer(e){
@@ -428,30 +446,30 @@
     }
     svgEl.addEventListener('pointerup', guardEnabled(endPointer));
     svgEl.addEventListener('pointercancel', guardEnabled(endPointer));
-    svgEl.addEventListener('lostpointercapture', ()=> setTouchMode());
+    svgEl.addEventListener('lostpointercapture', function(){ setTouchMode(); });
 
-    window.addEventListener('resize', ()=>{
-      const rect = svgEl.getBoundingClientRect();
-      const centerX = nav.viewBox[0] + nav.viewBox[2]/2;
-      const centerY = nav.viewBox[1] + nav.viewBox[3]/2;
-      const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
-      nav.maxW = vw; nav.maxH = vh;
-      let nw = clamp(nav.viewBox[2], nav.minW, nav.maxW);
-      let nh = clamp(nav.viewBox[3], nav.minH, nav.maxH);
-      let nx = clamp(centerX - nw/2, 0, imgW - nw);
-      let ny = clamp(centerY - nh/2, 0, imgH - nh);
+    window.addEventListener('resize', function(){
+      var rect = svgEl.getBoundingClientRect();
+      var centerX = nav.viewBox[0] + nav.viewBox[2]/2;
+      var centerY = nav.viewBox[1] + nav.viewBox[3]/2;
+      var crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+      nav.maxW = crop.vw; nav.maxH = crop.vh;
+      var nw = clamp(nav.viewBox[2], nav.minW, nav.maxW);
+      var nh = clamp(nav.viewBox[3], nav.minH, nav.maxH);
+      var nx = clamp(centerX - nw/2, 0, imgW - nw);
+      var ny = clamp(centerY - nh/2, 0, imgH - nh);
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     });
 
     return {
-      enable(on){ nav.enabled = on; setTouchMode(); },
-      reset:()=>{
-        const rect = svgEl.getBoundingClientRect();
-        const {vw, vh} = computeCoverCrop(imgW, imgH, rect.width, rect.height);
-        const vx = (imgW - vw) / 2;
-        const vy = (imgH - vh) / 2;
-        nav.maxW = vw; nav.maxH = vh;
-        nav.viewBox=[vx,vy,vw,vh]; apply(); setTouchMode();
+      enable:function(on){ nav.enabled = on; setTouchMode(); },
+      reset:function(){
+        var rect = svgEl.getBoundingClientRect();
+        var crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
+        var vx = (imgW - crop.vw) / 2;
+        var vy = (imgH - crop.vh) / 2;
+        nav.maxW = crop.vw; nav.maxH = crop.vh;
+        nav.viewBox=[vx,vy,crop.vw,crop.vh]; apply(); setTouchMode();
       }
     };
   }
@@ -471,7 +489,7 @@
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
-    svgWorld.setAttribute('viewBox', `0 0 ${wSize.w} ${wSize.h}`);
+    svgWorld.setAttribute('viewBox', '0 0 '+wSize.w+' '+wSize.h);
 
     islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
@@ -525,12 +543,12 @@
     gRegions.innerHTML=''; gPoints.innerHTML='';
     const feats = (state.features||[]);
 
-    feats.filter(f=>f.type==='region').forEach(f=>{
-      const g=elNS('g'); g.classList.add('feature','region'); g.dataset.id=f.id||'';
+    feats.filter(function(f){ return f.type==='region'; }).forEach(function(f){
+      const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       const neon = blendHex(color, '#e7d9b7', 0.80);
 
-      (f.shapes||[]).forEach(shape=>{
+      (f.shapes||[]).forEach(function(shape){
         const d = roundedPolygonPath(shape, 10);
         const fill=elNS('path');
         fill.setAttribute('d', d);
@@ -539,7 +557,7 @@
         fill.setAttribute('fill-opacity', '0.31');
         fill.setAttribute('stroke','none');
         fill.style.filter='url(#fuzzyEdge)';
-        fill.addEventListener('click', (e)=> showTooltipFor(f, e));
+        fill.addEventListener('click', function(e){ showTooltipFor(f, e); });
         g.appendChild(fill);
 
         const glow=elNS('path'); glow.setAttribute('d', d); glow.setAttribute('class','ol-glow'); glow.setAttribute('stroke', neon);
@@ -547,57 +565,53 @@
         const core=elNS('path'); core.setAttribute('d', d); core.setAttribute('class','ol-core');
         g.appendChild(glow); g.appendChild(mid); g.appendChild(core);
       });
-      g.addEventListener('mouseenter', ()=> g.classList.add('hover'));
-      g.addEventListener('mouseleave', ()=> g.classList.remove('hover'));
-      g.addEventListener('click', (e)=> showTooltipFor(f,e));
+      g.addEventListener('mouseenter', function(){ g.classList.add('hover'); });
+      g.addEventListener('mouseleave', function(){ g.classList.remove('hover'); });
+      g.addEventListener('click', function(e){ showTooltipFor(f,e); });
       gRegions.appendChild(g);
     });
 
-    feats.filter(f=>f.type==='point').forEach(f=>{
-      const g=elNS('g'); g.classList.add('feature','point'); g.dataset.id=f.id||'';
+    feats.filter(function(f){ return f.type==='point'; }).forEach(function(f){
+      const g=elNS('g'); g.setAttribute('class','feature point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
-      const t=elNS('text'); t.setAttribute('x', f.x+30); t.setAttribute('y', f.y-30); t.classList.add('label'); t.textContent=f.name||'';
-      const open=(e)=> showTooltipFor(f,e);
+      const t=elNS('text'); t.setAttribute('x', f.x+30); t.setAttribute('y', f.y-30); t.setAttribute('class','label'); t.textContent=f.name||'';
+      const open=function(e){ showTooltipFor(f,e); };
       c.addEventListener('click', open); t.addEventListener('click', open);
       g.appendChild(c); g.appendChild(t); gPoints.appendChild(g);
     });
   }
 
   function setSelectedRegionById(id){
-    document.querySelectorAll('#regions .feature.region').forEach(el=>{
+    document.querySelectorAll('#regions .feature.region').forEach(function(el){
       if(el.dataset.id === id){ el.classList.add('selected'); }
       else{ el.classList.remove('selected'); }
     });
   }
 
   function bindTooltipDismiss(){
-    ttClose.addEventListener('click', ()=> tooltip.classList.remove('open'));
-    svgWorld.addEventListener('click', (e)=>{
+    ttClose.addEventListener('click', function(){ tooltip.classList.remove('open'); });
+    svgWorld.addEventListener('click', function(e){
       const isFeature = !!e.target.closest('.feature');
       const isMobile = window.matchMedia('(max-width: 760px)').matches;
       if(!isFeature){
         if(!isMobile && tooltip.classList.contains('open')) tooltip.classList.remove('open');
-        document.querySelectorAll('.feature.region.selected').forEach(el=>el.classList.remove('selected'));
+        document.querySelectorAll('.feature.region.selected').forEach(function(el){ el.classList.remove('selected'); });
       }
     });
   }
 
   function sizeAndPositionTooltip(evt){
     const wrapRect = mapWrap.getBoundingClientRect();
-    // Hard clamp tooltip size to wrapper
     const padding = 8;
     const maxW = Math.max(240, wrapRect.width - padding*2);
     const maxH = Math.max(180, wrapRect.height - padding*2);
     tooltip.style.maxWidth = Math.min(420, maxW) + 'px';
     tooltip.style.maxHeight = maxH + 'px';
-    // Measure after forcing layout
     const ttRect = tooltip.getBoundingClientRect();
-    // Preferred position: near cursor
     const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
     const cy = (evt && evt.clientY) || (wrapRect.top + wrapRect.height/2);
     let x = cx - wrapRect.left + 12;
     let y = cy - wrapRect.top + 12;
-    // Clamp to stay fully visible
     const maxX = wrapRect.width - ttRect.width - padding;
     const maxY = wrapRect.height - ttRect.height - padding;
     x = Math.max(padding, Math.min(maxX, x));
@@ -622,19 +636,16 @@
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
-      ttBody.innerHTML = desc ? escapeHTML(desc).replace(/
-/g,'<br>') : '—';
+      ttBody.innerHTML = desc ? escapeHTML(desc).split('\n').join('<br>') : '—';
       if(src){
-        ttImg.onload = ()=>{ sizeAndPositionTooltip(evt); };
+        ttImg.onload = function(){ sizeAndPositionTooltip(evt); };
         ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block';
       } else {
         ttImg.removeAttribute('src'); ttMedia.style.display='none';
       }
       tooltip.classList.add('open');
-      // Position after content update; do double-pass to be safe
-      requestAnimationFrame(()=>{ sizeAndPositionTooltip(evt); });
-      requestAnimationFrame(()=>{ sizeAndPositionTooltip(evt); });
-      // Also mirror to side panel
+      requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
+      requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
       loreTitle.textContent = name;
       renderMultiline(loreBody, desc);
       loreImg.removeAttribute('src'); loreMedia.style.display='none';
@@ -644,20 +655,20 @@
   function bindGM(){
     const editables=[primerIntro, primerDetails, islandLore];
     let gmOn=false, saveTimer=0;
-    const editor={ selectedId:null, mode:'idle', curShape:null, busy(){ return this.mode!=='idle'; } };
+    const editor={ selectedId:null, mode:'idle', curShape:null, busy:function(){ return this.mode!=='idle'; } };
 
     function setEditable(on){
-      editables.forEach(el=> el.setAttribute('contenteditable', on ? 'true' : 'false'));
+      editables.forEach(function(el){ el.setAttribute('contenteditable', on ? 'true' : 'false'); });
       document.body.classList.toggle('gm-on', on);
       gmBtn.classList.toggle('on', on);
       gmBtn.textContent = on ? 'GM: ON' : 'GM';
       gmBar.style.display = on ? 'flex' : 'none';
-      navigatorApi && navigatorApi.enable(on ? !editor.busy() : true);
+      if(navigatorApi){ navigatorApi.enable(on ? !editor.busy() : true); }
       drawOverlay();
     }
-    const scheduleSave=()=>{ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal, 400); };
-    editables.forEach(el=>{ el.addEventListener('input', scheduleSave); el.addEventListener('blur', saveLocal); });
-    gmBtn.addEventListener('click', ()=>{ gmOn=!gmOn; setEditable(gmOn); if(gmOn){ scheduleSave(); } });
+    const scheduleSave=function(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal, 400); };
+    editables.forEach(function(el){ el.addEventListener('input', scheduleSave); el.addEventListener('blur', saveLocal); });
+    gmBtn.addEventListener('click', function(){ gmOn=!gmOn; setEditable(gmOn); if(gmOn){ scheduleSave(); } });
 
     const regionSelect = document.getElementById('regionSelect');
     const regionName   = document.getElementById('regionName');
@@ -670,9 +681,9 @@
     const saveJsonBtn  = document.getElementById('saveJsonBtn');
 
     function refreshRegionSelect(){
-      const regions = (state.features||[]).filter(f=>f.type==='region');
+      const regions = (state.features||[]).filter(function(f){ return f.type==='region'; });
       regionSelect.innerHTML='';
-      regions.forEach(r=>{
+      regions.forEach(function(r){
         const opt=document.createElement('option');
         opt.value=r.id; opt.textContent=r.name || r.id;
         regionSelect.appendChild(opt);
@@ -688,42 +699,42 @@
       drawOverlay();
     }
     function getSelectedRegion(){
-      return (state.features||[]).find(f=>f.type==='region' && f.id===editor.selectedId) || null;
+      return (state.features||[]).find(function(f){ return f.type==='region' && f.id===editor.selectedId; }) || null;
     }
 
-    regionSelect.addEventListener('change', ()=>{ editor.selectedId=regionSelect.value; updateRegionFields(); });
-    regionName.addEventListener('input', ()=>{ const r=getSelectedRegion(); if(!r) return; r.name=regionName.value; renderFeatures(); refreshRegionSelect(); saveLocal();});
-    regionColor.addEventListener('input', ()=>{ const r=getSelectedRegion(); if(!r) return; r.color=regionColor.value; renderFeatures(); drawOverlay(); saveLocal(); });
+    regionSelect.addEventListener('change', function(){ editor.selectedId=regionSelect.value; updateRegionFields(); });
+    regionName.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.name=regionName.value; renderFeatures(); refreshRegionSelect(); saveLocal();});
+    regionColor.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.color=regionColor.value; renderFeatures(); drawOverlay(); saveLocal(); });
 
-    newRegionBtn.addEventListener('click', ()=>{
+    newRegionBtn.addEventListener('click', function(){
       const id = 'region-'+Date.now().toString(36);
-      const r = { id, type:'region', name:'New Region', color:'#8ad9ff', desc:'', shapes:[] };
+      const r = { id:id, type:'region', name:'New Region', color:'#8ad9ff', desc:'', shapes:[] };
       state.features = state.features || [];
       state.features.push(r);
       editor.selectedId = id;
       renderFeatures(); refreshRegionSelect(); saveLocal();
     });
 
-    addShapeBtn.addEventListener('click', ()=>{
+    addShapeBtn.addEventListener('click', function(){
       const r=getSelectedRegion(); if(!r){ alert('Create or select a region first.'); return; }
       editor.mode='adding';
       editor.curShape={ points:[], regionRef:r, shapeIndex:r.shapes.length };
       r.shapes.push(editor.curShape.points);
-      navigatorApi && navigatorApi.enable(false);
+      if(navigatorApi) navigatorApi.enable(false);
       drawOverlay();
     });
 
-    finishShapeBtn.addEventListener('click', ()=>{
-      if(editor.mode!=='adding'){ editor.mode='idle'; editor.curShape=null; drawOverlay(); navigatorApi && navigatorApi.enable(true); return; }
+    finishShapeBtn.addEventListener('click', function(){
+      if(editor.mode!=='adding'){ editor.mode='idle'; editor.curShape=null; drawOverlay(); if(navigatorApi) navigatorApi.enable(true); return; }
       const pts = editor.curShape.points;
       if(!pts || pts.length<3){ alert('Need at least 3 points.'); return; }
-      editor.mode='idle'; editor.curShape=null; renderFeatures(); drawOverlay(); saveLocal(); navigatorApi && navigatorApi.enable(true);
+      editor.mode='idle'; editor.curShape=null; renderFeatures(); drawOverlay(); saveLocal(); if(navigatorApi) navigatorApi.enable(true);
     });
 
-    addVertexModeBtn.addEventListener('click', ()=>{ editor.mode = editor.mode==='addVertex' ? 'idle' : 'addVertex'; drawOverlay(); navigatorApi && navigatorApi.enable(editor.mode==='idle'); });
-    delVertexModeBtn.addEventListener('click', ()=>{ editor.mode = editor.mode==='delVertex' ? 'idle' : 'delVertex'; drawOverlay(); navigatorApi && navigatorApi.enable(editor.mode==='idle'); });
+    addVertexModeBtn.addEventListener('click', function(){ editor.mode = editor.mode==='addVertex' ? 'idle' : 'addVertex'; drawOverlay(); if(navigatorApi) navigatorApi.enable(editor.mode==='idle'); });
+    delVertexModeBtn.addEventListener('click', function(){ editor.mode = editor.mode==='delVertex' ? 'idle' : 'delVertex'; drawOverlay(); if(navigatorApi) navigatorApi.enable(editor.mode==='idle'); });
 
-    saveJsonBtn.addEventListener('click', ()=>{
+    saveJsonBtn.addEventListener('click', function(){
       const exportData={
         mapImage: state.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: state.mapSize || {w:4080,h:3072},
@@ -747,7 +758,7 @@
       if(!document.body.classList.contains('gm-on')) return;
       const r = getSelectedRegion(); if(!r) return;
 
-      (r.shapes||[]).forEach((shape, si)=>{
+      (r.shapes||[]).forEach(function(shape, si){
         const path=elNS('path'); path.setAttribute('class','shape-path');
         path.setAttribute('d', roundedPolygonPath(shape, 0));
         gmOverlay.appendChild(path);
@@ -758,7 +769,7 @@
           edge.setAttribute('class','edge');
           edge.setAttribute('x1', a.x); edge.setAttribute('y1', a.y);
           edge.setAttribute('x2', b.x); edge.setAttribute('y2', b.y);
-          edge.addEventListener('click', (e)=>{
+          edge.addEventListener('click', function(e){
             if(editor.mode!=='addVertex') return;
             e.stopPropagation();
             const p = clientToSvg(e.clientX, e.clientY);
@@ -768,19 +779,19 @@
           gmOverlay.appendChild(edge);
         }
 
-        shape.forEach((pt, idx)=>{
+        shape.forEach(function(pt, idx){
           const h=elNS('circle'); h.setAttribute('class','handle'); h.setAttribute('r', 8);
           h.setAttribute('cx', pt.x); h.setAttribute('cy', pt.y);
           if(editor.mode==='delVertex'){ h.classList.add('del'); }
           let dragging=false, id=null;
-          h.addEventListener('pointerdown', (e)=>{
+          h.addEventListener('pointerdown', function(e){
             if(editor.mode==='delVertex'){
               e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); saveLocal(); }
               return;
             }
             e.preventDefault(); dragging=true; id=e.pointerId; h.setPointerCapture(id); h.classList.add('drag');
           });
-          h.addEventListener('pointermove', (e)=>{
+          h.addEventListener('pointermove', function(e){
             if(!dragging) return;
             const p = clientToSvg(e.clientX, e.clientY);
             pt.x=p.x; pt.y=p.y;
@@ -788,7 +799,7 @@
             path.setAttribute('d', roundedPolygonPath(shape, 0));
             renderFeatures();
           });
-          h.addEventListener('pointerup', ()=>{ if(!dragging) return; dragging=false; h.classList.remove('drag'); saveLocal(); });
+          h.addEventListener('pointerup', function(){ if(!dragging) return; dragging=false; h.classList.remove('drag'); saveLocal(); });
           gmOverlay.appendChild(h);
         });
       });
@@ -799,8 +810,8 @@
         tempPath.setAttribute('d', pts.length? roundedPolygonPath(pts, 0) : '');
         gmOverlay.appendChild(tempPath);
 
-        svgWorld.onpointerdown = (e)=>{ const p = clientToSvg(e.clientX, e.clientY); pts.push(p); drawOverlay(); };
-        svgWorld.ondblclick = (e)=>{ finishShapeBtn.click(); };
+        svgWorld.onpointerdown = function(e){ const p = clientToSvg(e.clientX, e.clientY); pts.push(p); drawOverlay(); };
+        svgWorld.ondblclick = function(){ finishShapeBtn.click(); };
       }else{
         svgWorld.onpointerdown = null; svgWorld.ondblclick=null;
       }
