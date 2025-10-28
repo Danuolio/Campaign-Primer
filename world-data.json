@@ -2474,9 +2474,10 @@
     {
       "id": "4koif2djekqmh0pvein",
       "type": "region",
-      "name": "Scarlands",
+      "name": "Arrania",
       "color": "#ff7300",
-      "desc": "",
+      "img": "/Campaign-Primer/map/Arrania.png",
+      "desc": "The Scarthold, the Thrice-Burned Lands, Old Arrania — a region whose people struggle to hold on to identity while falling to the mercy of their neighbours. For decades, Athium has used these lands as a place to train and entertain its armies.\n\nThe Arranian realms, long weakened by the scars of a ravening war waged when the gods still walked Draelon, are nonetheless home to some of the most prideful folk in the world. Their fierce stubbornness may yet prove enough to keep their enemies at bay.",
       "shapes": [
         [
           {
@@ -2935,6 +2936,7 @@
     }
   ]
 }
+
 
 
 
