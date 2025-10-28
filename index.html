@@ -393,8 +393,9 @@
       nav.start = {x: e.clientX, y: e.clientY};
       nav.last  = {x: e.clientX, y: e.clientY};
       if(nav.pointers.size===2){
-        var pts=[]; nav.pointers.forEach(lambda:=None)
-        pts=[].concat([v for v in nav.pointers.values()])  # placeholder will be ignored by JS; just to avoid regex issues in this environment
+        var pts = Array.from(nav.pointers.values());
+        nav.initialPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+        nav.initialViewBox = nav.viewBox.slice();
       }
       svgEl.style.cursor='grabbing'; setTouchMode();
     }));
@@ -824,3 +825,4 @@
 })();</script>
 </body>
 </html>
+
