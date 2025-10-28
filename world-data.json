@@ -11,7 +11,7 @@
   },
   "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples still stand, their names still carry weight, but none have crossed the Divine Gate since the Silence. The Athumi claim their Lady of Brass remains—the last of them to walk the mortal world—but even that faith feels brittle after centuries of war and decay.\n\nNations have filled the silence with their own order: Oscana’s feudal lords forge alliances and betrayals in equal measure, Athium’s empire spreads its doctrine through steel and flame, and Eturia hoards magic like coin. Trade and conflict bind them all, yet something stirs beneath the surface—monsters changing in form and mind, storms that howl with voices, and an island called Signika drawing them in like a wound in the world.",
   "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
-  "islandLore": "Add your Signika lore here — history, factions, features, and travel notes.",
+  "islandLore": "This is where I'll give a rundown of the campaign framing with all the relevant info.",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -2937,6 +2937,7 @@
     }
   ]
 }
+
 
 
 
