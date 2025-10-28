@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v55)</title>
+  <title>The World of Draelon – Campaign Primer (v56)</title>
   <style>
     :root{
       --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -93,14 +93,18 @@
     .feature.region.selected .ol-mid,
     .feature.region.selected .ol-core{ opacity:.7; }
 
-    .tooltip{position:absolute;min-width:260px;max-width:420px;background:var(--paper);border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);z-index:1000;display:none;pointer-events:auto;overflow:hidden}
+    .tooltip{
+      position:absolute;min-width:260px;max-width:420px;background:var(--paper);
+      border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);
+      z-index:1000;display:none;pointer-events:auto;overflow:auto;
+    }
     .tooltip.open{display:block}
-    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:relative; z-index:2}
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:sticky; top:0; z-index:2}
     .tooltip header h3{margin:0;font-size:16px}
     .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
     .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
     .tooltip .media img{width:100%;height:auto;display:block}
-    .tooltip .body{padding:10px 12px;line-height:1.5; max-height:none; overflow:visible}
+    .tooltip .body{padding:10px 12px;line-height:1.5;}
     .tooltip .body p{margin:0}
 
     .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
@@ -236,10 +240,10 @@
   </div>
 <script>
 (function(){
-  const JSON_PATH = './world-data.json';
+  const JSON_PATH = './world-data.json?v=' + Date.now();
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v55';
+  const LS_KEY = 'signika.world.v56';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -278,7 +282,8 @@
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
   const escapeHTML = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function renderMultiline(el, text){ el.innerHTML = escapeHTML(text || '').replace(/\n/g, '<br>'); }
+  function renderMultiline(el, text){ el.innerHTML = escapeHTML(text || '').replace(/
+/g, '<br>'); }
 
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
@@ -483,7 +488,9 @@
     try{
       const res = await fetch(JSON_PATH, {cache:'no-store'});
       if(!res.ok) throw 0;
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try{ data = JSON.parse(text);}catch(e){ console.error('JSON parse error:', e, text); throw e; }
       return {
         mapSrc: data.mapImage || data.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: data.mapSize || {w:4080,h:3072},
@@ -495,6 +502,7 @@
         islandLore: data.islandLore || ''
       };
     }catch(e){
+      console.error('Falling back to defaults due to load error:', e);
       return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMapSrc: DEFAULT_ISLAND_MAP,
                campaignMapSize:{w:1024,h:1024}, features:[], primerIntro:'', primerDetails:'', islandLore:'' };
     }
@@ -574,6 +582,30 @@
     });
   }
 
+  function sizeAndPositionTooltip(evt){
+    const wrapRect = mapWrap.getBoundingClientRect();
+    // Hard clamp tooltip size to wrapper
+    const padding = 8;
+    const maxW = Math.max(240, wrapRect.width - padding*2);
+    const maxH = Math.max(180, wrapRect.height - padding*2);
+    tooltip.style.maxWidth = Math.min(420, maxW) + 'px';
+    tooltip.style.maxHeight = maxH + 'px';
+    // Measure after forcing layout
+    const ttRect = tooltip.getBoundingClientRect();
+    // Preferred position: near cursor
+    const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
+    const cy = (evt && evt.clientY) || (wrapRect.top + wrapRect.height/2);
+    let x = cx - wrapRect.left + 12;
+    let y = cy - wrapRect.top + 12;
+    // Clamp to stay fully visible
+    const maxX = wrapRect.width - ttRect.width - padding;
+    const maxY = wrapRect.height - ttRect.height - padding;
+    x = Math.max(padding, Math.min(maxX, x));
+    y = Math.max(padding, Math.min(maxY, y));
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  }
+
   function showTooltipFor(f, evt){
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
@@ -590,27 +622,23 @@
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
-      ttBody.innerHTML = desc ? escapeHTML(desc).replace(/\n/g,'<br>') : '—';
-      if(src){ ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block'; }
-      else { ttImg.removeAttribute('src'); ttMedia.style.display='none'; }
+      ttBody.innerHTML = desc ? escapeHTML(desc).replace(/
+/g,'<br>') : '—';
+      if(src){
+        ttImg.onload = ()=>{ sizeAndPositionTooltip(evt); };
+        ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block';
+      } else {
+        ttImg.removeAttribute('src'); ttMedia.style.display='none';
+      }
       tooltip.classList.add('open');
-      positionTooltip(evt);
+      // Position after content update; do double-pass to be safe
+      requestAnimationFrame(()=>{ sizeAndPositionTooltip(evt); });
+      requestAnimationFrame(()=>{ sizeAndPositionTooltip(evt); });
+      // Also mirror to side panel
       loreTitle.textContent = name;
       renderMultiline(loreBody, desc);
       loreImg.removeAttribute('src'); loreMedia.style.display='none';
     }
-  }
-  function positionTooltip(evt){
-    const wrapRect = mapWrap.getBoundingClientRect();
-    const ttRect = tooltip.getBoundingClientRect();
-    const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
-    const cy = (evt && evt.clientY) || (wrapRect.top + wrapRect.height/2);
-    let x = cx - wrapRect.left + 12;
-    let y = cy - wrapRect.top + 12;
-    const maxX = wrapRect.width - ttRect.width - 8;
-    const maxY = wrapRect.height - ttRect.height - 8;
-    x = Math.max(8, Math.min(maxX, x)); y = Math.max(8, Math.min(maxY, y));
-    tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
   }
 
   function bindGM(){
@@ -750,7 +778,7 @@
               e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); saveLocal(); }
               return;
             }
-            e.preventDefault(); dragging=true; id=e.pointerId; h.classList.add('drag'); h.setPointerCapture(id);
+            e.preventDefault(); dragging=true; id=e.pointerId; h.setPointerCapture(id); h.classList.add('drag');
           });
           h.addEventListener('pointermove', (e)=>{
             if(!dragging) return;
