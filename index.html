@@ -3,73 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v57)</title>
+  <title>The World of Draelon – Campaign Primer (v58)</title>
   <style>
     :root{
-      --bg:#efe7d2; --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
-      --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25); --radius:16px;
-      --wrap:clamp(895px, 90vw, 1400px);
-      --gold:#e7d9b7; --ivory:#f6e7c8;
+      --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
+      --accent:#8b5e34; --rule:#d8caa6; --edge:#cbb98f; --shadow:0 18px 40px rgba(0,0,0,.25);
+      --radius:16px;
+      --wrap-wide: min(96vw, 1900px);
+      --wrap-mobile: min(92vw, 900px);
+      --ivory:#f6e7c8;
       --btn:#ead8aa; --btn2:#dfc98a;
     }
     html,body{height:100%}
-    body{ margin:0; color:var(--ink);
-      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
-      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; line-height:1.4;
+    body{
+      margin:0; color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+      line-height:1.45;
       -webkit-tap-highlight-color: transparent;
     }
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
-    input, textarea, select, .gm-modal, .cms, .island-lore, .primer, .side .content{
-      user-select: text; -webkit-user-select: text;
-    }
-    .primer,.panel{
+    input, textarea, select, .island-lore, .side .content{ user-select: text; -webkit-user-select: text; }
+
+    /* Generic panels */
+    .panel{
       background: linear-gradient(180deg, var(--paper), var(--paper-2));
       border: 1px solid var(--edge);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       position:relative;
     }
-    .primer::after,.panel::after{
+    .panel::after{
       content:""; position:absolute; inset:0; pointer-events:none; border-radius: var(--radius);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
     }
-    .primer{margin:16px; padding:18px 18px 14px}
-    .primer h2{ margin:0 0 10px 0; font-size:26px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--rule); padding-bottom:6px; }
-    .app{ display:grid; grid-template-columns: 1fr; gap:0; }
-    .map-row{display:flex; justify-content:center}
+
+    /* Map area */
+    .map-row{display:flex; justify-content:center; margin-top:18px;}
     .map-wrap{
       position:relative;
-      width:100%; max-width:var(--wrap);
-      min-height:60vh; max-height:82vh;
-      margin:16px; overflow:hidden;
+      width:100%;
+      max-width: var(--wrap-wide);
+      min-height: 64vh;
+      max-height: 86vh;
+      margin: 0 12px;
+      overflow:hidden;
     }
-    @media (min-width: 1400px){ .map-wrap{ min-height:72vh; } }
+    /* Ornamented frame around the world map */
+    .map-wrap.ornate{
+      border-radius: 22px;
+      background:
+        radial-gradient(140% 120% at 50% 0%, rgba(255,255,255,.20), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, var(--paper-2), var(--paper));
+      border: 1px solid var(--edge);
+      box-shadow:
+        0 20px 40px rgba(0,0,0,.25),
+        inset 0 0 0 2px rgba(139,94,52,.15),
+        inset 0 0 60px rgba(139,94,52,.10);
+    }
+    .map-wrap.ornate::before,
+    .map-wrap.ornate::after{
+      content:"";
+      position:absolute; pointer-events:none;
+      left:14px; right:14px; top:12px; bottom:12px;
+      border-radius:18px;
+      border: 2px solid rgba(139,94,52,.25);
+      mask:
+        radial-gradient(32px 32px at 0 0, #000 98%, transparent 100%) top left,
+        radial-gradient(32px 32px at 100% 0, #000 98%, transparent 100%) top right,
+        radial-gradient(32px 32px at 100% 100%, #000 98%, transparent 100%) bottom right,
+        radial-gradient(32px 32px at 0 100%, #000 98%, transparent 100%) bottom left;
+      -webkit-mask-composite: destination-out;
+              mask-composite: exclude;
+      border-image: repeating-linear-gradient(90deg,
+                 rgba(139,94,52,.55) 0 16px,
+                 rgba(139,94,52,.15) 16px 32px) 1;
+    }
+    .map-wrap.ornate::after{
+      inset: 28px 28px;
+      border: 1px dashed rgba(139,94,52,.35);
+      border-radius:14px;
+    }
+
     .map-wrap svg{
       width:100%; height:100%; display:block;
       background:#efe6c8;
       touch-action:none; cursor:grab;
+      border-radius: 18px;
     }
-    .side-row{display:flex; justify-content:center}
-    .side{
-      width:100%; max-width:var(--wrap);
-      display:flex;flex-direction:column;
-      margin:0 16px 16px 16px; overflow:hidden;
-    }
-    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
-    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
-    .side .content{padding:16px;overflow:visible}
-    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-    .lore-body{line-height:1.6;}
-    .lore-media{margin:0 0 12px 0; display:none}
-    .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
 
-    .muted{color:var(--ink-soft);font-size:12px}
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .gm-btn{position:absolute;top:12px;right:12px;z-index:40;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
     .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
 
+    /* Features */
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
@@ -93,8 +123,9 @@
     .feature.region.selected .ol-mid,
     .feature.region.selected .ol-core{ opacity:.7; }
 
+    /* Tooltip */
     .tooltip{
-      position:absolute;min-width:260px;max-width:420px;background:var(--paper);
+      position:absolute;min-width:260px;max-width:520px;background:var(--paper);
       border:1px solid var(--edge);border-radius:12px;box-shadow: var(--shadow);
       z-index:1000;display:none;pointer-events:auto;overflow:auto;
     }
@@ -107,8 +138,48 @@
     .tooltip .body{padding:10px 12px;line-height:1.5;}
     .tooltip .body p{margin:0}
 
+    /* Mobile-only side panel for tooltips */
+    .side-row{display:flex; justify-content:center}
+    .side{
+      width:100%;
+      max-width: var(--wrap-mobile);
+      display:flex;flex-direction:column;
+      margin:12px; overflow:hidden;
+    }
+    .side header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--rule);background:linear-gradient(180deg,var(--paper),var(--paper-2));border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
+    .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+    .side .content{padding:16px;overflow:visible}
+    .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
+    .lore-body{line-height:1.6;}
+    .lore-media{margin:0 0 12px 0; display:none}
+    .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
+
+    /* Ornate horizontal rule */
+    .ornate-rule{
+      display:flex; align-items:center; justify-content:center;
+      gap:14px; margin: 18px auto; width:100%;
+      max-width: var(--wrap-wide);
+    }
+    .ornate-rule .line{
+      height:0; border:0; border-top:1px solid rgba(139,94,52,.45);
+      box-shadow: 0 -1px 0 rgba(255,255,255,.3) inset;
+      flex:1;
+    }
+    .ornate-rule .glyph{
+      width:34px; height:34px; border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(139,94,52,.18), rgba(139,94,52,0) 60%),
+        conic-gradient(from 0deg, rgba(139,94,52,.7), rgba(139,94,52,.15), rgba(139,94,52,.7));
+      border:1px solid rgba(139,94,52,.45);
+      box-shadow: var(--shadow), inset 0 0 0 2px rgba(255,255,255,.35);
+    }
+
+    /* Island section */
     .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
-    .island-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; max-width:1280px; width:100%; }
+    .island-grid{
+      display:grid; grid-template-columns: 1fr 1fr; gap:16px;
+      align-items:start; max-width:var(--wrap-wide); width:100%;
+    }
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
       border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
       display:block; max-width:100%; }
@@ -117,6 +188,7 @@
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
     .island-lore .body{line-height:1.6}
 
+    /* GM overlay */
     .gm-bar{
       position:absolute; left:12px; top:12px; z-index:45;
       background:linear-gradient(180deg, #fff7dd, #f2e5b7);
@@ -146,26 +218,29 @@
       background: linear-gradient(180deg, rgba(255,255,240,.35), rgba(255,255,220,.25));
       border-radius: 8px; padding: 6px; transition: background .2s ease;
     }
-    body.gm-on [contenteditable="true"]:focus{ background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45)); }
+    body.gm-on [contenteditable="true"]:focus{
+      background: linear-gradient(180deg, rgba(255,255,230,.6), rgba(255,255,210,.45));
+    }
 
+    /* Responsive */
     @media (max-width: 760px){
+      .map-wrap{ max-width: var(--wrap-mobile); min-height: min(60vh, calc(100vw * 0.72)); max-height:none; }
       .tooltip{ display:none !important; }
-      .map-wrap{ height: min(60vh, calc(100vw * 0.72)); min-height:auto; max-height:none; }
-      .map-wrap svg{ height:100%; }
-      .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: 720px; }
-      .island-card{ max-width: 100% !important; width: 100% !important; order: 1 !important; }
+      .side-row{ display:flex; }
+      .ornate-rule{ max-width: var(--wrap-mobile); }
+      .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: var(--wrap-mobile); }
+      .island-card{ order: 1 !important; }
       .island-lore{ order: 2 !important; margin-top: 12px !important; }
+    }
+    @media (min-width: 761px){
+      .side-row{ display:none; } /* desktop removes world map side panel */
     }
   </style>
 </head>
 <body>
-  <div class="primer" id="primerTop">
-    <h2>The World of Draelon</h2>
-    <div id="primerIntro">This is your editable campaign introduction. Enable GM mode to edit this text. Players can scroll the map, tap regions, and read tooltips.</div>
-  </div>
   <div class="app">
     <div class="map-row">
-      <div class="map-wrap panel" id="mapWrap">
+      <div class="map-wrap ornate" id="mapWrap">
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
 
@@ -217,9 +292,11 @@
         </svg>
       </div>
     </div>
+
+    <!-- Mobile-only panel for tooltip content -->
     <div class="side-row">
       <aside class="side panel" id="sidePanel">
-        <header><h1>Campaign Info</h1><span class="muted">Click the map to explore</span></header>
+        <header><h1>Campaign Info</h1><span class="muted">Tap the map to explore</span></header>
         <div class="content">
           <div class="lore-media" id="loreMedia"><img id="loreImg" alt=""></div>
           <h3 class="lore-title" id="loreTitle">Welcome</h3>
@@ -227,23 +304,26 @@
         </div>
       </aside>
     </div>
+
+    <!-- Ornate divider between world map and island/campaign section -->
+    <div class="ornate-rule" aria-hidden="true">
+      <span class="line"></span><span class="glyph"></span><span class="line"></span>
+    </div>
   </div>
+
   <section class="section">
     <div class="island-grid">
       <figure class="island-card"><img id="islandImg" src="" alt="Signika island map"/></figure>
       <div class="island-lore panel"><h3>Island Lore</h3><div id="islandLore" class="body">Add your Signika lore here — history, factions, features, and travel notes.</div></div>
     </div>
   </section>
-  <div class="primer panel" id="primerBottom">
-    <h2>Primer – Details</h2>
-    <div id="primerDetails">Add your campaign factions, tone, safety tools, character hooks, and session 0 notes here. Enable GM mode to edit this section.</div>
-  </div>
+
 <script>
 (function(){
-  const JSON_PATH = './world-data.json?v=' + Date.now();
+  const JSON_PATH = './world-data.json?v=' + Date.now(); // no-cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v57';
+  const LS_KEY = 'signika.world.v58';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -254,8 +334,6 @@
   const gmOverlay= document.getElementById('gmOverlay');
   const islandImg = document.getElementById('islandImg');
   const islandLore = document.getElementById('islandLore');
-  const primerIntro = document.getElementById('primerIntro');
-  const primerDetails = document.getElementById('primerDetails');
   const loreTitle = document.getElementById('loreTitle');
   const loreBody  = document.getElementById('loreBody');
   const loreMedia = document.getElementById('loreMedia');
@@ -483,10 +561,6 @@
     const saved = loadLocal();
     state = Object.assign({}, loaded, saved);
 
-    renderMultiline(primerIntro, state.primerIntro || '');
-    renderMultiline(primerDetails, state.primerDetails || '');
-    renderMultiline(islandLore, state.islandLore || islandLore.textContent || '');
-
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
@@ -516,14 +590,12 @@
         campaignMapSrc: data.campaignMap || data.campaignMapSrc || DEFAULT_ISLAND_MAP,
         campaignMapSize: data.campaignMapSize || {w:1024,h:1024},
         features: data.features || [],
-        primerIntro: data.primerIntro || '',
-        primerDetails: data.primerDetails || '',
         islandLore: data.islandLore || ''
       };
     }catch(e){
       console.error('Falling back to defaults due to load error:', e);
       return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMapSrc: DEFAULT_ISLAND_MAP,
-               campaignMapSize:{w:1024,h:1024}, features:[], primerIntro:'', primerDetails:'', islandLore:'' };
+               campaignMapSize:{w:1024,h:1024}, features:[], islandLore:'' };
     }
   }
 
@@ -533,8 +605,6 @@
       mapSrc: state.mapSrc, mapSize: state.mapSize,
       campaignMapSrc: state.campaignMapSrc, campaignMapSize: state.campaignMapSize,
       features: state.features,
-      primerIntro: primerIntro.textContent.trim(),
-      primerDetails: primerDetails.textContent.trim(),
       islandLore: islandLore.textContent.trim()
     };
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
@@ -604,9 +674,9 @@
   function sizeAndPositionTooltip(evt){
     const wrapRect = mapWrap.getBoundingClientRect();
     const padding = 8;
-    const maxW = Math.max(240, wrapRect.width - padding*2);
+    const maxW = Math.max(260, wrapRect.width - padding*2);
     const maxH = Math.max(180, wrapRect.height - padding*2);
-    tooltip.style.maxWidth = Math.min(420, maxW) + 'px';
+    tooltip.style.maxWidth = Math.min(520, maxW) + 'px';
     tooltip.style.maxHeight = maxH + 'px';
     const ttRect = tooltip.getBoundingClientRect();
     const cx = (evt && evt.clientX) || (wrapRect.left + wrapRect.width/2);
@@ -647,14 +717,12 @@
       tooltip.classList.add('open');
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
-      loreTitle.textContent = name;
-      renderMultiline(loreBody, desc);
-      loreImg.removeAttribute('src'); loreMedia.style.display='none';
+      // Do not mirror content to a desktop side panel (no panel on desktop)
     }
   }
 
   function bindGM(){
-    const editables=[primerIntro, primerDetails, islandLore];
+    const editables=[islandLore];
     let gmOn=false, saveTimer=0;
     const editor={ selectedId:null, mode:'idle', curShape:null, busy:function(){ return this.mode!=='idle'; } };
 
@@ -741,8 +809,6 @@
         mapSize: state.mapSize || {w:4080,h:3072},
         campaignMap: state.campaignMapSrc || DEFAULT_ISLAND_MAP,
         campaignMapSize: state.campaignMapSize || {w:1024,h:1024},
-        primerIntro: primerIntro.innerText.trim(),
-        primerDetails: primerDetails.innerText.trim(),
         islandLore: islandLore.innerText.trim(),
         features: state.features || []
       };
@@ -825,4 +891,3 @@
 })();</script>
 </body>
 </html>
-
