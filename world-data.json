@@ -1329,7 +1329,7 @@
       "name": "Eturia",
       "img": "/Campaign-Primer/map/Eturia.png",
       "color": "#25db00",
-      "desc": "A realm of towers and tomes. Knowledge is power here, and power is bought with perilous bargains whispered in candlelight.",
+      "desc": "A magocratic republic sprawled across the islands of the Cetryan Ocean, where politics boil down to one thing: talent with magic.\n\nA relatively young power in Draelon—founded only 170 years ago—Eturia has nonetheless secured an impressive foothold on the world stage. Having forged an uneasy alliance with Athium, and with its arcane archives growing larger by the day, ambition has become the nation’s cornerstone.",
       "shapes": [
         [
           {
@@ -1941,8 +1941,9 @@
       "id": "gce2x426lhmh0pjxxr",
       "type": "region",
       "name": "Letrylor",
+      "img": "/Campaign-Primer/map/Letrylor.png",
       "color": "#fbff00",
-      "desc": "A continent swallowed by emerald jungles and ruin. Once home to radiant gods, now only beasts and wanderers hear their echoes beneath the canopy.",
+      "desc": "A continent swallowed by emerald jungles and ruin, once home to an entire pantheon of radiant gods. The earth, plants, and beasts still dominate with a wild magic bestowed in the ancient past. \n\nWhat settlements dot these lands have learned to grow as one with nature, lead by powerful druids or fearless explorers.",
       "shapes": [
         [
           {
@@ -2934,6 +2935,7 @@
     }
   ]
 }
+
 
 
 
