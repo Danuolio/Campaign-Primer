@@ -19,7 +19,7 @@
       "name": "Oscana",
       "img": "/Campaign-Primer/map/Oscana.png",
       "color": "#ff000d",
-      "desc": "A land of crumbling thrones and proud banners. Its knights wage endless wars of honour while the peasants whisper of ancient pacts sealed in blood.",
+      "desc": "A stark, grey land of feudal kingdoms, where honour lies as much in the strength of one’s arm as in the quality of one’s tools. Two lords might build a grand metal runeway between their lands to trade goods at great speed—only to aim crank-ballistae at one another the next day for daring to use it.\n\nThe Oscanan League has been founded and refounded countless times by kingdoms desperate to defend their homes. With raids from the wildlands beyond Naebolg’s Belt and the growing power of nations across the sea, good craftsmanship and grit remain an Oscanan’s truest companions.",
       "shapes": [
         [
           {
@@ -705,7 +705,7 @@
       "name": "Athium",
       "img": "/Campaign-Primer/map/Athium.png",
       "color": "#001eff",
-      "desc": "An empire forged by discipline and fire. Cities of marble and brass rise where forests once stood, feeding the ambitions of its war councils.",
+      "desc": "The Athumi Empire is the greatest power on Draelon. Expanding for centuries from the holy city of Athumar, disciplined militaries and fervent devotion to their ever-shrouded goddess have fuelled their conquest for over five hundred years. In taming the Viverna Mountains, they claimed dominion over the wyverns, forging skyborne legions to spread their rule from above.\n\nWorship of any divine being other than the Lady of Brass is forbidden. Across the world, it is said there is far more to fear from an Athumi priest than from even their mightiest warrior.",
       "shapes": [
         [
           {
@@ -1943,7 +1943,7 @@
       "name": "Letrylor",
       "img": "/Campaign-Primer/map/Letrylor.png",
       "color": "#fbff00",
-      "desc": "A continent swallowed by emerald jungles and ruin, once home to an entire pantheon of radiant gods. The earth, plants, and beasts still dominate with a wild magic bestowed in the ancient past. \n\nWhat settlements dot these lands have learned to grow as one with nature, lead by powerful druids or fearless explorers.",
+      "desc": "A continent swallowed by emerald jungles and overgrown ruins, once home to an entire pantheon of radiant gods. The earth, plants, and beasts still dominate with a wild magic bestowed in the ancient past. \n\nWhat settlements dot these lands have learned to grow as one with nature, lead by powerful druids or fearless explorers.",
       "shapes": [
         [
           {
@@ -2799,7 +2799,7 @@
       "type": "region",
       "name": "Frissia",
       "color": "#8ad9ff",
-      "desc": "Frissian Isles",
+      "desc": "Once the seat of a world-spanning empire, modern Frissia is a shadow of its former grandeur. Now ruled by two tribes—the Fokari and the Areth—whose mutual hatred has only deepened with time, the island is a land of old scars and stubborn pride. Desperate to prove themselves the rightful heirs to a realm the rest of the world has chosen to forget, they fight over a legacy few still remember.\n\nThe people of the island know better. The secrets buried here may yet shape history once more.",
       "shapes": [
         [
           {
@@ -2935,6 +2935,7 @@
     }
   ]
 }
+
 
 
 
