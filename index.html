@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v58)</title>
+  <title>The World of Draelon – Campaign Primer (v59)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -122,6 +122,20 @@
     .feature.region.selected .ol-glow,
     .feature.region.selected .ol-mid,
     .feature.region.selected .ol-core{ opacity:.7; }
+
+    /* Desktop-only: stronger highlight + more transparent idle regions */
+    @media (min-width: 761px){
+      /* Idle fill is set inline below (.20). These increase on interaction */
+      .feature.region.hover path.fill{ fill-opacity: .48 !important; }
+      .feature.region.selected path.fill{ fill-opacity: .56 !important; }
+      /* Make outlines pop a little more on hover/selected */
+      .feature.region.hover .ol-glow,
+      .feature.region.hover .ol-mid,
+      .feature.region.hover .ol-core{ opacity: .70 !important; }
+      .feature.region.selected .ol-glow,
+      .feature.region.selected .ol-mid,
+      .feature.region.selected .ol-core{ opacity: .90 !important; }
+    }
 
     /* Tooltip */
     .tooltip{
@@ -323,7 +337,7 @@
   const JSON_PATH = './world-data.json?v=' + Date.now(); // no-cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v58';
+  const LS_KEY = 'signika.world.v59';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -376,7 +390,7 @@
   }
   function renderMultiline(el, text){
     const safe = escapeHTML(text||'');
-    el.innerHTML = safe.split('\n').join('<br>');
+    el.innerHTML = safe.split('\\n').join('<br>');
   }
 
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
@@ -617,7 +631,7 @@
     feats.filter(function(f){ return f.type==='region'; }).forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
-      const neon = blendHex(color, '#e7d9b7', 0.80);
+      const neon = blendHex(color, '#e7d9b7', 0.65); // slightly more vibrant
 
       (f.shapes||[]).forEach(function(shape){
         const d = roundedPolygonPath(shape, 10);
@@ -625,7 +639,7 @@
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
         fill.setAttribute('fill', color);
-        fill.setAttribute('fill-opacity', '0.31');
+        fill.setAttribute('fill-opacity', '0.20'); // more transparent by default
         fill.setAttribute('stroke','none');
         fill.style.filter='url(#fuzzyEdge)';
         fill.addEventListener('click', function(e){ showTooltipFor(f, e); });
@@ -707,7 +721,7 @@
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
-      ttBody.innerHTML = desc ? escapeHTML(desc).split('\n').join('<br>') : '—';
+      ttBody.innerHTML = desc ? escapeHTML(desc).split('\\n').join('<br>') : '—';
       if(src){
         ttImg.onload = function(){ sizeAndPositionTooltip(evt); };
         ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block';
@@ -717,7 +731,7 @@
       tooltip.classList.add('open');
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
-      // Do not mirror content to a desktop side panel (no panel on desktop)
+      // No desktop side panel
     }
   }
 
