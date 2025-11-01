@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v63)</title>
+  <title>The World of Draelon – Campaign Primer (v63a)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -17,12 +17,10 @@
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      /* Seam-proof background (single, non-repeating linear gradient) */
-      background: linear-gradient(180deg, #f7efcf 0%, #efe2c0 60%, #e6d7b5 100%);
+      background:#fff8da; /* solid parchment, no seams */
       font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
       line-height:1.45;
       -webkit-tap-highlight-color: transparent;
-      background-attachment: scroll; /* make sure nothing 'loops' on resize/scroll */
     }
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
     input, textarea, select, .island-lore, .side .content{ user-select: text; -webkit-user-select: text; }
@@ -228,6 +226,7 @@
     }
     body.gm-on .gm-bar{ display:flex; }
     .gm-bar .row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+
     .gm-bar label{ font-size:12px; color:var(--ink-soft) }
     .gm-bar input[type="text"], .gm-bar input[type="color"], .gm-bar select{
       font-size:12px; padding:4px 6px; border:1px solid var(--edge); border-radius:6px; background:#fffaf0;
@@ -358,8 +357,8 @@
 
 <script>
 (function(){
-  // no local cache
-  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62','signika.world.v63'].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
+  // nuke any local cache versions
+  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62','signika.world.v63','signika.world.v63a'].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
 
   const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
@@ -502,15 +501,15 @@
       requestAnimationFrame(step);
     }
 
-    /* Wheel zoom — a bit quicker now */
+    /* Wheel zoom — quicker */
     svgEl.addEventListener('wheel', guardEnabled(function(e){
       var vb = nav.viewBox.slice();
       var full = atFull();
       if(full && e.deltaY > 0){ return; }
       e.preventDefault();
-      var scale=(e.deltaY<0?0.85:1.15);          // faster
+      var scale=(e.deltaY<0?0.85:1.15);
       var mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
-      animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 110); // shorter duration
+      animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 110);
     }), {passive:false});
 
     svgEl.addEventListener('pointerup', guardEnabled(function(e){
@@ -610,7 +609,7 @@
       zoomByAnimated:function(factor){
         var vb = nav.viewBox.slice();
         var mx = 0.5, my = 0.5;
-        animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 120); // quicker buttons
+        animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 120);
       }
     };
   }
@@ -639,9 +638,9 @@
     bindGM();
     bindTooltipDismiss();
 
-    // zoom buttons
-    zoomInBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.82); }); // stronger in
-    zoomOutBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.18); }); // stronger out
+    // zoom buttons (stronger)
+    zoomInBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.82); });
+    zoomOutBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.18); });
 
     loader.style.display='none';
   }
@@ -780,7 +779,7 @@
     }
   }
 
-  // GM (export-only)
+  // GM (export-only — region drawing & vertex edit)
   function bindGM(){
     const editables=[islandLore];
     let gmOn=false;
@@ -941,7 +940,7 @@
         gmOverlay.appendChild(tempPath);
 
         svgWorld.onpointerdown = function(e){ const p = clientToSvg(e.clientX, e.clientY); pts.push(p); drawOverlay(); };
-        svgWorld.ondblclick = function(){ finishShapeBtn.click(); };
+        svgWorld.ondblclick = function(){ document.getElementById('finishShapeBtn').click(); };
       }else{
         svgWorld.onpointerdown = null; svgWorld.ondblclick=null;
       }
