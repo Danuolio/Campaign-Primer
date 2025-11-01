@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v62)</title>
+  <title>The World of Draelon – Campaign Primer (v62b)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -17,8 +17,7 @@
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
       font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
       line-height:1.45;
       -webkit-tap-highlight-color: transparent;
@@ -389,7 +388,9 @@
 <script>
 (function(){
   // no local cache
-  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62'].forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  try{
+    ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62'].forEach(function(k){ localStorage.removeItem(k); });
+  }catch(e){}
 
   const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
@@ -443,9 +444,9 @@
     el.innerHTML = safe.split('\\n').join('<br>');
   }
 
-  function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
+  function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(function(c){return c+c;}).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
-  function rgbToHex({r,g,b}){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(r)+h(g)+h(b); }
+  function rgbToHex(o){ const h=(v)=>('0'+v.toString(16)).slice(-2); return '#'+h(o.r)+h(o.g)+h(o.b); }
   function blendHex(a,b,t){ const A=hexToRgb(a), B=hexToRgb(b);
     const lerp=(x,y)=>Math.round(x+(y-x)*t);
     return rgbToHex({r:lerp(A.r,B.r), g:lerp(A.g,B.g), b:lerp(A.b,B.b)}); }
@@ -581,7 +582,7 @@
         var dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
           nav.panning=true; nav.dragCandidate=false; nav.dragged=true;
-          try{ svgEl.setPointerCapture(e.pointerId); }catch{}
+          try{ svgEl.setPointerCapture(e.pointerId); }catch(e){}
         }
       }
       if(!nav.panning) return;
@@ -598,7 +599,7 @@
       nav.panning=false; nav.dragCandidate=false; nav.dragged=false;
       nav.initialPinchDist=0; nav.initialViewBox=null;
       svgEl.style.cursor='grab'; setTouchMode();
-      try{ svgEl.releasePointerCapture(e.pointerId); }catch{}
+      try{ svgEl.releasePointerCapture(e.pointerId); }catch(e){}
     }
     svgEl.addEventListener('pointerup', guardEnabled(endPointer));
     svgEl.addEventListener('pointercancel', guardEnabled(endPointer));
@@ -637,7 +638,7 @@
   }
 
   let navigatorApi=null;
-  init().catch(console.error);
+  init().catch(function(e){ console.error(e); });
 
   async function init(){
     const loaded = await loadData();
@@ -660,9 +661,9 @@
     bindGM();
     bindTooltipDismiss();
 
-    // hook zoom buttons
-    zoomInBtn.addEventListener('click', function(){ navigatorApi && navigatorApi.zoomByAnimated(0.9); });
-    zoomOutBtn.addEventListener('click', function(){ navigatorApi && navigatorApi.zoomByAnimated(1.1); });
+    // zoom buttons
+    document.getElementById('zoomIn').addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.9); });
+    document.getElementById('zoomOut').addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.1); });
 
     loader.style.display='none';
   }
@@ -670,10 +671,9 @@
   async function loadData(){
     try{
       const res = await fetch(JSON_PATH, {cache:'no-store'});
-      if(!res.ok) throw 0;
+      if(!res.ok) throw new Error('HTTP '+res.status);
       const text = await res.text();
-      let data;
-      try{ data = JSON.parse(text);}catch(e){ console.error('JSON parse error:', e, text); throw e; }
+      let data = JSON.parse(text);
       return {
         mapSrc: data.mapImage || data.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: data.mapSize || {w:4080,h:3072},
@@ -695,7 +695,7 @@
     regions.innerHTML=''; points.innerHTML='';
     const feats = (state.features||[]);
 
-    feats.filter(f=>f.type==='region').forEach(function(f){
+    feats.filter(function(f){return f.type==='region';}).forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       const neon = blendHex(color, '#e7d9b7', 0.65);
@@ -723,11 +723,11 @@
       regions.appendChild(g);
     });
 
-    feats.filter(f=>f.type==='point').forEach(function(f){
+    feats.filter(function(f){return f.type==='point';}).forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
       const t=elNS('text'); t.setAttribute('x', f.x+30); t.setAttribute('y', f.y-30); t.setAttribute('class','label'); t.textContent=f.name||'';
-      const open=(e)=>showTooltipFor(f,e);
+      const open=function(e){ showTooltipFor(f,e); };
       c.addEventListener('click', open); t.addEventListener('click', open);
       g.appendChild(c); g.appendChild(t); points.appendChild(g);
     });
@@ -741,7 +741,6 @@
   }
 
   function bindTooltipDismiss(){
-    const tooltip = document.getElementById('tooltip');
     const ttClose = document.getElementById('ttClose');
     ttClose.addEventListener('click', function(){ tooltip.classList.remove('open'); });
     svgWorld.addEventListener('click', function(e){
@@ -775,11 +774,6 @@
   }
 
   function showTooltipFor(f, evt){
-    const tooltip = document.getElementById('tooltip');
-    const ttTitle = document.getElementById('ttTitle');
-    const ttBody  = document.getElementById('ttBody');
-    const ttMedia = document.getElementById('ttMedia');
-    const ttImg   = document.getElementById('ttImg');
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const name = f.name || '—';
@@ -911,7 +905,7 @@
       if(!document.body.classList.contains('gm-on')) return;
       const r = getSelectedRegion(); if(!r) return;
 
-      (r.shapes||[]).forEach(function(shape, si){
+      (r.shapes||[]).forEach(function(shape){
         const path=elNS('path'); path.setAttribute('class','shape-path');
         path.setAttribute('d', roundedPolygonPath(shape, 0));
         gmOverlay.appendChild(path);
@@ -930,7 +924,7 @@
             drawOverlay(); renderFeatures();
           });
           gmOverlay.appendChild(edge);
-        });
+        }
 
         shape.forEach(function(pt, idx){
           const h=elNS('circle'); h.setAttribute('class','handle'); h.setAttribute('r', 8);
@@ -942,7 +936,9 @@
               e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); }
               return;
             }
-            e.preventDefault(); dragging=true; id=e.pointerId; h.setPointerCapture(id); h.classList.add('drag');
+            e.preventDefault(); dragging=true; id=e.pointerId;
+            try{ h.setPointerCapture(id); }catch(e){}
+            h.classList.add('drag');
           });
           h.addEventListener('pointermove', function(e){
             if(!dragging) return;
@@ -952,7 +948,10 @@
             path.setAttribute('d', roundedPolygonPath(shape, 0));
             renderFeatures();
           });
-          h.addEventListener('pointerup', function(){ if(!dragging) return; dragging=false; h.classList.remove('drag'); });
+          h.addEventListener('pointerup', function(){
+            if(!dragging) return;
+            dragging=false; h.classList.remove('drag');
+          });
           gmOverlay.appendChild(h);
         });
       });
@@ -974,6 +973,7 @@
     drawOverlay();
   }
 
-})();</script>
+})();
+</script>
 </body>
 </html>
