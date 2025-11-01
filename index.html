@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v62b)</title>
+  <title>The World of Draelon – Campaign Primer (v63)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -17,10 +17,12 @@
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      background: radial-gradient(1200px 800px at 60% 0%, #f9f1d9 0%, #efe7d2 60%, #e7dbbd 100%);
+      /* Seam-proof background (single, non-repeating linear gradient) */
+      background: linear-gradient(180deg, #f7efcf 0%, #efe2c0 60%, #e6d7b5 100%);
       font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
       line-height:1.45;
       -webkit-tap-highlight-color: transparent;
+      background-attachment: scroll; /* make sure nothing 'loops' on resize/scroll */
     }
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
     input, textarea, select, .island-lore, .side .content{ user-select: text; -webkit-user-select: text; }
@@ -44,13 +46,6 @@
         radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
       border-radius: 14px;
       white-space: nowrap;
-    }
-    .page-title:before, .page-title:after{
-      content:"";
-      position:absolute; left:10%; right:10%; top:-6px; height:10px; pointer-events:none;
-      border-radius: 50%;
-      background: radial-gradient(100% 200% at 50% 0%, rgba(139,94,52,.25), rgba(139,94,52,0) 70%);
-      filter: blur(1.5px);
     }
     .page-title .sub{
       display:block; font-size: clamp(12px, 2vw, 16px); letter-spacing: 3px; color: #6a5841;
@@ -105,30 +100,6 @@
         inset 0 0 0 2px rgba(139,94,52,.15),
         inset 0 0 60px rgba(139,94,52,.10);
     }
-    .map-wrap.ornate::before,
-    .map-wrap.ornate::after{
-      content:"";
-      position:absolute; pointer-events:none;
-      left:14px; right:14px; top:12px; bottom:12px;
-      border-radius:18px;
-      border: 2px solid rgba(139,94,52,.25);
-      mask:
-        radial-gradient(32px 32px at 0 0, #000 98%, transparent 100%) top left,
-        radial-gradient(32px 32px at 100% 0, #000 98%, transparent 100%) top right,
-        radial-gradient(32px 32px at 100% 100%, #000 98%, transparent 100%) bottom right,
-        radial-gradient(32px 32px at 0 100%, #000 98%, transparent 100%) bottom left;
-      -webkit-mask-composite: destination-out;
-              mask-composite: exclude;
-      border-image: repeating-linear-gradient(90deg,
-                 rgba(139,94,52,.55) 0 16px,
-                 rgba(139,94,52,.15) 16px 32px) 1;
-    }
-    .map-wrap.ornate::after{
-      inset: 28px 28px;
-      border: 1px dashed rgba(139,94,52,.35);
-      border-radius:14px;
-    }
-
     .map-wrap svg{
       width:100%; height:100%; display:block;
       background:#efe6c8;
@@ -388,9 +359,7 @@
 <script>
 (function(){
   // no local cache
-  try{
-    ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62'].forEach(function(k){ localStorage.removeItem(k); });
-  }catch(e){}
+  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62','signika.world.v63'].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
 
   const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
@@ -512,7 +481,7 @@
     }
     function guardEnabled(handler){ return function(e){ if(!nav.enabled) return; return handler(e); }; }
 
-    // LERPed zoom utility
+    /* -------- Zoom animation (desktop wheel/buttons only) -------- */
     function animateZoom(targetW, targetH, mx, my, dur){
       const vb0 = nav.viewBox.slice();
       const nxW = clamp(targetW, nav.minW, nav.maxW);
@@ -533,14 +502,15 @@
       requestAnimationFrame(step);
     }
 
+    /* Wheel zoom — a bit quicker now */
     svgEl.addEventListener('wheel', guardEnabled(function(e){
       var vb = nav.viewBox.slice();
       var full = atFull();
       if(full && e.deltaY > 0){ return; }
       e.preventDefault();
-      var scale=(e.deltaY<0?0.9:1.1);
+      var scale=(e.deltaY<0?0.85:1.15);          // faster
       var mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
-      animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 160);
+      animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 110); // shorter duration
     }), {passive:false});
 
     svgEl.addEventListener('pointerup', guardEnabled(function(e){
@@ -548,7 +518,7 @@
     }), {passive:false, capture:true});
 
     svgEl.addEventListener('pointerdown', guardEnabled(function(e){
-      nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
+      nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY, type: e.pointerType});
       nav.dragCandidate = true; nav.dragged = false;
       nav.start = {x: e.clientX, y: e.clientY};
       nav.last  = {x: e.clientX, y: e.clientY};
@@ -562,22 +532,30 @@
 
     svgEl.addEventListener('pointermove', guardEnabled(function(e){
       if(!nav.pointers.has(e.pointerId)) return;
-      nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
+      nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY, type: e.pointerType});
+
+      /* Two-pointer pinch — instant (no lerp) to keep mobile snappy */
       if(nav.pointers.size===2){
         var pts = Array.from(nav.pointers.values());
         var dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
         if(nav.initialPinchDist>0){
           var scale = nav.initialPinchDist / dist;
           var vb = nav.initialViewBox;
+          var nxW = clamp(vb[2]*scale, nav.minW, nav.maxW);
+          var nxH = clamp(vb[3]*scale, nav.minH, nav.maxH);
           var mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
           var my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
-          animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 140);
+          var nxX = clamp(vb[0] + (vb[2]-nxW)*mx, 0, imgW - nxW);
+          var nxY = clamp(vb[1] + (vb[3]-nxH)*my, 0, imgH - nxH);
+          nav.viewBox=[nxX,nxY,nxW,nxH]; apply(); setTouchMode();
         } else {
           nav.initialPinchDist = dist;
           nav.initialViewBox = nav.viewBox.slice();
         }
         return;
       }
+
+      /* Drag/pan */
       if(nav.dragCandidate){
         var dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -632,7 +610,7 @@
       zoomByAnimated:function(factor){
         var vb = nav.viewBox.slice();
         var mx = 0.5, my = 0.5;
-        animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 180);
+        animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 120); // quicker buttons
       }
     };
   }
@@ -662,8 +640,8 @@
     bindTooltipDismiss();
 
     // zoom buttons
-    document.getElementById('zoomIn').addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.9); });
-    document.getElementById('zoomOut').addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.1); });
+    zoomInBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.82); }); // stronger in
+    zoomOutBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.18); }); // stronger out
 
     loader.style.display='none';
   }
