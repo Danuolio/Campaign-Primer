@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v59)</title>
+  <title>The World of Draelon – Campaign Primer (v61)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -26,6 +26,46 @@
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
     input, textarea, select, .island-lore, .side .content{ user-select: text; -webkit-user-select: text; }
 
+    /* Fantasy title */
+    .title-wrap{display:flex; justify-content:center; margin: 18px 12px 0;}
+    .page-title{
+      max-width: var(--wrap-wide);
+      width:100%;
+      text-align:center;
+      font-variant: small-caps;
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: clamp(28px, 6vw, 64px);
+      color: #3b2b15;
+      margin: 8px auto 0;
+      padding: 10px 8px 6px;
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(139,94,52,.12), rgba(139,94,52,0)),
+        radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
+      border-radius: 14px;
+    }
+    .page-title:before, .page-title:after{
+      content:"";
+      position:absolute; left:10%; right:10%; top:-6px; height:10px; pointer-events:none;
+      border-radius: 50%;
+      background: radial-gradient(100% 200% at 50% 0%, rgba(139,94,52,.25), rgba(139,94,52,0) 70%);
+      filter: blur(1.5px);
+    }
+    .page-title .sub{
+      display:block; font-size: clamp(12px, 2vw, 16px); letter-spacing: 3px; color: #6a5841;
+      margin-top: 2px;
+    }
+    .page-title .glyph{
+      display:inline-block; width: clamp(22px, 2.8vw, 34px); height: clamp(22px, 2.8vw, 34px);
+      border-radius:50%; margin: 0 10px; vertical-align: -4px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(139,94,52,.18), rgba(139,94,52,0) 60%),
+        conic-gradient(from 0deg, rgba(139,94,52,.7), rgba(139,94,52,.15), rgba(139,94,52,.7));
+      border:1px solid rgba(139,94,52,.45);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+    }
+
     /* Generic panels */
     .panel{
       background: linear-gradient(180deg, var(--paper), var(--paper-2));
@@ -40,7 +80,7 @@
     }
 
     /* Map area */
-    .map-row{display:flex; justify-content:center; margin-top:18px;}
+    .map-row{display:flex; justify-content:center; margin-top:12px;}
     .map-wrap{
       position:relative;
       width:100%;
@@ -49,10 +89,9 @@
       max-height: 86vh;
       margin: 0 12px;
       overflow:hidden;
-    }
-    /* Ornamented frame around the world map */
-    .map-wrap.ornate{
       border-radius: 22px;
+    }
+    .map-wrap.ornate{
       background:
         radial-gradient(140% 120% at 50% 0%, rgba(255,255,255,.20), rgba(0,0,0,0) 60%),
         linear-gradient(180deg, var(--paper-2), var(--paper));
@@ -104,8 +143,8 @@
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
     .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
-    .feature.region.hover path.fill{fill-opacity:.35}
-    .feature.region.selected path.fill{fill-opacity:.42}
+    .feature.region.hover path.fill{fill-opacity:.48}
+    .feature.region.selected path.fill{fill-opacity:.56}
 
     .feature.region .ol-glow,
     .feature.region .ol-mid,
@@ -118,24 +157,10 @@
     .feature.region .ol-core{ stroke:var(--ivory); stroke-width:2.5; }
     .feature.region.hover .ol-glow,
     .feature.region.hover .ol-mid,
-    .feature.region.hover .ol-core{ opacity:.5; }
+    .feature.region.hover .ol-core{ opacity:.70; }
     .feature.region.selected .ol-glow,
     .feature.region.selected .ol-mid,
-    .feature.region.selected .ol-core{ opacity:.7; }
-
-    /* Desktop-only: stronger highlight + more transparent idle regions */
-    @media (min-width: 761px){
-      /* Idle fill is set inline below (.20). These increase on interaction */
-      .feature.region.hover path.fill{ fill-opacity: .48 !important; }
-      .feature.region.selected path.fill{ fill-opacity: .56 !important; }
-      /* Make outlines pop a little more on hover/selected */
-      .feature.region.hover .ol-glow,
-      .feature.region.hover .ol-mid,
-      .feature.region.hover .ol-core{ opacity: .70 !important; }
-      .feature.region.selected .ol-glow,
-      .feature.region.selected .ol-mid,
-      .feature.region.selected .ol-core{ opacity: .90 !important; }
-    }
+    .feature.region.selected .ol-core{ opacity:.90; }
 
     /* Tooltip */
     .tooltip{
@@ -247,12 +272,16 @@
       .island-lore{ order: 2 !important; margin-top: 12px !important; }
     }
     @media (min-width: 761px){
-      .side-row{ display:none; } /* desktop removes world map side panel */
+      .side-row{ display:none; }
     }
   </style>
 </head>
 <body>
   <div class="app">
+    <div class="title-wrap">
+      <h1 class="page-title">The <span class="glyph"></span> World of Draelon <span class="glyph"></span><span class="sub">Campaign Primer</span></h1>
+    </div>
+
     <div class="map-row">
       <div class="map-wrap ornate" id="mapWrap">
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
@@ -319,7 +348,6 @@
       </aside>
     </div>
 
-    <!-- Ornate divider between world map and island/campaign section -->
     <div class="ornate-rule" aria-hidden="true">
       <span class="line"></span><span class="glyph"></span><span class="line"></span>
     </div>
@@ -334,10 +362,14 @@
 
 <script>
 (function(){
-  const JSON_PATH = './world-data.json?v=' + Date.now(); // no-cache
+  // kill any old local caches (we don't use them anymore)
+  try{
+    ['signika.world.v59','signika.world.v60','signika.world.v61'].forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+
+  const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
   const DEFAULT_ISLAND_MAP = '/Campaign-Primer/map/campaign-map.png';
-  const LS_KEY = 'signika.world.v59';
   let state=null;
 
   const mapWrap  = document.getElementById('mapWrap');
@@ -436,8 +468,8 @@
     function initialView(){
       const rect = svgEl.getBoundingClientRect();
       const crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
-      const vx = (imgW - crop.vw) / 2;
-      const vy = (imgH - crop.vh) / 2;
+      const vx = (imgW - crop.vw) / 2; // center horizontally
+      const vy = 0; // pan fully to top
       return {vx, vy, vw: crop.vw, vh: crop.vh};
     }
     let first = initialView();
@@ -551,6 +583,7 @@
       var nh = clamp(nav.viewBox[3], nav.minH, nav.maxH);
       var nx = clamp(centerX - nw/2, 0, imgW - nw);
       var ny = clamp(centerY - nh/2, 0, imgH - nh);
+      ny = Math.max(0, Math.min(imgH - nh, ny));
       nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
     });
 
@@ -560,7 +593,7 @@
         var rect = svgEl.getBoundingClientRect();
         var crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
         var vx = (imgW - crop.vw) / 2;
-        var vy = (imgH - crop.vh) / 2;
+        var vy = 0; // top
         nav.maxW = crop.vw; nav.maxH = crop.vh;
         nav.viewBox=[vx,vy,crop.vw,crop.vh]; apply(); setTouchMode();
       }
@@ -572,16 +605,20 @@
 
   async function init(){
     const loaded = await loadData();
-    const saved = loadLocal();
-    state = Object.assign({}, loaded, saved);
+    state = loaded; // remote JSON is the source of truth
 
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
     mapImage.setAttribute('width', wSize.w); mapImage.setAttribute('height', wSize.h);
     svgWorld.setAttribute('viewBox', '0 0 '+wSize.w+' '+wSize.h);
 
-    islandImg.src = state.campaignMapSrc || state.campaignMap || DEFAULT_ISLAND_MAP;
+    islandImg.src = state.campaignMap || state.campaignMapSrc || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
+
+    // Render island lore from JSON on load (e.g., "Grikky")
+    if (state.islandLore) {
+      renderMultiline(islandLore, state.islandLore);
+    }
 
     renderFeatures();
     navigatorApi = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
@@ -601,27 +638,16 @@
       return {
         mapSrc: data.mapImage || data.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: data.mapSize || {w:4080,h:3072},
-        campaignMapSrc: data.campaignMap || data.campaignMapSrc || DEFAULT_ISLAND_MAP,
+        campaignMap: data.campaignMap || data.campaignMapSrc || DEFAULT_ISLAND_MAP,
         campaignMapSize: data.campaignMapSize || {w:1024,h:1024},
         features: data.features || [],
         islandLore: data.islandLore || ''
       };
     }catch(e){
       console.error('Falling back to defaults due to load error:', e);
-      return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMapSrc: DEFAULT_ISLAND_MAP,
+      return { mapSrc: DEFAULT_WORLD_MAP, mapSize:{w:4080,h:3072}, campaignMap: DEFAULT_ISLAND_MAP,
                campaignMapSize:{w:1024,h:1024}, features:[], islandLore:'' };
     }
-  }
-
-  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }catch(e){ return {}; } }
-  function saveLocal(){
-    const payload={
-      mapSrc: state.mapSrc, mapSize: state.mapSize,
-      campaignMapSrc: state.campaignMapSrc, campaignMapSize: state.campaignMapSize,
-      features: state.features,
-      islandLore: islandLore.textContent.trim()
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(payload));
   }
 
   function renderFeatures(){
@@ -631,7 +657,7 @@
     feats.filter(function(f){ return f.type==='region'; }).forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
-      const neon = blendHex(color, '#e7d9b7', 0.65); // slightly more vibrant
+      const neon = blendHex(color, '#e7d9b7', 0.65);
 
       (f.shapes||[]).forEach(function(shape){
         const d = roundedPolygonPath(shape, 10);
@@ -639,7 +665,7 @@
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
         fill.setAttribute('fill', color);
-        fill.setAttribute('fill-opacity', '0.20'); // more transparent by default
+        fill.setAttribute('fill-opacity', '0.20');
         fill.setAttribute('stroke','none');
         fill.style.filter='url(#fuzzyEdge)';
         fill.addEventListener('click', function(e){ showTooltipFor(f, e); });
@@ -731,13 +757,13 @@
       tooltip.classList.add('open');
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
       requestAnimationFrame(function(){ sizeAndPositionTooltip(evt); });
-      // No desktop side panel
     }
   }
 
+  // GM (no persistence; export only)
   function bindGM(){
     const editables=[islandLore];
-    let gmOn=false, saveTimer=0;
+    let gmOn=false;
     const editor={ selectedId:null, mode:'idle', curShape:null, busy:function(){ return this.mode!=='idle'; } };
 
     function setEditable(on){
@@ -749,9 +775,7 @@
       if(navigatorApi){ navigatorApi.enable(on ? !editor.busy() : true); }
       drawOverlay();
     }
-    const scheduleSave=function(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal, 400); };
-    editables.forEach(function(el){ el.addEventListener('input', scheduleSave); el.addEventListener('blur', saveLocal); });
-    gmBtn.addEventListener('click', function(){ gmOn=!gmOn; setEditable(gmOn); if(gmOn){ scheduleSave(); } });
+    gmBtn.addEventListener('click', function(){ gmOn=!gmOn; setEditable(gmOn); });
 
     const regionSelect = document.getElementById('regionSelect');
     const regionName   = document.getElementById('regionName');
@@ -786,8 +810,8 @@
     }
 
     regionSelect.addEventListener('change', function(){ editor.selectedId=regionSelect.value; updateRegionFields(); });
-    regionName.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.name=regionName.value; renderFeatures(); refreshRegionSelect(); saveLocal();});
-    regionColor.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.color=regionColor.value; renderFeatures(); drawOverlay(); saveLocal(); });
+    regionName.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.name=regionName.value; renderFeatures(); refreshRegionSelect(); });
+    regionColor.addEventListener('input', function(){ const r=getSelectedRegion(); if(!r) return; r.color=regionColor.value; renderFeatures(); drawOverlay(); });
 
     newRegionBtn.addEventListener('click', function(){
       const id = 'region-'+Date.now().toString(36);
@@ -795,7 +819,7 @@
       state.features = state.features || [];
       state.features.push(r);
       editor.selectedId = id;
-      renderFeatures(); refreshRegionSelect(); saveLocal();
+      renderFeatures(); refreshRegionSelect();
     });
 
     addShapeBtn.addEventListener('click', function(){
@@ -811,7 +835,7 @@
       if(editor.mode!=='adding'){ editor.mode='idle'; editor.curShape=null; drawOverlay(); if(navigatorApi) navigatorApi.enable(true); return; }
       const pts = editor.curShape.points;
       if(!pts || pts.length<3){ alert('Need at least 3 points.'); return; }
-      editor.mode='idle'; editor.curShape=null; renderFeatures(); drawOverlay(); saveLocal(); if(navigatorApi) navigatorApi.enable(true);
+      editor.mode='idle'; editor.curShape=null; renderFeatures(); drawOverlay(); if(navigatorApi) navigatorApi.enable(true);
     });
 
     addVertexModeBtn.addEventListener('click', function(){ editor.mode = editor.mode==='addVertex' ? 'idle' : 'addVertex'; drawOverlay(); if(navigatorApi) navigatorApi.enable(editor.mode==='idle'); });
@@ -821,7 +845,7 @@
       const exportData={
         mapImage: state.mapSrc || DEFAULT_WORLD_MAP,
         mapSize: state.mapSize || {w:4080,h:3072},
-        campaignMap: state.campaignMapSrc || DEFAULT_ISLAND_MAP,
+        campaignMap: state.campaignMap || DEFAULT_ISLAND_MAP,
         campaignMapSize: state.campaignMapSize || {w:1024,h:1024},
         islandLore: islandLore.innerText.trim(),
         features: state.features || []
@@ -855,7 +879,7 @@
             e.stopPropagation();
             const p = clientToSvg(e.clientX, e.clientY);
             shape.splice(i+1, 0, p);
-            drawOverlay(); renderFeatures(); saveLocal();
+            drawOverlay(); renderFeatures();
           });
           gmOverlay.appendChild(edge);
         }
@@ -867,7 +891,7 @@
           let dragging=false, id=null;
           h.addEventListener('pointerdown', function(e){
             if(editor.mode==='delVertex'){
-              e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); saveLocal(); }
+              e.stopPropagation(); if(shape.length>3){ shape.splice(idx,1); drawOverlay(); renderFeatures(); }
               return;
             }
             e.preventDefault(); dragging=true; id=e.pointerId; h.setPointerCapture(id); h.classList.add('drag');
@@ -880,7 +904,7 @@
             path.setAttribute('d', roundedPolygonPath(shape, 0));
             renderFeatures();
           });
-          h.addEventListener('pointerup', function(){ if(!dragging) return; dragging=false; h.classList.remove('drag'); saveLocal(); });
+          h.addEventListener('pointerup', function(){ if(!dragging) return; dragging=false; h.classList.remove('drag'); });
           gmOverlay.appendChild(h);
         });
       });
