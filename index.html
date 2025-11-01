@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The World of Draelon – Campaign Primer (v61)</title>
+  <title>The World of Draelon – Campaign Primer (v62)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -44,6 +44,7 @@
         linear-gradient(180deg, rgba(139,94,52,.12), rgba(139,94,52,0)),
         radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
       border-radius: 14px;
+      white-space: nowrap;
     }
     .page-title:before, .page-title:after{
       content:"";
@@ -54,7 +55,7 @@
     }
     .page-title .sub{
       display:block; font-size: clamp(12px, 2vw, 16px); letter-spacing: 3px; color: #6a5841;
-      margin-top: 2px;
+      margin-top: 2px; white-space: normal;
     }
     .page-title .glyph{
       display:inline-block; width: clamp(22px, 2.8vw, 34px); height: clamp(22px, 2.8vw, 34px);
@@ -64,6 +65,10 @@
         conic-gradient(from 0deg, rgba(139,94,52,.7), rgba(139,94,52,.15), rgba(139,94,52,.7));
       border:1px solid rgba(139,94,52,.45);
       box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+    }
+    @media (max-width: 560px){
+      .page-title{ letter-spacing: 1px; font-size: clamp(26px, 7.2vw, 56px); padding: 8px 6px 4px; }
+      .page-title .glyph{ display:none; }
     }
 
     /* Generic panels */
@@ -132,10 +137,27 @@
       border-radius: 18px;
     }
 
+    /* Zoom controls */
+    .zoom-ctrl{
+      position:absolute; right:14px; bottom:14px; z-index:45;
+      display:flex; flex-direction:column; gap:8px;
+      background: rgba(255,255,255,.7);
+      border:1px solid var(--edge); border-radius:12px; padding:8px;
+      backdrop-filter: blur(2px);
+      box-shadow: var(--shadow);
+    }
+    .zoom-ctrl button{
+      font-size:18px; line-height:1; width:40px; height:40px;
+      border-radius:10px; border:1px solid var(--edge);
+      background: linear-gradient(180deg, #f7edcf, #efe2b6);
+      cursor:pointer;
+    }
+    .zoom-ctrl button:active{ transform: translateY(1px); }
+
     .loader{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:6px 10px;z-index:20;backdrop-filter:blur(2px)}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.2); border-top-color:var(--accent); animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .gm-btn{position:absolute;top:12px;right:12px;z-index:40;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
+    .gm-btn{position:absolute;top:12px;right:72px;z-index:46;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
     .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
 
     /* Features */
@@ -286,6 +308,10 @@
       <div class="map-wrap ornate" id="mapWrap">
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
+        <div class="zoom-ctrl" aria-label="Map zoom controls">
+          <button id="zoomIn" title="Zoom in">＋</button>
+          <button id="zoomOut" title="Zoom out">－</button>
+        </div>
 
         <div class="gm-bar" id="gmBar">
           <div class="row">
@@ -362,10 +388,8 @@
 
 <script>
 (function(){
-  // kill any old local caches (we don't use them anymore)
-  try{
-    ['signika.world.v59','signika.world.v60','signika.world.v61'].forEach(k=>localStorage.removeItem(k));
-  }catch(e){}
+  // no local cache
+  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62'].forEach(k=>localStorage.removeItem(k)); }catch(e){}
 
   const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
@@ -393,15 +417,9 @@
   const ttClose = document.getElementById('ttClose');
   const gmBtn   = document.getElementById('gmBtn');
   const gmBar   = document.getElementById('gmBar');
-  const regionSelect = document.getElementById('regionSelect');
-  const regionName   = document.getElementById('regionName');
-  const regionColor  = document.getElementById('regionColor');
-  const addShapeBtn  = document.getElementById('addShapeBtn');
-  const finishShapeBtn= document.getElementById('finishShapeBtn');
-  const addVertexModeBtn= document.getElementById('addVertexModeBtn');
-  const delVertexModeBtn= document.getElementById('delVertexModeBtn');
-  const newRegionBtn = document.getElementById('newRegionBtn');
-  const saveJsonBtn  = document.getElementById('saveJsonBtn');
+
+  const zoomInBtn = document.getElementById('zoomIn');
+  const zoomOutBtn= document.getElementById('zoomOut');
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
@@ -493,6 +511,27 @@
     }
     function guardEnabled(handler){ return function(e){ if(!nav.enabled) return; return handler(e); }; }
 
+    // LERPed zoom utility
+    function animateZoom(targetW, targetH, mx, my, dur){
+      const vb0 = nav.viewBox.slice();
+      const nxW = clamp(targetW, nav.minW, nav.maxW);
+      const nxH = clamp(targetH, nav.minH, nav.maxH);
+      const nxX = clamp(vb0[0] + (vb0[2] - nxW)*mx, 0, imgW - nxW);
+      const nxY = clamp(vb0[1] + (vb0[3] - nxH)*my, 0, imgH - nxH);
+      const start = performance.now();
+      function step(t){
+        const k = Math.min(1, (t - start) / dur);
+        const ease = 1 - Math.pow(1-k, 3); // cubic ease-out
+        const vx = vb0[0] + (nxX - vb0[0])*ease;
+        const vy = vb0[1] + (nxY - vb0[1])*ease;
+        const vw = vb0[2] + (nxW - vb0[2])*ease;
+        const vh = vb0[3] + (nxH - vb0[3])*ease;
+        nav.viewBox=[vx,vy,vw,vh]; apply();
+        if(k<1) requestAnimationFrame(step); else setTouchMode();
+      }
+      requestAnimationFrame(step);
+    }
+
     svgEl.addEventListener('wheel', guardEnabled(function(e){
       var vb = nav.viewBox.slice();
       var full = atFull();
@@ -500,11 +539,7 @@
       e.preventDefault();
       var scale=(e.deltaY<0?0.9:1.1);
       var mx=e.offsetX/svgEl.clientWidth, my=e.offsetY/svgEl.clientHeight;
-      var nw=clamp(vb[2]*scale, nav.minW, nav.maxW);
-      var nh=clamp(vb[3]*scale, nav.minH, nav.maxH);
-      var nx=clamp(vb[0]+(vb[2]-nw)*mx, 0, imgW-nw);
-      var ny=clamp(vb[1]+(vb[3]-nh)*my, 0, imgH-nh);
-      nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
+      animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 160);
     }), {passive:false});
 
     svgEl.addEventListener('pointerup', guardEnabled(function(e){
@@ -533,13 +568,9 @@
         if(nav.initialPinchDist>0){
           var scale = nav.initialPinchDist / dist;
           var vb = nav.initialViewBox;
-          var nw = clamp(vb[2] * scale, nav.minW, nav.maxW);
-          var nh = clamp(vb[3] * scale, nav.minH, nav.maxH);
           var mx = ((pts[0].x + pts[1].x)/2) / svgEl.clientWidth;
           var my = ((pts[0].y + pts[1].y)/2) / svgEl.clientHeight;
-          var nx = clamp(vb[0] + (vb[2] - nw)*mx, 0, imgW - nw);
-          var ny = clamp(vb[1] + (vb[3] - nh)*my, 0, imgH - nh);
-          nav.viewBox=[nx,ny,nw,nh]; apply(); setTouchMode();
+          animateZoom(vb[2]*scale, vb[3]*scale, mx, my, 140);
         } else {
           nav.initialPinchDist = dist;
           nav.initialViewBox = nav.viewBox.slice();
@@ -596,6 +627,11 @@
         var vy = 0; // top
         nav.maxW = crop.vw; nav.maxH = crop.vh;
         nav.viewBox=[vx,vy,crop.vw,crop.vh]; apply(); setTouchMode();
+      },
+      zoomByAnimated:function(factor){
+        var vb = nav.viewBox.slice();
+        var mx = 0.5, my = 0.5;
+        animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 180);
       }
     };
   }
@@ -605,7 +641,7 @@
 
   async function init(){
     const loaded = await loadData();
-    state = loaded; // remote JSON is the source of truth
+    state = loaded;
 
     const wSize = state.mapSize || {w:4080,h:3072};
     mapImage.setAttribute('href', state.mapSrc || DEFAULT_WORLD_MAP);
@@ -615,7 +651,6 @@
     islandImg.src = state.campaignMap || state.campaignMapSrc || DEFAULT_ISLAND_MAP;
     islandImg.alt = "Signika island map";
 
-    // Render island lore from JSON on load (e.g., "Grikky")
     if (state.islandLore) {
       renderMultiline(islandLore, state.islandLore);
     }
@@ -624,6 +659,10 @@
     navigatorApi = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
     bindGM();
     bindTooltipDismiss();
+
+    // hook zoom buttons
+    zoomInBtn.addEventListener('click', function(){ navigatorApi && navigatorApi.zoomByAnimated(0.9); });
+    zoomOutBtn.addEventListener('click', function(){ navigatorApi && navigatorApi.zoomByAnimated(1.1); });
 
     loader.style.display='none';
   }
@@ -651,10 +690,12 @@
   }
 
   function renderFeatures(){
-    gRegions.innerHTML=''; gPoints.innerHTML='';
+    const regions = document.getElementById('regions');
+    const points  = document.getElementById('points');
+    regions.innerHTML=''; points.innerHTML='';
     const feats = (state.features||[]);
 
-    feats.filter(function(f){ return f.type==='region'; }).forEach(function(f){
+    feats.filter(f=>f.type==='region').forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
       const neon = blendHex(color, '#e7d9b7', 0.65);
@@ -679,16 +720,16 @@
       g.addEventListener('mouseenter', function(){ g.classList.add('hover'); });
       g.addEventListener('mouseleave', function(){ g.classList.remove('hover'); });
       g.addEventListener('click', function(e){ showTooltipFor(f,e); });
-      gRegions.appendChild(g);
+      regions.appendChild(g);
     });
 
-    feats.filter(function(f){ return f.type==='point'; }).forEach(function(f){
+    feats.filter(f=>f.type==='point').forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature point'); g.dataset.id=f.id||'';
       const c=elNS('circle'); c.setAttribute('cx', f.x); c.setAttribute('cy', f.y); c.setAttribute('r', 18);
       const t=elNS('text'); t.setAttribute('x', f.x+30); t.setAttribute('y', f.y-30); t.setAttribute('class','label'); t.textContent=f.name||'';
-      const open=function(e){ showTooltipFor(f,e); };
+      const open=(e)=>showTooltipFor(f,e);
       c.addEventListener('click', open); t.addEventListener('click', open);
-      g.appendChild(c); g.appendChild(t); gPoints.appendChild(g);
+      g.appendChild(c); g.appendChild(t); points.appendChild(g);
     });
   }
 
@@ -700,6 +741,8 @@
   }
 
   function bindTooltipDismiss(){
+    const tooltip = document.getElementById('tooltip');
+    const ttClose = document.getElementById('ttClose');
     ttClose.addEventListener('click', function(){ tooltip.classList.remove('open'); });
     svgWorld.addEventListener('click', function(e){
       const isFeature = !!e.target.closest('.feature');
@@ -732,6 +775,11 @@
   }
 
   function showTooltipFor(f, evt){
+    const tooltip = document.getElementById('tooltip');
+    const ttTitle = document.getElementById('ttTitle');
+    const ttBody  = document.getElementById('ttBody');
+    const ttMedia = document.getElementById('ttMedia');
+    const ttImg   = document.getElementById('ttImg');
     if(!f) return;
     const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const name = f.name || '—';
@@ -760,7 +808,7 @@
     }
   }
 
-  // GM (no persistence; export only)
+  // GM (export-only)
   function bindGM(){
     const editables=[islandLore];
     let gmOn=false;
@@ -882,7 +930,7 @@
             drawOverlay(); renderFeatures();
           });
           gmOverlay.appendChild(edge);
-        }
+        });
 
         shape.forEach(function(pt, idx){
           const h=elNS('circle'); h.setAttribute('class','handle'); h.setAttribute('r', 8);
