@@ -18,7 +18,7 @@
       "type": "region",
       "name": "Oscana",
       "img": "/Campaign-Primer/map/Oscana.png",
-      "color": "#4f6478",
+      "color": "#0808c7",
       "desc": "A stark, grey land of feudal kingdoms, where honour lies as much in the strength of one’s arm as in the quality of one’s tools. Two lords might build a grand metal runeway between their lands to trade goods at great speed—only to aim crank-ballistae at one another the next day for daring to use it.\n\nThe Oscanan League has been founded and refounded countless times by kingdoms desperate to defend their homes. With raids from the wildlands beyond Naebolg’s Belt and the growing power of nations across the sea, good craftsmanship and grit remain an Oscanan’s truest companions.",
       "shapes": [
         [
@@ -704,7 +704,7 @@
       "type": "region",
       "name": "Athium",
       "img": "/Campaign-Primer/map/Athium.png",
-      "color": "#611d66",
+      "color": "#b508c2",
       "desc": "The Athumi Empire is the greatest power on Draelon. Expanding for centuries from the holy city of Athumar, disciplined militaries and fervent devotion to their ever-shrouded goddess have fuelled their conquest for over five hundred years. In taming the Viverna Mountains, they claimed dominion over the wyverns, forging skyborne legions to spread their rule from above.\n\nWorship of any divine being other than the Lady of Brass is forbidden. Across the world, it is said there is far more to fear from an Athumi priest than from even their mightiest warrior.",
       "shapes": [
         [
@@ -1942,7 +1942,7 @@
       "type": "region",
       "name": "Letrylor",
       "img": "/Campaign-Primer/map/Letrylor.png",
-      "color": "#910f1e",
+      "color": "#34ba07",
       "desc": "A continent swallowed by emerald jungles and overgrown ruins, once home to an entire pantheon of radiant gods. The earth, plants, and beasts still dominate with a wild magic bestowed in the ancient past. \n\nWhat settlements dot these lands have learned to grow as one with nature, lead by powerful druids or fearless explorers.",
       "shapes": [
         [
@@ -2475,7 +2475,7 @@
       "id": "4koif2djekqmh0pvein",
       "type": "region",
       "name": "Arrania",
-      "color": "#ff7300",
+      "color": "#f70031",
       "img": "/Campaign-Primer/map/Arrania.png",
       "desc": "The Scarthold, the Thrice-Burned Lands, Old Arrania — a region whose people struggle to hold on to identity while falling to the mercy of their neighbours. For decades, Athium has used these lands as a place to train and entertain its armies.\n\nThe Arranian realms, long weakened by the scars of a ravening war waged when the gods still walked Draelon, are nonetheless home to some of the most prideful folk in the world. Their fierce stubbornness may yet prove enough to keep their enemies at bay.",
       "shapes": [
@@ -2937,6 +2937,7 @@
     }
   ]
 }
+
 
 
 
