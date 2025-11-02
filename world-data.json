@@ -18,7 +18,7 @@
       "type": "region",
       "name": "Oscana",
       "img": "/Campaign-Primer/map/Oscana.png",
-      "color": "#ff000d",
+      "color": "#4f6478",
       "desc": "A stark, grey land of feudal kingdoms, where honour lies as much in the strength of one’s arm as in the quality of one’s tools. Two lords might build a grand metal runeway between their lands to trade goods at great speed—only to aim crank-ballistae at one another the next day for daring to use it.\n\nThe Oscanan League has been founded and refounded countless times by kingdoms desperate to defend their homes. With raids from the wildlands beyond Naebolg’s Belt and the growing power of nations across the sea, good craftsmanship and grit remain an Oscanan’s truest companions.",
       "shapes": [
         [
@@ -704,7 +704,7 @@
       "type": "region",
       "name": "Athium",
       "img": "/Campaign-Primer/map/Athium.png",
-      "color": "#001eff",
+      "color": "#611d66",
       "desc": "The Athumi Empire is the greatest power on Draelon. Expanding for centuries from the holy city of Athumar, disciplined militaries and fervent devotion to their ever-shrouded goddess have fuelled their conquest for over five hundred years. In taming the Viverna Mountains, they claimed dominion over the wyverns, forging skyborne legions to spread their rule from above.\n\nWorship of any divine being other than the Lady of Brass is forbidden. Across the world, it is said there is far more to fear from an Athumi priest than from even their mightiest warrior.",
       "shapes": [
         [
@@ -1328,7 +1328,7 @@
       "type": "region",
       "name": "Eturia",
       "img": "/Campaign-Primer/map/Eturia.png",
-      "color": "#25db00",
+      "color": "#c2af1d",
       "desc": "A magocratic republic sprawled across the islands of the Cetryan Ocean, where politics boil down to one thing: talent with magic.\n\nA relatively young power in Draelon—founded only 170 years ago—Eturia has nonetheless secured an impressive foothold on the world stage. Having forged an uneasy alliance with Athium, and with its arcane archives growing larger by the day, ambition has become the nation’s cornerstone.",
       "shapes": [
         [
@@ -1942,7 +1942,7 @@
       "type": "region",
       "name": "Letrylor",
       "img": "/Campaign-Primer/map/Letrylor.png",
-      "color": "#fbff00",
+      "color": "#910f1e",
       "desc": "A continent swallowed by emerald jungles and overgrown ruins, once home to an entire pantheon of radiant gods. The earth, plants, and beasts still dominate with a wild magic bestowed in the ancient past. \n\nWhat settlements dot these lands have learned to grow as one with nature, lead by powerful druids or fearless explorers.",
       "shapes": [
         [
@@ -2800,7 +2800,7 @@
       "type": "region",
       "name": "Frissia",
       "img":"/Campaign-Primer/map/Frissia.png",
-      "color": "#8ad9ff",
+      "color": "#0085c4",
       "desc": "Once the seat of a world-spanning empire, modern Frissia is a shadow of its former grandeur. Now ruled by two tribes—the Fokari and the Areth—whose mutual hatred has only deepened with time, the island is a land of old scars and stubborn pride. Desperate to prove themselves the rightful heirs to a realm the rest of the world has chosen to forget, they fight over a legacy few still remember.\n\nThe people of the island know better. The secrets buried here may yet shape history once more.",
       "shapes": [
         [
@@ -2937,6 +2937,7 @@
     }
   ]
 }
+
 
 
 
