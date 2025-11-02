@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>The World of Draelon – Campaign Primer (v64 aesthetics)</title>
-
-  <!-- Fantasy type -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The World of Draelon – Campaign Primer (v63a)</title>
   <style>
     :root{
       --paper:#fbf3dd; --paper-2:#f6edd1; --ink:#2c2416; --ink-soft:#5c523f;
@@ -17,73 +13,31 @@
       --wrap-mobile: min(92vw, 900px);
       --ivory:#f6e7c8;
       --btn:#ead8aa; --btn2:#dfc98a;
-
-      /* Themeable */
-      --border-glow-mix: 0.65;
-      --region-fill-opacity: .20;
-      --hover-fill-opacity: .48;
-      --sel-fill-opacity: .56;
-
-      /* Day theme (default) */
-      --bg:#fff8da;
-      --tint-ornate-outer: rgba(139,94,52,.10);
-      --tint-ornate-inner: rgba(139,94,52,.15);
-      --mote-color: rgba(139,94,52,.26);
     }
-    [data-theme="night"]{
-      --bg:#ede5c9;
-      --paper:#f2ead3; --paper-2:#e9dfc2; --ink:#201b12; --ink-soft:#4a4030;
-      --accent:#6a4526; --rule:#cdbb91; --edge:#bea779;
-      --ivory:#efe4c9;
-      --tint-ornate-outer: rgba(40,35,25,.14);
-      --tint-ornate-inner: rgba(139,94,52,.22);
-      --mote-color: rgba(60,44,26,.30);
-      --border-glow-mix: 0.55; /* slightly calmer glow at night */
-    }
-
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      background: var(--bg);
-      font-family: "Cormorant Garamond", Georgia, "Iowan Old Style", "Palatino Linotype", serif;
-      line-height:1.5;
+      background:#fff8da; /* solid parchment, no seams */
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+      line-height:1.45;
       -webkit-tap-highlight-color: transparent;
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M3 21l5-5 5 5-5-18z" fill="%235e4933"/></svg>') 2 2, auto;
     }
-    /* Faint paper grain overlay */
-    body::before{
-      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-      background-image: radial-gradient(rgba(0,0,0,.02) 1px, transparent 1px);
-      background-size: 3px 3px;
-      opacity:.7;
-    }
-
     *{ user-select: none; -webkit-user-select: none; -ms-user-select: none; }
     input, textarea, select, .island-lore, .side .content{ user-select: text; -webkit-user-select: text; }
 
-    /* Top bar: title + toggles */
-    .top-wrap{display:flex; justify-content:center; margin: 16px 12px 0; position:relative; z-index:1}
-    .top-inner{display:flex; align-items:center; gap:16px; width:100%; max-width:var(--wrap-wide); justify-content:center; flex-wrap:wrap}
-    .toggle-bar{display:flex; gap:10px; align-items:center; margin-top:6px}
-    .toggle-bar .btn{
-      font-family: Cinzel, serif;
-      font-size:12px; letter-spacing:.8px; text-transform:uppercase;
-      background: linear-gradient(180deg, #f7edcf, #efe2b6);
-      border:1px solid var(--edge); border-radius:999px; padding:8px 10px; cursor:pointer;
-      box-shadow: var(--shadow);
-    }
-    .toggle-bar .btn[aria-pressed="true"]{ background: linear-gradient(180deg, #e7d69e, #e0c87e); }
-
     /* Fantasy title */
+    .title-wrap{display:flex; justify-content:center; margin: 18px 12px 0;}
     .page-title{
+      max-width: var(--wrap-wide);
+      width:100%;
       text-align:center;
-      font-family: Cinzel, serif;
-      font-weight: 900;
+      font-variant: small-caps;
+      font-weight: 800;
       letter-spacing: 2px;
       font-size: clamp(28px, 6vw, 64px);
       color: #3b2b15;
-      margin: 0;
-      padding: 6px 8px 4px;
+      margin: 8px auto 0;
+      padding: 10px 8px 6px;
       position: relative;
       background:
         linear-gradient(180deg, rgba(139,94,52,.12), rgba(139,94,52,0)),
@@ -92,9 +46,8 @@
       white-space: nowrap;
     }
     .page-title .sub{
-      display:block; font-family: "Cormorant Garamond", serif;
-      font-size: clamp(12px, 2vw, 16px); letter-spacing: 3px; color: #6a5841;
-      margin-top: 2px; white-space: normal; font-weight:600;
+      display:block; font-size: clamp(12px, 2vw, 16px); letter-spacing: 3px; color: #6a5841;
+      margin-top: 2px; white-space: normal;
     }
     .page-title .glyph{
       display:inline-block; width: clamp(22px, 2.8vw, 34px); height: clamp(22px, 2.8vw, 34px);
@@ -110,21 +63,21 @@
       .page-title .glyph{ display:none; }
     }
 
-    /* Knotwork divider */
-    .ornate-rule{
-      display:flex; align-items:center; justify-content:center;
-      gap:14px; margin: 18px auto; width:100%;
-      max-width: var(--wrap-wide);
+    /* Generic panels */
+    .panel{
+      background: linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid var(--edge);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
     }
-    .ornate-rule svg{ width:220px; height:auto; opacity:.6 }
-    .ornate-rule .line{
-      height:0; border:0; border-top:1px solid rgba(139,94,52,.45);
-      box-shadow: 0 -1px 0 rgba(255,255,255,.3) inset;
-      flex:1;
+    .panel::after{
+      content:""; position:absolute; inset:0; pointer-events:none; border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 30px 60px rgba(0,0,0,.06);
     }
 
     /* Map area */
-    .map-row{display:flex; justify-content:center; margin-top:6px;}
+    .map-row{display:flex; justify-content:center; margin-top:12px;}
     .map-wrap{
       position:relative;
       width:100%;
@@ -134,15 +87,6 @@
       margin: 0 12px;
       overflow:hidden;
       border-radius: 22px;
-
-      /* Soft torn parchment edge via mask */
-      -webkit-mask-image:
-        radial-gradient(18px 18px at 0 0, #0000 97%, #000 98%),
-        radial-gradient(18px 18px at 100% 0, #0000 97%, #000 98%),
-        radial-gradient(18px 18px at 100% 100%, #0000 97%, #000 98%),
-        radial-gradient(18px 18px at 0 100%, #0000 97%, #000 98%);
-      -webkit-mask-composite: xor;
-              mask-composite: exclude;
     }
     .map-wrap.ornate{
       background:
@@ -151,21 +95,14 @@
       border: 1px solid var(--edge);
       box-shadow:
         0 20px 40px rgba(0,0,0,.25),
-        inset 0 0 0 2px var(--tint-ornate-inner),
-        inset 0 0 60px var(--tint-ornate-outer);
+        inset 0 0 0 2px rgba(139,94,52,.15),
+        inset 0 0 60px rgba(139,94,52,.10);
     }
     .map-wrap svg{
       width:100%; height:100%; display:block;
       background:#efe6c8;
       touch-action:none; cursor:grab;
       border-radius: 18px;
-    }
-
-    /* Compass rose */
-    .compass{
-      position:absolute; right:16px; top:16px; z-index:10; opacity:.85;
-      width:68px; height:68px; pointer-events:none;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,.25));
     }
 
     /* Zoom controls */
@@ -191,41 +128,13 @@
     .gm-btn{position:absolute;top:12px;right:72px;z-index:46;background:linear-gradient(180deg, #f7edcf, #efe2b6);color:var(--ink);border:1px solid var(--edge);border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow: var(--shadow)}
     .gm-btn.on{background:linear-gradient(180deg, #e7d69e, #e0c87e);}
 
-    /* GM watermark */
-    body.gm-on .map-wrap::after{
-      content:"GM MODE"; position:absolute; inset:0; pointer-events:none;
-      display:flex; align-items:center; justify-content:center;
-      font-family: Cinzel, serif; font-weight:900; font-size:48px; letter-spacing:6px;
-      color: rgba(139,94,52,.18);
-      transform: rotate(-18deg);
-    }
-
-    /* Drifting dust motes */
-    .motes{ position:fixed; inset:0; pointer-events:none; z-index:0; }
-    .motes span{
-      position:absolute; width:6px; height:6px; border-radius:50%;
-      background: var(--mote-color);
-      filter: blur(1px);
-      animation: drift 12s linear infinite;
-    }
-    @keyframes drift{
-      from{ transform: translateY(0) translateX(0); opacity:.45; }
-      to{ transform: translateY(-120vh) translateX(30vw); opacity:0; }
-    }
-    @media (prefers-reduced-motion: reduce){
-      .motes, .candleglow, .ink-reveal{ display:none !important; }
-      .map-wrap svg{ scroll-behavior: auto; }
-    }
-
     /* Features */
     .feature{cursor:pointer}
     .feature.point circle{stroke:var(--paper);stroke-width:3;fill:var(--accent)}
     .feature.point .label{font-size:36px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:#faedcf;stroke-width:6px;stroke-linejoin:round}
-
-    /* Region fills + outline neon (existing) */
     .feature.region path.fill{transition:fill-opacity .12s linear; pointer-events:auto}
-    .feature.region.hover path.fill{fill-opacity: var(--hover-fill-opacity)}
-    .feature.region.selected path.fill{fill-opacity: var(--sel-fill-opacity)}
+    .feature.region.hover path.fill{fill-opacity:.48}
+    .feature.region.selected path.fill{fill-opacity:.56}
 
     .feature.region .ol-glow,
     .feature.region .ol-mid,
@@ -243,9 +152,6 @@
     .feature.region.selected .ol-mid,
     .feature.region.selected .ol-core{ opacity:.90; }
 
-    /* Ink-bleed hover effect on fill */
-    .feature.region.hover path.fill{ filter:url(#inkBleed); }
-
     /* Tooltip */
     .tooltip{
       position:absolute;min-width:260px;max-width:520px;background:var(--paper);
@@ -253,47 +159,15 @@
       z-index:1000;display:none;pointer-events:auto;overflow:auto;
     }
     .tooltip.open{display:block}
-    .tooltip header{
-      display:flex;justify-content:space-between;align-items:center;padding:8px 12px;
-      border-bottom:1px solid var(--rule);
-      background:linear-gradient(180deg,var(--paper),var(--paper-2));
-      position:sticky; top:0; z-index:2
-    }
+    .tooltip header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--paper-2)); position:sticky; top:0; z-index:2}
     .tooltip header h3{margin:0;font-size:16px}
     .tooltip .close{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:18px}
-
-    /* Wax seal */
-    .wax{
-      display:inline-block; width:22px; height:22px; margin-right:8px;
-      border-radius:50%;
-      background: radial-gradient(circle at 35% 35%, #a11f2c, #7a121f 70%);
-      box-shadow: inset 0 2px 2px rgba(255,255,255,.25), 0 2px 0 rgba(0,0,0,.15);
-      position:relative; vertical-align:middle;
-    }
-    .wax::after{
-      content:""; position:absolute; inset:5px; border-radius:50%;
-      border:1px solid rgba(0,0,0,.25); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
-    }
-
     .tooltip .media{width:100%;overflow:hidden;background:#e6d9b6;border-bottom:1px solid var(--rule)}
     .tooltip .media img{width:100%;height:auto;display:block}
-    .tooltip .body{padding:10px 12px;line-height:1.6; font-size: 17px;}
+    .tooltip .body{padding:10px 12px;line-height:1.5;}
     .tooltip .body p{margin:0}
 
-    /* Ink-reveal for tooltip body (desktop) */
-    .ink-reveal{
-      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 0%, transparent 0%);
-              mask-image: linear-gradient(90deg, #000 0%, #000 0%, transparent 0%);
-      animation: reveal 550ms ease-out forwards;
-    }
-    @keyframes reveal{
-      to{
-        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 100%, #000 100%);
-                mask-image: linear-gradient(90deg, #000 0%, #000 100%, #000 100%);
-      }
-    }
-
-    /* Mobile-only side panel for tooltip content */
+    /* Mobile-only side panel for tooltips */
     .side-row{display:flex; justify-content:center}
     .side{
       width:100%;
@@ -305,9 +179,29 @@
     .side header h1{font-size:18px;margin:0;letter-spacing:.6px;text-transform:uppercase}
     .side .content{padding:16px;overflow:visible}
     .lore-title{font-weight:700;margin:0 0 8px;font-size:20px;letter-spacing:.2px}
-    .lore-body{line-height:1.7; font-size:18px;}
+    .lore-body{line-height:1.6;}
     .lore-media{margin:0 0 12px 0; display:none}
     .lore-media img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--edge); box-shadow: var(--shadow)}
+
+    /* Ornate horizontal rule */
+    .ornate-rule{
+      display:flex; align-items:center; justify-content:center;
+      gap:14px; margin: 18px auto; width:100%;
+      max-width: var(--wrap-wide);
+    }
+    .ornate-rule .line{
+      height:0; border:0; border-top:1px solid rgba(139,94,52,.45);
+      box-shadow: 0 -1px 0 rgba(255,255,255,.3) inset;
+      flex:1;
+    }
+    .ornate-rule .glyph{
+      width:34px; height:34px; border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(139,94,52,.18), rgba(139,94,52,0) 60%),
+        conic-gradient(from 0deg, rgba(139,94,52,.7), rgba(139,94,52,.15), rgba(139,94,52,.7));
+      border:1px solid rgba(139,94,52,.45);
+      box-shadow: var(--shadow), inset 0 0 0 2px rgba(255,255,255,.35);
+    }
 
     /* Island section */
     .section{margin:8px 16px 16px 16px; display:flex; justify-content:center;}
@@ -318,14 +212,12 @@
     .island-card{ margin:0; padding:12px; background:linear-gradient(180deg, var(--paper), var(--paper-2));
       border:1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--shadow);
       display:block; max-width:100%; }
-    .island-card img{display:block; width:100%; height:auto; will-change: transform;}
-    /* Tiny parallax on scroll */
-    .island-card img.parallax{ transform: translateY(var(--py, 0px)); transition: transform .08s linear; }
+    .island-card img{display:block; width:100%; height:auto}
     .island-lore{padding:16px}
     .island-lore h3{margin:0 0 8px 0;font-size:18px;text-transform:uppercase;letter-spacing:.4px}
-    .island-lore .body{line-height:1.7; font-size:18px;}
+    .island-lore .body{line-height:1.6}
 
-    /* GM overlay editor */
+    /* GM overlay */
     .gm-bar{
       position:absolute; left:12px; top:12px; z-index:45;
       background:linear-gradient(180deg, #fff7dd, #f2e5b7);
@@ -334,6 +226,7 @@
     }
     body.gm-on .gm-bar{ display:flex; }
     .gm-bar .row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+
     .gm-bar label{ font-size:12px; color:var(--ink-soft) }
     .gm-bar input[type="text"], .gm-bar input[type="color"], .gm-bar select{
       font-size:12px; padding:4px 6px; border:1px solid var(--edge); border-radius:6px; background:#fffaf0;
@@ -361,10 +254,10 @@
 
     /* Responsive */
     @media (max-width: 760px){
+      .map-wrap{ max-width: var(--wrap-mobile); min-height: min(60vh, calc(100vw * 0.72)); max-height:none; }
       .tooltip{ display:none !important; }
       .side-row{ display:flex; }
       .ornate-rule{ max-width: var(--wrap-mobile); }
-      .map-wrap{ max-width: var(--wrap-mobile); min-height: min(60vh, calc(100vw * 0.72)); max-height:none; }
       .island-grid{ grid-template-columns: 1fr !important; grid-auto-flow: row !important; max-width: var(--wrap-mobile); }
       .island-card{ order: 1 !important; }
       .island-lore{ order: 2 !important; margin-top: 12px !important; }
@@ -375,51 +268,13 @@
   </style>
 </head>
 <body>
-  <!-- drifting dust motes -->
-  <div class="motes" aria-hidden="true">
-    <span style="left:10%; bottom:-10%; animation-duration:14s;"></span>
-    <span style="left:40%; bottom:-8%; animation-duration:12s; width:5px; height:5px;"></span>
-    <span style="left:72%; bottom:-9%; animation-duration:13.5s; width:4px; height:4px;"></span>
-  </div>
-
   <div class="app">
-    <div class="top-wrap">
-      <div class="top-inner">
-        <h1 class="page-title">The <span class="glyph"></span> World of Draelon <span class="glyph"></span><span class="sub">Campaign Primer</span></h1>
-        <div class="toggle-bar" role="group" aria-label="Display toggles">
-          <button class="btn" id="themeBtn" aria-pressed="false" title="Day/Night">Night</button>
-          <button class="btn" id="motionBtn" aria-pressed="false" title="Reduce motion">Reduce Motion</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="ornate-rule" aria-hidden="true">
-      <span class="line"></span>
-      <!-- Celtic knotwork bar -->
-      <svg viewBox="0 0 400 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M20,20 C40,0 60,40 80,20 S120,0 140,20 160,40 180,20 200,0 220,20 240,40 260,20 280,0 300,20 320,40 340,20 360,0 380,20" fill="none" stroke="#8b5e34" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-        <path d="M20,20 C40,40 60,0 80,20 S120,40 140,20 160,0 180,20 200,40 220,20 240,0 260,20 280,40 300,20 320,0 340,20 360,40 380,20" fill="none" stroke="#c7a773" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-      </svg>
-      <span class="line"></span>
+    <div class="title-wrap">
+      <h1 class="page-title">The <span class="glyph"></span> World of Draelon <span class="glyph"></span><span class="sub">Campaign Primer</span></h1>
     </div>
 
     <div class="map-row">
       <div class="map-wrap ornate" id="mapWrap">
-        <!-- Compass rose -->
-        <svg class="compass" id="compass" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="46" fill="url(#compGrad)" stroke="rgba(0,0,0,.25)"/>
-          <g transform="translate(50 50)">
-            <polygon points="0,-36 6,0 0,36 -6,0" fill="#7a5a35"/>
-            <polygon points="0,-30 4,0 0,30 -4,0" fill="#e6d0a0"/>
-          </g>
-          <defs>
-            <radialGradient id="compGrad">
-              <stop offset="0" stop-color="#f7e7bf"/>
-              <stop offset="1" stop-color="#e2cda0"/>
-            </radialGradient>
-          </defs>
-        </svg>
-
         <div class="loader" id="loader" aria-live="polite"><div class="spinner"></div><span id="loaderText">Loading world…</span></div>
         <button class="gm-btn" id="gmBtn" title="GM Mode" type="button">GM</button>
         <div class="zoom-ctrl" aria-label="Map zoom controls">
@@ -447,13 +302,13 @@
         <div class="tooltip" id="tooltip" role="dialog" aria-live="polite">
           <div class="media" id="ttMedia" style="display:none"><img id="ttImg" alt=""></div>
           <header>
-            <div><span class="wax" aria-hidden="true"></span><h3 id="ttTitle" style="display:inline-block; vertical-align:middle">Title</h3></div>
+            <h3 id="ttTitle">Title</h3>
             <button class="close" id="ttClose" aria-label="Close">×</button>
           </header>
           <div class="body" id="ttBody"></div>
         </div>
 
-        <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map" style="cursor:grab">
+        <svg id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-label="Interactive world map">
           <defs>
             <filter id="fuzzyEdge" x="-4%" y="-4%" width="108%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
@@ -467,12 +322,6 @@
               <feGaussianBlur stdDeviation="1.5" result="blur3"/>
               <feMerge><feMergeNode in="blur3"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            <!-- Ink bleed on hover -->
-            <filter id="inkBleed" x="-5%" y="-5%" width="110%" height="110%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="noise"/>
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
-              <feGaussianBlur stdDeviation="0.6"/>
-            </filter>
           </defs>
           <image id="mapImage" href="" x="0" y="0" width="1000" height="600" preserveAspectRatio="none" />
           <g id="regions"></g>
@@ -484,7 +333,7 @@
 
     <!-- Mobile-only panel for tooltip content -->
     <div class="side-row">
-      <aside class="side ornate panel" id="sidePanel">
+      <aside class="side panel" id="sidePanel">
         <header><h1>Campaign Info</h1><span class="muted">Tap the map to explore</span></header>
         <div class="content">
           <div class="lore-media" id="loreMedia"><img id="loreImg" alt=""></div>
@@ -495,28 +344,21 @@
     </div>
 
     <div class="ornate-rule" aria-hidden="true">
-      <span class="line"></span>
-      <svg viewBox="0 0 400 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M20,20 C40,0 60,40 80,20 S120,0 140,20 160,40 180,20 200,0 220,20 240,40 260,20 280,0 300,20 320,40 340,20 360,0 380,20" fill="none" stroke="#8b5e34" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-        <path d="M20,20 C40,40 60,0 80,20 S120,40 140,20 160,0 180,20 200,40 220,20 240,0 260,20 280,40 300,20 320,0 340,20 360,40 380,20" fill="none" stroke="#c7a773" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-      </svg>
-      <span class="line"></span>
+      <span class="line"></span><span class="glyph"></span><span class="line"></span>
     </div>
   </div>
 
   <section class="section">
     <div class="island-grid">
-      <figure class="island-card"><img id="islandImg" class="parallax" src="" alt="Signika island map"/></figure>
+      <figure class="island-card"><img id="islandImg" src="" alt="Signika island map"/></figure>
       <div class="island-lore panel"><h3>Island Lore</h3><div id="islandLore" class="body">Add your Signika lore here — history, factions, features, and travel notes.</div></div>
     </div>
   </section>
 
 <script>
 (function(){
-  /* cache-bust localStorage and fetch */
-  try{
-    ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62','signika.world.v63','signika.world.v63a','signika.world.v64'].forEach(function(k){ localStorage.removeItem(k); });
-  }catch(e){}
+  // nuke any local cache versions
+  try{ ['signika.world.v59','signika.world.v60','signika.world.v61','signika.world.v62','signika.world.v63','signika.world.v63a'].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
 
   const JSON_PATH = './world-data.json?v=' + Date.now(); // bypass HTTP cache
   const DEFAULT_WORLD_MAP = '/Campaign-Primer/map/world-map.png';
@@ -544,34 +386,12 @@
   const ttClose = document.getElementById('ttClose');
   const gmBtn   = document.getElementById('gmBtn');
   const gmBar   = document.getElementById('gmBar');
-  const compass = document.getElementById('compass');
 
   const zoomInBtn = document.getElementById('zoomIn');
   const zoomOutBtn= document.getElementById('zoomOut');
 
-  const themeBtn  = document.getElementById('themeBtn');
-  const motionBtn = document.getElementById('motionBtn');
-
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const elNS=(n)=>document.createElementNS('http://www.w3.org/2000/svg',n);
-
-  /* Reduced motion toggle (also respects prefers-reduced-motion) */
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(prefersReduced){ document.documentElement.setAttribute('data-reduce-motion','true'); motionBtn.setAttribute('aria-pressed','true'); }
-  motionBtn.addEventListener('click', function(){
-    const on = motionBtn.getAttribute('aria-pressed')==='true';
-    motionBtn.setAttribute('aria-pressed', on?'false':'true');
-    document.documentElement.toggleAttribute('data-reduce-motion', !on);
-    document.querySelector('.motes').style.display = on ? '' : 'none';
-  });
-
-  /* Day/Night */
-  themeBtn.addEventListener('click', function(){
-    const night = document.documentElement.getAttribute('data-theme')!=='night';
-    document.documentElement.setAttribute('data-theme', night?'night':'');
-    themeBtn.textContent = night? 'Day' : 'Night';
-    themeBtn.setAttribute('aria-pressed', night?'true':'false');
-  });
 
   function escapeHTML(str){
     if(!str) return '';
@@ -631,8 +451,7 @@
     return {vw, vh};
   }
 
-  /* Navigation with pan/zoom + small API so we can rotate the compass */
-  function makeBoundedNavigator(svgEl, imgW, imgH, onApply){
+  function makeBoundedNavigator(svgEl, imgW, imgH){
     function initialView(){
       const rect = svgEl.getBoundingClientRect();
       const crop = computeCoverCrop(imgW, imgH, rect.width, rect.height);
@@ -651,10 +470,7 @@
       pointers:new Map(), initialPinchDist:0, initialViewBox:null,
       enabled:true
     };
-    const apply=()=>{
-      svgEl.setAttribute('viewBox', nav.viewBox[0]+' '+nav.viewBox[1]+' '+nav.viewBox[2]+' '+nav.viewBox[3]);
-      if(typeof onApply==='function'){ onApply(nav.viewBox.slice()); }
-    };
+    const apply=()=> svgEl.setAttribute('viewBox', nav.viewBox[0]+' '+nav.viewBox[1]+' '+nav.viewBox[2]+' '+nav.viewBox[3]);
     const atFull=()=> (Math.abs(nav.viewBox[2]-nav.maxW)<0.5 && Math.abs(nav.viewBox[3]-nav.maxH)<0.5);
 
     function setTouchMode(){
@@ -664,6 +480,7 @@
     }
     function guardEnabled(handler){ return function(e){ if(!nav.enabled) return; return handler(e); }; }
 
+    /* -------- Zoom animation (desktop wheel/buttons only) -------- */
     function animateZoom(targetW, targetH, mx, my, dur){
       const vb0 = nav.viewBox.slice();
       const nxW = clamp(targetW, nav.minW, nav.maxW);
@@ -673,7 +490,7 @@
       const start = performance.now();
       function step(t){
         const k = Math.min(1, (t - start) / dur);
-        const ease = 1 - Math.pow(1-k, 3);
+        const ease = 1 - Math.pow(1-k, 3); // cubic ease-out
         const vx = vb0[0] + (nxX - vb0[0])*ease;
         const vy = vb0[1] + (nxY - vb0[1])*ease;
         const vw = vb0[2] + (nxW - vb0[2])*ease;
@@ -684,6 +501,7 @@
       requestAnimationFrame(step);
     }
 
+    /* Wheel zoom — quicker */
     svgEl.addEventListener('wheel', guardEnabled(function(e){
       var vb = nav.viewBox.slice();
       var full = atFull();
@@ -715,6 +533,7 @@
       if(!nav.pointers.has(e.pointerId)) return;
       nav.pointers.set(e.pointerId, {x: e.clientX, y: e.clientY, type: e.pointerType});
 
+      /* Two-pointer pinch — instant (no lerp) to keep mobile snappy */
       if(nav.pointers.size===2){
         var pts = Array.from(nav.pointers.values());
         var dist = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
@@ -735,6 +554,7 @@
         return;
       }
 
+      /* Drag/pan */
       if(nav.dragCandidate){
         var dx0=e.clientX - nav.start.x, dy0=e.clientY - nav.start.y;
         if(dx0*dx0 + dy0*dy0 > 16){
@@ -790,13 +610,11 @@
         var vb = nav.viewBox.slice();
         var mx = 0.5, my = 0.5;
         animateZoom(vb[2]*factor, vb[3]*factor, mx, my, 120);
-      },
-      getViewBox:function(){ return nav.viewBox.slice(); }
+      }
     };
   }
 
   let navigatorApi=null;
-
   init().catch(function(e){ console.error(e); });
 
   async function init(){
@@ -816,32 +634,13 @@
     }
 
     renderFeatures();
-
-    /* Make navigator and hook compass rotation/parallax */
-    navigatorApi = makeBoundedNavigator(svgWorld, wSize.w, wSize.h, function(vb){
-      // rotate compass slightly based on viewBox center
-      const cx = vb[0] + vb[2]/2;
-      const cy = vb[1] + vb[3]/2;
-      const ang = ((cx / wSize.w) - .5) * 12 + ((cy / wSize.h) - .5) * -8; // gentle tilt
-      compass.style.transform = 'rotate('+ang+'deg)';
-    });
-
+    navigatorApi = makeBoundedNavigator(svgWorld, wSize.w, wSize.h);
     bindGM();
     bindTooltipDismiss();
 
     // zoom buttons (stronger)
     zoomInBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(0.82); });
     zoomOutBtn.addEventListener('click', function(){ if(navigatorApi) navigatorApi.zoomByAnimated(1.18); });
-
-    /* Light parallax on island image (disabled if reduce motion) */
-    const reduce = document.documentElement.hasAttribute('data-reduce-motion');
-    if(!reduce){
-      window.addEventListener('scroll', function(){
-        const rect = islandImg.getBoundingClientRect();
-        const vis = Math.min(1, Math.max(0, 1 - Math.abs(rect.top - window.innerHeight*0.5)/(window.innerHeight)));
-        islandImg.style.setProperty('--py', ( (1-vis)*8 ) + 'px');
-      }, {passive:true});
-    }
 
     loader.style.display='none';
   }
@@ -876,7 +675,7 @@
     feats.filter(function(f){return f.type==='region';}).forEach(function(f){
       const g=elNS('g'); g.setAttribute('class','feature region'); g.dataset.id=f.id||'';
       const color=f.color||'#8ad9ff';
-      const neon = blendHex(color, '#e7d9b7', parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-glow-mix')) || .65);
+      const neon = blendHex(color, '#e7d9b7', 0.65);
 
       (f.shapes||[]).forEach(function(shape){
         const d = roundedPolygonPath(shape, 10);
@@ -884,7 +683,7 @@
         fill.setAttribute('d', d);
         fill.setAttribute('class','fill');
         fill.setAttribute('fill', color);
-        fill.setAttribute('fill-opacity', String(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--region-fill-opacity'))||.20));
+        fill.setAttribute('fill-opacity', '0.20');
         fill.setAttribute('stroke','none');
         fill.style.filter='url(#fuzzyEdge)';
         fill.addEventListener('click', function(e){ showTooltipFor(f, e); });
@@ -919,6 +718,7 @@
   }
 
   function bindTooltipDismiss(){
+    const ttClose = document.getElementById('ttClose');
     ttClose.addEventListener('click', function(){ tooltip.classList.remove('open'); });
     svgWorld.addEventListener('click', function(e){
       const isFeature = !!e.target.closest('.feature');
@@ -956,42 +756,17 @@
     const name = f.name || '—';
     const desc = f.desc || '';
     const src = f.img || f.image || f.imageUrl || null;
-    const crest = f.crest || null; // NEW: heraldic badge (URL)
-
     if(f.type === 'region'){ setSelectedRegionById(f.id || ''); }
 
     if(isMobile){
       loreTitle.textContent = name;
       renderMultiline(loreBody, desc);
-      // crest as faint bg behind text
-      document.getElementById('sidePanel').style.backgroundImage = crest ? 'url('+crest+')' : '';
-      document.getElementById('sidePanel').style.backgroundSize = crest ? '160px auto' : '';
-      document.getElementById('sidePanel').style.backgroundRepeat = 'no-repeat';
-      document.getElementById('sidePanel').style.backgroundPosition = 'calc(100% - 16px) calc(100% - 16px)';
-      document.getElementById('sidePanel').style.backgroundBlendMode = crest ? 'multiply' : 'normal';
       if(src){ loreImg.src=src; loreImg.alt=name+' image'; loreMedia.style.display='block'; }
       else { loreImg.removeAttribute('src'); loreMedia.style.display='none'; }
       tooltip.classList.remove('open');
     }else{
       ttTitle.textContent = name;
-      const bodyHtml = desc ? escapeHTML(desc).split('\\n').join('<br>') : '—';
-      ttBody.classList.remove('ink-reveal'); // restart anim
-      ttBody.innerHTML = '<div class="ink-reveal">'+bodyHtml+'</div>';
-
-      // crest in header left of title (next to wax seal) and as faint watermark in body bg
-      if(crest){
-        ttTitle.style.background = 'url('+crest+') left center / 0px no-repeat'; // keep layout stable (header already has wax)
-        ttBody.style.backgroundImage = 'url('+crest+')';
-        ttBody.style.backgroundRepeat = 'no-repeat';
-        ttBody.style.backgroundSize = '180px auto';
-        ttBody.style.backgroundPosition = 'calc(100% - 10px) calc(100% - 8px)';
-        ttBody.style.opacity = '1';
-        ttBody.style.backgroundBlendMode = 'multiply';
-        ttBody.style.filter = 'none';
-      } else {
-        ttBody.style.backgroundImage = 'none';
-      }
-
+      ttBody.innerHTML = desc ? escapeHTML(desc).split('\\n').join('<br>') : '—';
       if(src){
         ttImg.onload = function(){ sizeAndPositionTooltip(evt); };
         ttImg.src = src; ttImg.alt = name+' image'; ttMedia.style.display='block';
