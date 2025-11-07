@@ -952,5 +952,24 @@
 
 })();
 </script>
+
+<script>
+// Paragraph formatting fix
+function renderTextWithParagraphs(text) {
+  return text.split('
+
+').map(p => `<p>${p}</p>`).join('');
+}
+
+// Wait until content is ready and then fix JSON-based text rendering
+document.addEventListener('DOMContentLoaded', () => {
+  const loreElement = document.getElementById('islandLore');
+  if (loreElement && loreElement.textContent.includes('
+')) {
+    loreElement.innerHTML = renderTextWithParagraphs(loreElement.textContent);
+  }
+});
+</script>
+
 </body>
 </html>
