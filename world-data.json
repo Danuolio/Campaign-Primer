@@ -11,7 +11,7 @@
   },
   "primerIntro": "The gods haven’t walked Draelon in six hundred years. Their temples still stand, their names still carry weight, but none have crossed the Divine Gate since the Silence. The Athumi claim their Lady of Brass remains—the last of them to walk the mortal world—but even that faith feels brittle after centuries of war and decay.\n\nNations have filled the silence with their own order: Oscana’s feudal lords forge alliances and betrayals in equal measure, Athium’s empire spreads its doctrine through steel and flame, and Eturia hoards magic like coin. Trade and conflict bind them all, yet something stirs beneath the surface—monsters changing in form and mind, storms that howl with voices, and an island called Signika drawing them in like a wound in the world.",
   "primerDetails": "Each continent bears scars of wars long past. Oscana’s noble houses feud across verdant plains, while Athium’s iron legions march beneath banners of conquest. Eturia’s mage-lords weave politics like spells, and Letrylor’s jungles whisper with forgotten gods. Yet all eyes now turn north—to Signika—where the world’s wild magic stirs once more.",
-  "islandLore": "Grikky",
+  "islandLore": "Signika lies off the northern coast of Oscana. The island falls under the rule of House Drevain, though they have not visited in years, and was never more than a modest port built to bolster trade and guard passing ships against Frissian pirates and sea monsters. Over generations, the port town of Greywake has grown slowly along the southern shore, its weathered docks and misted streets much the same now as they’ve always been. A place of shipwrights, fishmongers, and tavern patrons, its people never showed much interest in the island’s interior wildlands.\n\nNow, what few guards Greywake has are outnumbered by foreign visitors. The Legio Xernacus arrived weeks ago, their sudden march through Greywake’s port setting the quiet town on edge. Clad in polished uniforms and led by Xernacus himself astride his wyvern, they set up camp inland. Soon after came the Wyrm’s Hoard, a guild of monster hunters, mercenaries, and adventurers. Many set off to explore the wilds, though no small number lingered in the taverns, less fearsome only because they paid handsomely for their ale. Each day, more strange folk arrive at the now overworked harbour: eccentric Eturian researchers, opportunistic merchants, and priests of every persuasion.\n\nFor it seems something inexplicable is happening to Signika. For months, there have been reports of encounters with great beasts of land, sea, and sky; more with each passing day. These magical creatures seem drawn to the island as if by a force not yet understood. Those slain are said to reveal glowing organs, rich with alchemical potential. No one can say what calls them here. And so the race begins: to explore, to exploit, to uncover whatever truths lie buried beneath Signika’s mist and stone.",
   "features": [
     {
       "id": "n9iu5etxqcimh0h2v6u",
@@ -2937,6 +2937,7 @@
     }
   ]
 }
+
 
 
 
