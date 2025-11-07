@@ -409,7 +409,9 @@
   }
   function renderMultiline(el, text){
     const safe = escapeHTML(text||'');
-    el.innerHTML = safe.split('\\n').join('<br>');
+    // Treat real newlines as HTML line breaks
+    el.innerHTML = safe.split('
+').join('<br>');
   }
 
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(function(c){return c+c;}).join('');
@@ -952,22 +954,5 @@
 
 })();
 </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const worldDataElement = document.getElementById('islandLore');
-    if (worldDataElement && typeof worldData !== 'undefined' && worldData.islandLore) {
-      worldDataElement.innerHTML = worldData.islandLore
-        .split('\n\n')
-        .map(p => `<p>${p}</p>`)
-        .join('');
-    }
-  } catch (e) {
-    console.error('Paragraph render fix error:', e);
-  }
-});
-</script>
-
 </body>
 </html>
