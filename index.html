@@ -407,12 +407,13 @@
     }
     return out;
   }
-  function renderMultiline(el, text){
-    const safe = escapeHTML(text||'');
-    // Treat real newlines as HTML line breaks
-    el.innerHTML = safe.split('
-').join('<br>');
-  }
+  function renderMultiline(el, text) {
+  const safe = escapeHTML(text || '');
+  // Split double newlines into paragraph spacing
+  el.innerHTML = safe
+    .split('\n\n').join('<br><br>')
+    .split('\n').join('<br>');
+}
 
   function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(function(c){return c+c;}).join('');
     const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
